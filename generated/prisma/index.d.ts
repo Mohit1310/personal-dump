@@ -3,7 +3,7 @@
  * Client
 **/
 
-import * as runtime from './runtime/library.js';
+import * as runtime from './runtime/client.js';
 import $Types = runtime.Types // general types
 import $Public = runtime.Types.Public
 import $Utils = runtime.Types.Utils
@@ -14,10 +14,20 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
 
 /**
- * Model Post
+ * Model Dump
  * 
  */
-export type Post = $Result.DefaultSelection<Prisma.$PostPayload>
+export type Dump = $Result.DefaultSelection<Prisma.$DumpPayload>
+/**
+ * Model Chunk
+ * 
+ */
+export type Chunk = $Result.DefaultSelection<Prisma.$ChunkPayload>
+/**
+ * Model Embedding
+ * 
+ */
+export type Embedding = $Result.DefaultSelection<Prisma.$EmbeddingPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -26,12 +36,12 @@ export type Post = $Result.DefaultSelection<Prisma.$PostPayload>
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Posts
- * const posts = await prisma.post.findMany()
+ * // Fetch zero or more Dumps
+ * const dumps = await prisma.dump.findMany()
  * ```
  *
  *
- * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+ * Read more in our [docs](https://pris.ly/d/client).
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
@@ -47,12 +57,12 @@ export class PrismaClient<
    * @example
    * ```
    * const prisma = new PrismaClient()
-   * // Fetch zero or more Posts
-   * const posts = await prisma.post.findMany()
+   * // Fetch zero or more Dumps
+   * const dumps = await prisma.dump.findMany()
    * ```
    *
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
+   * Read more in our [docs](https://pris.ly/d/client).
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
@@ -75,7 +85,7 @@ export class PrismaClient<
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
 
@@ -87,7 +97,7 @@ export class PrismaClient<
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
 
@@ -98,7 +108,7 @@ export class PrismaClient<
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
 
@@ -110,7 +120,7 @@ export class PrismaClient<
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
    *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
 
@@ -132,20 +142,39 @@ export class PrismaClient<
 
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
-
   $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
     extArgs: ExtArgs
   }>>
 
       /**
-   * `prisma.post`: Exposes CRUD operations for the **Post** model.
+   * `prisma.dump`: Exposes CRUD operations for the **Dump** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more Posts
-    * const posts = await prisma.post.findMany()
+    * // Fetch zero or more Dumps
+    * const dumps = await prisma.dump.findMany()
     * ```
     */
-  get post(): Prisma.PostDelegate<ExtArgs, ClientOptions>;
+  get dump(): Prisma.DumpDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.chunk`: Exposes CRUD operations for the **Chunk** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Chunks
+    * const chunks = await prisma.chunk.findMany()
+    * ```
+    */
+  get chunk(): Prisma.ChunkDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.embedding`: Exposes CRUD operations for the **Embedding** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Embeddings
+    * const embeddings = await prisma.embedding.findMany()
+    * ```
+    */
+  get embedding(): Prisma.EmbeddingDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -186,14 +215,6 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics
-   */
-  export type Metrics = runtime.Metrics
-  export type Metric<T> = runtime.Metric<T>
-  export type MetricHistogram = runtime.MetricHistogram
-  export type MetricHistogramBucket = runtime.MetricHistogramBucket
-
-  /**
   * Extensions
   */
   export import Extension = $Extensions.UserArgs
@@ -204,11 +225,12 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.19.2
-   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
+   * Prisma Client JS version: 7.3.0
+   * Query Engine version: 9d6ad21cbbceab97458517b147a6a09ff43aa735
    */
   export type PrismaVersion = {
     client: string
+    engine: string
   }
 
   export const prismaVersion: PrismaVersion
@@ -587,15 +609,14 @@ export namespace Prisma {
 
 
   export const ModelName: {
-    Post: 'Post'
+    Dump: 'Dump',
+    Chunk: 'Chunk',
+    Embedding: 'Embedding'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
 
 
-  export type Datasources = {
-    db?: Datasource
-  }
 
   interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
     returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
@@ -606,81 +627,213 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "post"
+      modelProps: "dump" | "chunk" | "embedding"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
-      Post: {
-        payload: Prisma.$PostPayload<ExtArgs>
-        fields: Prisma.PostFieldRefs
+      Dump: {
+        payload: Prisma.$DumpPayload<ExtArgs>
+        fields: Prisma.DumpFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.PostFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload> | null
+            args: Prisma.DumpFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.PostFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>
+            args: Prisma.DumpFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>
           }
           findFirst: {
-            args: Prisma.PostFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload> | null
+            args: Prisma.DumpFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.PostFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>
+            args: Prisma.DumpFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>
           }
           findMany: {
-            args: Prisma.PostFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>[]
+            args: Prisma.DumpFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>[]
           }
           create: {
-            args: Prisma.PostCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>
+            args: Prisma.DumpCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>
           }
           createMany: {
-            args: Prisma.PostCreateManyArgs<ExtArgs>
+            args: Prisma.DumpCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.PostCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>[]
+            args: Prisma.DumpCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>[]
           }
           delete: {
-            args: Prisma.PostDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>
+            args: Prisma.DumpDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>
           }
           update: {
-            args: Prisma.PostUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>
+            args: Prisma.DumpUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>
           }
           deleteMany: {
-            args: Prisma.PostDeleteManyArgs<ExtArgs>
+            args: Prisma.DumpDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.PostUpdateManyArgs<ExtArgs>
+            args: Prisma.DumpUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.PostUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>[]
+            args: Prisma.DumpUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>[]
           }
           upsert: {
-            args: Prisma.PostUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$PostPayload>
+            args: Prisma.DumpUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DumpPayload>
           }
           aggregate: {
-            args: Prisma.PostAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregatePost>
+            args: Prisma.DumpAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDump>
           }
           groupBy: {
-            args: Prisma.PostGroupByArgs<ExtArgs>
-            result: $Utils.Optional<PostGroupByOutputType>[]
+            args: Prisma.DumpGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DumpGroupByOutputType>[]
           }
           count: {
-            args: Prisma.PostCountArgs<ExtArgs>
-            result: $Utils.Optional<PostCountAggregateOutputType> | number
+            args: Prisma.DumpCountArgs<ExtArgs>
+            result: $Utils.Optional<DumpCountAggregateOutputType> | number
+          }
+        }
+      }
+      Chunk: {
+        payload: Prisma.$ChunkPayload<ExtArgs>
+        fields: Prisma.ChunkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ChunkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ChunkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>
+          }
+          findFirst: {
+            args: Prisma.ChunkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ChunkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>
+          }
+          findMany: {
+            args: Prisma.ChunkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>[]
+          }
+          create: {
+            args: Prisma.ChunkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>
+          }
+          createMany: {
+            args: Prisma.ChunkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ChunkCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>[]
+          }
+          delete: {
+            args: Prisma.ChunkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>
+          }
+          update: {
+            args: Prisma.ChunkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>
+          }
+          deleteMany: {
+            args: Prisma.ChunkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ChunkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ChunkUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>[]
+          }
+          upsert: {
+            args: Prisma.ChunkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChunkPayload>
+          }
+          aggregate: {
+            args: Prisma.ChunkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateChunk>
+          }
+          groupBy: {
+            args: Prisma.ChunkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ChunkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ChunkCountArgs<ExtArgs>
+            result: $Utils.Optional<ChunkCountAggregateOutputType> | number
+          }
+        }
+      }
+      Embedding: {
+        payload: Prisma.$EmbeddingPayload<ExtArgs>
+        fields: Prisma.EmbeddingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EmbeddingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EmbeddingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload>
+          }
+          findFirst: {
+            args: Prisma.EmbeddingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EmbeddingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload>
+          }
+          findMany: {
+            args: Prisma.EmbeddingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload>[]
+          }
+          delete: {
+            args: Prisma.EmbeddingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload>
+          }
+          update: {
+            args: Prisma.EmbeddingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload>
+          }
+          deleteMany: {
+            args: Prisma.EmbeddingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EmbeddingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EmbeddingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmbeddingPayload>[]
+          }
+          aggregate: {
+            args: Prisma.EmbeddingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEmbedding>
+          }
+          groupBy: {
+            args: Prisma.EmbeddingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EmbeddingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EmbeddingCountArgs<ExtArgs>
+            result: $Utils.Optional<EmbeddingCountAggregateOutputType> | number
           }
         }
       }
@@ -713,14 +866,6 @@ export namespace Prisma {
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
   export interface PrismaClientOptions {
     /**
-     * Overwrites the datasource url from your schema.prisma file
-     */
-    datasources?: Datasources
-    /**
-     * Overwrites the datasource url from your schema.prisma file
-     */
-    datasourceUrl?: string
-    /**
      * @default "colorless"
      */
     errorFormat?: ErrorFormat
@@ -746,7 +891,7 @@ export namespace Prisma {
      *  { emit: 'stdout', level: 'error' }
      * 
      * ```
-     * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
+     * Read more in our [docs](https://pris.ly/d/logging).
      */
     log?: (LogLevel | LogDefinition)[]
     /**
@@ -762,7 +907,11 @@ export namespace Prisma {
     /**
      * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
      */
-    adapter?: runtime.SqlDriverAdapterFactory | null
+    adapter?: runtime.SqlDriverAdapterFactory
+    /**
+     * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
+     */
+    accelerateUrl?: string
     /**
      * Global configuration for omitting model fields by default.
      * 
@@ -778,9 +927,27 @@ export namespace Prisma {
      * ```
      */
     omit?: Prisma.GlobalOmitConfig
+    /**
+     * SQL commenter plugins that add metadata to SQL queries as comments.
+     * Comments follow the sqlcommenter format: https://google.github.io/sqlcommenter/
+     * 
+     * @example
+     * ```
+     * const prisma = new PrismaClient({
+     *   adapter,
+     *   comments: [
+     *     traceContext(),
+     *     queryInsights(),
+     *   ],
+     * })
+     * ```
+     */
+    comments?: runtime.SqlCommenterPlugin[]
   }
   export type GlobalOmitConfig = {
-    post?: PostOmit
+    dump?: DumpOmit
+    chunk?: ChunkOmit
+    embedding?: EmbeddingOmit
   }
 
   /* Types for Logging */
@@ -856,364 +1023,358 @@ export namespace Prisma {
    */
 
 
+  /**
+   * Count Type DumpCountOutputType
+   */
+
+  export type DumpCountOutputType = {
+    chunks: number
+  }
+
+  export type DumpCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chunks?: boolean | DumpCountOutputTypeCountChunksArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DumpCountOutputType without action
+   */
+  export type DumpCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DumpCountOutputType
+     */
+    select?: DumpCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DumpCountOutputType without action
+   */
+  export type DumpCountOutputTypeCountChunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChunkWhereInput
+  }
+
 
   /**
    * Models
    */
 
   /**
-   * Model Post
+   * Model Dump
    */
 
-  export type AggregatePost = {
-    _count: PostCountAggregateOutputType | null
-    _avg: PostAvgAggregateOutputType | null
-    _sum: PostSumAggregateOutputType | null
-    _min: PostMinAggregateOutputType | null
-    _max: PostMaxAggregateOutputType | null
+  export type AggregateDump = {
+    _count: DumpCountAggregateOutputType | null
+    _min: DumpMinAggregateOutputType | null
+    _max: DumpMaxAggregateOutputType | null
   }
 
-  export type PostAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type PostSumAggregateOutputType = {
-    id: number | null
-  }
-
-  export type PostMinAggregateOutputType = {
-    id: number | null
-    name: string | null
+  export type DumpMinAggregateOutputType = {
+    id: string | null
+    content: string | null
     createdAt: Date | null
-    updatedAt: Date | null
   }
 
-  export type PostMaxAggregateOutputType = {
-    id: number | null
-    name: string | null
+  export type DumpMaxAggregateOutputType = {
+    id: string | null
+    content: string | null
     createdAt: Date | null
-    updatedAt: Date | null
   }
 
-  export type PostCountAggregateOutputType = {
+  export type DumpCountAggregateOutputType = {
     id: number
-    name: number
+    content: number
     createdAt: number
-    updatedAt: number
     _all: number
   }
 
 
-  export type PostAvgAggregateInputType = {
+  export type DumpMinAggregateInputType = {
     id?: true
-  }
-
-  export type PostSumAggregateInputType = {
-    id?: true
-  }
-
-  export type PostMinAggregateInputType = {
-    id?: true
-    name?: true
+    content?: true
     createdAt?: true
-    updatedAt?: true
   }
 
-  export type PostMaxAggregateInputType = {
+  export type DumpMaxAggregateInputType = {
     id?: true
-    name?: true
+    content?: true
     createdAt?: true
-    updatedAt?: true
   }
 
-  export type PostCountAggregateInputType = {
+  export type DumpCountAggregateInputType = {
     id?: true
-    name?: true
+    content?: true
     createdAt?: true
-    updatedAt?: true
     _all?: true
   }
 
-  export type PostAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which Post to aggregate.
+     * Filter which Dump to aggregate.
      */
-    where?: PostWhereInput
+    where?: DumpWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Posts to fetch.
+     * Determine the order of Dumps to fetch.
      */
-    orderBy?: PostOrderByWithRelationInput | PostOrderByWithRelationInput[]
+    orderBy?: DumpOrderByWithRelationInput | DumpOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: PostWhereUniqueInput
+    cursor?: DumpWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Posts from the position of the cursor.
+     * Take `±n` Dumps from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Posts.
+     * Skip the first `n` Dumps.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned Posts
+     * Count returned Dumps
     **/
-    _count?: true | PostCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: PostAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: PostSumAggregateInputType
+    _count?: true | DumpCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: PostMinAggregateInputType
+    _min?: DumpMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: PostMaxAggregateInputType
+    _max?: DumpMaxAggregateInputType
   }
 
-  export type GetPostAggregateType<T extends PostAggregateArgs> = {
-        [P in keyof T & keyof AggregatePost]: P extends '_count' | 'count'
+  export type GetDumpAggregateType<T extends DumpAggregateArgs> = {
+        [P in keyof T & keyof AggregateDump]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregatePost[P]>
-      : GetScalarType<T[P], AggregatePost[P]>
+        : GetScalarType<T[P], AggregateDump[P]>
+      : GetScalarType<T[P], AggregateDump[P]>
   }
 
 
 
 
-  export type PostGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: PostWhereInput
-    orderBy?: PostOrderByWithAggregationInput | PostOrderByWithAggregationInput[]
-    by: PostScalarFieldEnum[] | PostScalarFieldEnum
-    having?: PostScalarWhereWithAggregatesInput
+  export type DumpGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DumpWhereInput
+    orderBy?: DumpOrderByWithAggregationInput | DumpOrderByWithAggregationInput[]
+    by: DumpScalarFieldEnum[] | DumpScalarFieldEnum
+    having?: DumpScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: PostCountAggregateInputType | true
-    _avg?: PostAvgAggregateInputType
-    _sum?: PostSumAggregateInputType
-    _min?: PostMinAggregateInputType
-    _max?: PostMaxAggregateInputType
+    _count?: DumpCountAggregateInputType | true
+    _min?: DumpMinAggregateInputType
+    _max?: DumpMaxAggregateInputType
   }
 
-  export type PostGroupByOutputType = {
-    id: number
-    name: string
+  export type DumpGroupByOutputType = {
+    id: string
+    content: string
     createdAt: Date
-    updatedAt: Date
-    _count: PostCountAggregateOutputType | null
-    _avg: PostAvgAggregateOutputType | null
-    _sum: PostSumAggregateOutputType | null
-    _min: PostMinAggregateOutputType | null
-    _max: PostMaxAggregateOutputType | null
+    _count: DumpCountAggregateOutputType | null
+    _min: DumpMinAggregateOutputType | null
+    _max: DumpMaxAggregateOutputType | null
   }
 
-  type GetPostGroupByPayload<T extends PostGroupByArgs> = Prisma.PrismaPromise<
+  type GetDumpGroupByPayload<T extends DumpGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<PostGroupByOutputType, T['by']> &
+      PickEnumerable<DumpGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof PostGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof DumpGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], PostGroupByOutputType[P]>
-            : GetScalarType<T[P], PostGroupByOutputType[P]>
+              : GetScalarType<T[P], DumpGroupByOutputType[P]>
+            : GetScalarType<T[P], DumpGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type PostSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type DumpSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    name?: boolean
+    content?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["post"]>
+    chunks?: boolean | Dump$chunksArgs<ExtArgs>
+    _count?: boolean | DumpCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["dump"]>
 
-  export type PostSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type DumpSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    name?: boolean
+    content?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["post"]>
+  }, ExtArgs["result"]["dump"]>
 
-  export type PostSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type DumpSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    name?: boolean
+    content?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["post"]>
+  }, ExtArgs["result"]["dump"]>
 
-  export type PostSelectScalar = {
+  export type DumpSelectScalar = {
     id?: boolean
-    name?: boolean
+    content?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
   }
 
-  export type PostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
+  export type DumpOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "content" | "createdAt", ExtArgs["result"]["dump"]>
+  export type DumpInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chunks?: boolean | Dump$chunksArgs<ExtArgs>
+    _count?: boolean | DumpCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DumpIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type DumpIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
-  export type $PostPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Post"
-    objects: {}
+  export type $DumpPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Dump"
+    objects: {
+      chunks: Prisma.$ChunkPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
-      name: string
+      id: string
+      content: string
       createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["post"]>
+    }, ExtArgs["result"]["dump"]>
     composites: {}
   }
 
-  type PostGetPayload<S extends boolean | null | undefined | PostDefaultArgs> = $Result.GetResult<Prisma.$PostPayload, S>
+  type DumpGetPayload<S extends boolean | null | undefined | DumpDefaultArgs> = $Result.GetResult<Prisma.$DumpPayload, S>
 
-  type PostCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<PostFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: PostCountAggregateInputType | true
+  type DumpCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DumpFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DumpCountAggregateInputType | true
     }
 
-  export interface PostDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Post'], meta: { name: 'Post' } }
+  export interface DumpDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Dump'], meta: { name: 'Dump' } }
     /**
-     * Find zero or one Post that matches the filter.
-     * @param {PostFindUniqueArgs} args - Arguments to find a Post
+     * Find zero or one Dump that matches the filter.
+     * @param {DumpFindUniqueArgs} args - Arguments to find a Dump
      * @example
-     * // Get one Post
-     * const post = await prisma.post.findUnique({
+     * // Get one Dump
+     * const dump = await prisma.dump.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends PostFindUniqueArgs>(args: SelectSubset<T, PostFindUniqueArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends DumpFindUniqueArgs>(args: SelectSubset<T, DumpFindUniqueArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Post that matches the filter or throw an error with `error.code='P2025'`
+     * Find one Dump that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {PostFindUniqueOrThrowArgs} args - Arguments to find a Post
+     * @param {DumpFindUniqueOrThrowArgs} args - Arguments to find a Dump
      * @example
-     * // Get one Post
-     * const post = await prisma.post.findUniqueOrThrow({
+     * // Get one Dump
+     * const dump = await prisma.dump.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends PostFindUniqueOrThrowArgs>(args: SelectSubset<T, PostFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends DumpFindUniqueOrThrowArgs>(args: SelectSubset<T, DumpFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first Post that matches the filter.
+     * Find the first Dump that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostFindFirstArgs} args - Arguments to find a Post
+     * @param {DumpFindFirstArgs} args - Arguments to find a Dump
      * @example
-     * // Get one Post
-     * const post = await prisma.post.findFirst({
+     * // Get one Dump
+     * const dump = await prisma.dump.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends PostFindFirstArgs>(args?: SelectSubset<T, PostFindFirstArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends DumpFindFirstArgs>(args?: SelectSubset<T, DumpFindFirstArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first Post that matches the filter or
+     * Find the first Dump that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostFindFirstOrThrowArgs} args - Arguments to find a Post
+     * @param {DumpFindFirstOrThrowArgs} args - Arguments to find a Dump
      * @example
-     * // Get one Post
-     * const post = await prisma.post.findFirstOrThrow({
+     * // Get one Dump
+     * const dump = await prisma.dump.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends PostFindFirstOrThrowArgs>(args?: SelectSubset<T, PostFindFirstOrThrowArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends DumpFindFirstOrThrowArgs>(args?: SelectSubset<T, DumpFindFirstOrThrowArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more Posts that matches the filter.
+     * Find zero or more Dumps that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {DumpFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all Posts
-     * const posts = await prisma.post.findMany()
+     * // Get all Dumps
+     * const dumps = await prisma.dump.findMany()
      * 
-     * // Get first 10 Posts
-     * const posts = await prisma.post.findMany({ take: 10 })
+     * // Get first 10 Dumps
+     * const dumps = await prisma.dump.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const postWithIdOnly = await prisma.post.findMany({ select: { id: true } })
+     * const dumpWithIdOnly = await prisma.dump.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends PostFindManyArgs>(args?: SelectSubset<T, PostFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends DumpFindManyArgs>(args?: SelectSubset<T, DumpFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a Post.
-     * @param {PostCreateArgs} args - Arguments to create a Post.
+     * Create a Dump.
+     * @param {DumpCreateArgs} args - Arguments to create a Dump.
      * @example
-     * // Create one Post
-     * const Post = await prisma.post.create({
+     * // Create one Dump
+     * const Dump = await prisma.dump.create({
      *   data: {
-     *     // ... data to create a Post
+     *     // ... data to create a Dump
      *   }
      * })
      * 
      */
-    create<T extends PostCreateArgs>(args: SelectSubset<T, PostCreateArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends DumpCreateArgs>(args: SelectSubset<T, DumpCreateArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many Posts.
-     * @param {PostCreateManyArgs} args - Arguments to create many Posts.
+     * Create many Dumps.
+     * @param {DumpCreateManyArgs} args - Arguments to create many Dumps.
      * @example
-     * // Create many Posts
-     * const post = await prisma.post.createMany({
+     * // Create many Dumps
+     * const dump = await prisma.dump.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends PostCreateManyArgs>(args?: SelectSubset<T, PostCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends DumpCreateManyArgs>(args?: SelectSubset<T, DumpCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Posts and returns the data saved in the database.
-     * @param {PostCreateManyAndReturnArgs} args - Arguments to create many Posts.
+     * Create many Dumps and returns the data saved in the database.
+     * @param {DumpCreateManyAndReturnArgs} args - Arguments to create many Dumps.
      * @example
-     * // Create many Posts
-     * const post = await prisma.post.createManyAndReturn({
+     * // Create many Dumps
+     * const dump = await prisma.dump.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many Posts and only return the `id`
-     * const postWithIdOnly = await prisma.post.createManyAndReturn({
+     * // Create many Dumps and only return the `id`
+     * const dumpWithIdOnly = await prisma.dump.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -1223,28 +1384,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends PostCreateManyAndReturnArgs>(args?: SelectSubset<T, PostCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends DumpCreateManyAndReturnArgs>(args?: SelectSubset<T, DumpCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a Post.
-     * @param {PostDeleteArgs} args - Arguments to delete one Post.
+     * Delete a Dump.
+     * @param {DumpDeleteArgs} args - Arguments to delete one Dump.
      * @example
-     * // Delete one Post
-     * const Post = await prisma.post.delete({
+     * // Delete one Dump
+     * const Dump = await prisma.dump.delete({
      *   where: {
-     *     // ... filter to delete one Post
+     *     // ... filter to delete one Dump
      *   }
      * })
      * 
      */
-    delete<T extends PostDeleteArgs>(args: SelectSubset<T, PostDeleteArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends DumpDeleteArgs>(args: SelectSubset<T, DumpDeleteArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one Post.
-     * @param {PostUpdateArgs} args - Arguments to update one Post.
+     * Update one Dump.
+     * @param {DumpUpdateArgs} args - Arguments to update one Dump.
      * @example
-     * // Update one Post
-     * const post = await prisma.post.update({
+     * // Update one Dump
+     * const dump = await prisma.dump.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -1254,30 +1415,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends PostUpdateArgs>(args: SelectSubset<T, PostUpdateArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends DumpUpdateArgs>(args: SelectSubset<T, DumpUpdateArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more Posts.
-     * @param {PostDeleteManyArgs} args - Arguments to filter Posts to delete.
+     * Delete zero or more Dumps.
+     * @param {DumpDeleteManyArgs} args - Arguments to filter Dumps to delete.
      * @example
-     * // Delete a few Posts
-     * const { count } = await prisma.post.deleteMany({
+     * // Delete a few Dumps
+     * const { count } = await prisma.dump.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends PostDeleteManyArgs>(args?: SelectSubset<T, PostDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends DumpDeleteManyArgs>(args?: SelectSubset<T, DumpDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Posts.
+     * Update zero or more Dumps.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {DumpUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many Posts
-     * const post = await prisma.post.updateMany({
+     * // Update many Dumps
+     * const dump = await prisma.dump.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -1287,14 +1448,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends PostUpdateManyArgs>(args: SelectSubset<T, PostUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends DumpUpdateManyArgs>(args: SelectSubset<T, DumpUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Posts and returns the data updated in the database.
-     * @param {PostUpdateManyAndReturnArgs} args - Arguments to update many Posts.
+     * Update zero or more Dumps and returns the data updated in the database.
+     * @param {DumpUpdateManyAndReturnArgs} args - Arguments to update many Dumps.
      * @example
-     * // Update many Posts
-     * const post = await prisma.post.updateManyAndReturn({
+     * // Update many Dumps
+     * const dump = await prisma.dump.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -1303,8 +1464,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more Posts and only return the `id`
-     * const postWithIdOnly = await prisma.post.updateManyAndReturn({
+     * // Update zero or more Dumps and only return the `id`
+     * const dumpWithIdOnly = await prisma.dump.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -1317,56 +1478,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends PostUpdateManyAndReturnArgs>(args: SelectSubset<T, PostUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends DumpUpdateManyAndReturnArgs>(args: SelectSubset<T, DumpUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one Post.
-     * @param {PostUpsertArgs} args - Arguments to update or create a Post.
+     * Create or update one Dump.
+     * @param {DumpUpsertArgs} args - Arguments to update or create a Dump.
      * @example
-     * // Update or create a Post
-     * const post = await prisma.post.upsert({
+     * // Update or create a Dump
+     * const dump = await prisma.dump.upsert({
      *   create: {
-     *     // ... data to create a Post
+     *     // ... data to create a Dump
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the Post we want to update
+     *     // ... the filter for the Dump we want to update
      *   }
      * })
      */
-    upsert<T extends PostUpsertArgs>(args: SelectSubset<T, PostUpsertArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends DumpUpsertArgs>(args: SelectSubset<T, DumpUpsertArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of Posts.
+     * Count the number of Dumps.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostCountArgs} args - Arguments to filter Posts to count.
+     * @param {DumpCountArgs} args - Arguments to filter Dumps to count.
      * @example
-     * // Count the number of Posts
-     * const count = await prisma.post.count({
+     * // Count the number of Dumps
+     * const count = await prisma.dump.count({
      *   where: {
-     *     // ... the filter for the Posts we want to count
+     *     // ... the filter for the Dumps we want to count
      *   }
      * })
     **/
-    count<T extends PostCountArgs>(
-      args?: Subset<T, PostCountArgs>,
+    count<T extends DumpCountArgs>(
+      args?: Subset<T, DumpCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], PostCountAggregateOutputType>
+          : GetScalarType<T['select'], DumpCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a Post.
+     * Allows you to perform aggregations operations on a Dump.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {DumpAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -1386,13 +1547,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends PostAggregateArgs>(args: Subset<T, PostAggregateArgs>): Prisma.PrismaPromise<GetPostAggregateType<T>>
+    aggregate<T extends DumpAggregateArgs>(args: Subset<T, DumpAggregateArgs>): Prisma.PrismaPromise<GetDumpAggregateType<T>>
 
     /**
-     * Group by Post.
+     * Group by Dump.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {PostGroupByArgs} args - Group by arguments.
+     * @param {DumpGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -1407,14 +1568,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends PostGroupByArgs,
+      T extends DumpGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: PostGroupByArgs['orderBy'] }
-        : { orderBy?: PostGroupByArgs['orderBy'] },
+        ? { orderBy: DumpGroupByArgs['orderBy'] }
+        : { orderBy?: DumpGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -1463,21 +1624,22 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, PostGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPostGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, DumpGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDumpGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the Post model
+   * Fields of the Dump model
    */
-  readonly fields: PostFieldRefs;
+  readonly fields: DumpFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Post.
+   * The delegate class that acts as a "Promise-like" for Dump.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__PostClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__DumpClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    chunks<T extends Dump$chunksArgs<ExtArgs> = {}>(args?: Subset<T, Dump$chunksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1504,376 +1666,2420 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the Post model
+   * Fields of the Dump model
    */
-  interface PostFieldRefs {
-    readonly id: FieldRef<"Post", 'Int'>
-    readonly name: FieldRef<"Post", 'String'>
-    readonly createdAt: FieldRef<"Post", 'DateTime'>
-    readonly updatedAt: FieldRef<"Post", 'DateTime'>
+  interface DumpFieldRefs {
+    readonly id: FieldRef<"Dump", 'String'>
+    readonly content: FieldRef<"Dump", 'String'>
+    readonly createdAt: FieldRef<"Dump", 'DateTime'>
   }
     
 
   // Custom InputTypes
   /**
-   * Post findUnique
+   * Dump findUnique
    */
-  export type PostFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * Filter, which Post to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where: PostWhereUniqueInput
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * Filter, which Dump to fetch.
+     */
+    where: DumpWhereUniqueInput
   }
 
   /**
-   * Post findUniqueOrThrow
+   * Dump findUniqueOrThrow
    */
-  export type PostFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * Filter, which Post to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where: PostWhereUniqueInput
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * Filter, which Dump to fetch.
+     */
+    where: DumpWhereUniqueInput
   }
 
   /**
-   * Post findFirst
+   * Dump findFirst
    */
-  export type PostFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * Filter, which Post to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where?: PostWhereInput
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * Filter, which Dump to fetch.
+     */
+    where?: DumpWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Posts to fetch.
+     * Determine the order of Dumps to fetch.
      */
-    orderBy?: PostOrderByWithRelationInput | PostOrderByWithRelationInput[]
+    orderBy?: DumpOrderByWithRelationInput | DumpOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for Posts.
+     * Sets the position for searching for Dumps.
      */
-    cursor?: PostWhereUniqueInput
+    cursor?: DumpWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Posts from the position of the cursor.
+     * Take `±n` Dumps from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Posts.
+     * Skip the first `n` Dumps.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of Posts.
+     * Filter by unique combinations of Dumps.
      */
-    distinct?: PostScalarFieldEnum | PostScalarFieldEnum[]
+    distinct?: DumpScalarFieldEnum | DumpScalarFieldEnum[]
   }
 
   /**
-   * Post findFirstOrThrow
+   * Dump findFirstOrThrow
    */
-  export type PostFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * Filter, which Post to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where?: PostWhereInput
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * Filter, which Dump to fetch.
+     */
+    where?: DumpWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Posts to fetch.
+     * Determine the order of Dumps to fetch.
      */
-    orderBy?: PostOrderByWithRelationInput | PostOrderByWithRelationInput[]
+    orderBy?: DumpOrderByWithRelationInput | DumpOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for Posts.
+     * Sets the position for searching for Dumps.
      */
-    cursor?: PostWhereUniqueInput
+    cursor?: DumpWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Posts from the position of the cursor.
+     * Take `±n` Dumps from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Posts.
+     * Skip the first `n` Dumps.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of Posts.
+     * Filter by unique combinations of Dumps.
      */
-    distinct?: PostScalarFieldEnum | PostScalarFieldEnum[]
+    distinct?: DumpScalarFieldEnum | DumpScalarFieldEnum[]
   }
 
   /**
-   * Post findMany
+   * Dump findMany
    */
-  export type PostFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * Filter, which Posts to fetch.
+     * Choose, which related nodes to fetch as well
      */
-    where?: PostWhereInput
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * Filter, which Dumps to fetch.
+     */
+    where?: DumpWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Posts to fetch.
+     * Determine the order of Dumps to fetch.
      */
-    orderBy?: PostOrderByWithRelationInput | PostOrderByWithRelationInput[]
+    orderBy?: DumpOrderByWithRelationInput | DumpOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing Posts.
+     * Sets the position for listing Dumps.
      */
-    cursor?: PostWhereUniqueInput
+    cursor?: DumpWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Posts from the position of the cursor.
+     * Take `±n` Dumps from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Posts.
+     * Skip the first `n` Dumps.
      */
     skip?: number
-    distinct?: PostScalarFieldEnum | PostScalarFieldEnum[]
+    distinct?: DumpScalarFieldEnum | DumpScalarFieldEnum[]
   }
 
   /**
-   * Post create
+   * Dump create
    */
-  export type PostCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * The data needed to create a Post.
+     * Choose, which related nodes to fetch as well
      */
-    data: XOR<PostCreateInput, PostUncheckedCreateInput>
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Dump.
+     */
+    data: XOR<DumpCreateInput, DumpUncheckedCreateInput>
   }
 
   /**
-   * Post createMany
+   * Dump createMany
    */
-  export type PostCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many Posts.
+     * The data used to create many Dumps.
      */
-    data: PostCreateManyInput | PostCreateManyInput[]
+    data: DumpCreateManyInput | DumpCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * Post createManyAndReturn
+   * Dump createManyAndReturn
    */
-  export type PostCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelectCreateManyAndReturn<ExtArgs> | null
+    select?: DumpSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * The data used to create many Posts.
+     * The data used to create many Dumps.
      */
-    data: PostCreateManyInput | PostCreateManyInput[]
+    data: DumpCreateManyInput | DumpCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * Post update
+   * Dump update
    */
-  export type PostUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * The data needed to update a Post.
+     * Choose, which related nodes to fetch as well
      */
-    data: XOR<PostUpdateInput, PostUncheckedUpdateInput>
+    include?: DumpInclude<ExtArgs> | null
     /**
-     * Choose, which Post to update.
+     * The data needed to update a Dump.
      */
-    where: PostWhereUniqueInput
+    data: XOR<DumpUpdateInput, DumpUncheckedUpdateInput>
+    /**
+     * Choose, which Dump to update.
+     */
+    where: DumpWhereUniqueInput
   }
 
   /**
-   * Post updateMany
+   * Dump updateMany
    */
-  export type PostUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update Posts.
+     * The data used to update Dumps.
      */
-    data: XOR<PostUpdateManyMutationInput, PostUncheckedUpdateManyInput>
+    data: XOR<DumpUpdateManyMutationInput, DumpUncheckedUpdateManyInput>
     /**
-     * Filter which Posts to update
+     * Filter which Dumps to update
      */
-    where?: PostWhereInput
+    where?: DumpWhereInput
     /**
-     * Limit how many Posts to update.
+     * Limit how many Dumps to update.
      */
     limit?: number
   }
 
   /**
-   * Post updateManyAndReturn
+   * Dump updateManyAndReturn
    */
-  export type PostUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: DumpSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * The data used to update Posts.
+     * The data used to update Dumps.
      */
-    data: XOR<PostUpdateManyMutationInput, PostUncheckedUpdateManyInput>
+    data: XOR<DumpUpdateManyMutationInput, DumpUncheckedUpdateManyInput>
     /**
-     * Filter which Posts to update
+     * Filter which Dumps to update
      */
-    where?: PostWhereInput
+    where?: DumpWhereInput
     /**
-     * Limit how many Posts to update.
+     * Limit how many Dumps to update.
      */
     limit?: number
   }
 
   /**
-   * Post upsert
+   * Dump upsert
    */
-  export type PostUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * The filter to search for the Post to update in case it exists.
+     * Choose, which related nodes to fetch as well
      */
-    where: PostWhereUniqueInput
+    include?: DumpInclude<ExtArgs> | null
     /**
-     * In case the Post found by the `where` argument doesn't exist, create a new Post with this data.
+     * The filter to search for the Dump to update in case it exists.
      */
-    create: XOR<PostCreateInput, PostUncheckedCreateInput>
+    where: DumpWhereUniqueInput
     /**
-     * In case the Post was found with the provided `where` argument, update it with this data.
+     * In case the Dump found by the `where` argument doesn't exist, create a new Dump with this data.
      */
-    update: XOR<PostUpdateInput, PostUncheckedUpdateInput>
+    create: XOR<DumpCreateInput, DumpUncheckedCreateInput>
+    /**
+     * In case the Dump was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DumpUpdateInput, DumpUncheckedUpdateInput>
   }
 
   /**
-   * Post delete
+   * Dump delete
    */
-  export type PostDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Dump
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: DumpSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Dump
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: DumpOmit<ExtArgs> | null
     /**
-     * Filter which Post to delete.
+     * Choose, which related nodes to fetch as well
      */
-    where: PostWhereUniqueInput
+    include?: DumpInclude<ExtArgs> | null
+    /**
+     * Filter which Dump to delete.
+     */
+    where: DumpWhereUniqueInput
   }
 
   /**
-   * Post deleteMany
+   * Dump deleteMany
    */
-  export type PostDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DumpDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which Posts to delete
+     * Filter which Dumps to delete
      */
-    where?: PostWhereInput
+    where?: DumpWhereInput
     /**
-     * Limit how many Posts to delete.
+     * Limit how many Dumps to delete.
      */
     limit?: number
   }
 
   /**
-   * Post without action
+   * Dump.chunks
    */
-  export type PostDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Dump$chunksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Post
+     * Select specific fields to fetch from the Chunk
      */
-    select?: PostSelect<ExtArgs> | null
+    select?: ChunkSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Post
+     * Omit specific fields from the Chunk
      */
-    omit?: PostOmit<ExtArgs> | null
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    where?: ChunkWhereInput
+    orderBy?: ChunkOrderByWithRelationInput | ChunkOrderByWithRelationInput[]
+    cursor?: ChunkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChunkScalarFieldEnum | ChunkScalarFieldEnum[]
+  }
+
+  /**
+   * Dump without action
+   */
+  export type DumpDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Dump
+     */
+    select?: DumpSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Dump
+     */
+    omit?: DumpOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DumpInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Chunk
+   */
+
+  export type AggregateChunk = {
+    _count: ChunkCountAggregateOutputType | null
+    _avg: ChunkAvgAggregateOutputType | null
+    _sum: ChunkSumAggregateOutputType | null
+    _min: ChunkMinAggregateOutputType | null
+    _max: ChunkMaxAggregateOutputType | null
+  }
+
+  export type ChunkAvgAggregateOutputType = {
+    order: number | null
+  }
+
+  export type ChunkSumAggregateOutputType = {
+    order: number | null
+  }
+
+  export type ChunkMinAggregateOutputType = {
+    id: string | null
+    dumpId: string | null
+    content: string | null
+    order: number | null
+    createdAt: Date | null
+  }
+
+  export type ChunkMaxAggregateOutputType = {
+    id: string | null
+    dumpId: string | null
+    content: string | null
+    order: number | null
+    createdAt: Date | null
+  }
+
+  export type ChunkCountAggregateOutputType = {
+    id: number
+    dumpId: number
+    content: number
+    order: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ChunkAvgAggregateInputType = {
+    order?: true
+  }
+
+  export type ChunkSumAggregateInputType = {
+    order?: true
+  }
+
+  export type ChunkMinAggregateInputType = {
+    id?: true
+    dumpId?: true
+    content?: true
+    order?: true
+    createdAt?: true
+  }
+
+  export type ChunkMaxAggregateInputType = {
+    id?: true
+    dumpId?: true
+    content?: true
+    order?: true
+    createdAt?: true
+  }
+
+  export type ChunkCountAggregateInputType = {
+    id?: true
+    dumpId?: true
+    content?: true
+    order?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ChunkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Chunk to aggregate.
+     */
+    where?: ChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Chunks to fetch.
+     */
+    orderBy?: ChunkOrderByWithRelationInput | ChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Chunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Chunks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Chunks
+    **/
+    _count?: true | ChunkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ChunkAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ChunkSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ChunkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ChunkMaxAggregateInputType
+  }
+
+  export type GetChunkAggregateType<T extends ChunkAggregateArgs> = {
+        [P in keyof T & keyof AggregateChunk]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateChunk[P]>
+      : GetScalarType<T[P], AggregateChunk[P]>
+  }
+
+
+
+
+  export type ChunkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChunkWhereInput
+    orderBy?: ChunkOrderByWithAggregationInput | ChunkOrderByWithAggregationInput[]
+    by: ChunkScalarFieldEnum[] | ChunkScalarFieldEnum
+    having?: ChunkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ChunkCountAggregateInputType | true
+    _avg?: ChunkAvgAggregateInputType
+    _sum?: ChunkSumAggregateInputType
+    _min?: ChunkMinAggregateInputType
+    _max?: ChunkMaxAggregateInputType
+  }
+
+  export type ChunkGroupByOutputType = {
+    id: string
+    dumpId: string
+    content: string
+    order: number
+    createdAt: Date
+    _count: ChunkCountAggregateOutputType | null
+    _avg: ChunkAvgAggregateOutputType | null
+    _sum: ChunkSumAggregateOutputType | null
+    _min: ChunkMinAggregateOutputType | null
+    _max: ChunkMaxAggregateOutputType | null
+  }
+
+  type GetChunkGroupByPayload<T extends ChunkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ChunkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ChunkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ChunkGroupByOutputType[P]>
+            : GetScalarType<T[P], ChunkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ChunkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    dumpId?: boolean
+    content?: boolean
+    order?: boolean
+    createdAt?: boolean
+    dump?: boolean | DumpDefaultArgs<ExtArgs>
+    embedding?: boolean | Chunk$embeddingArgs<ExtArgs>
+  }, ExtArgs["result"]["chunk"]>
+
+  export type ChunkSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    dumpId?: boolean
+    content?: boolean
+    order?: boolean
+    createdAt?: boolean
+    dump?: boolean | DumpDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chunk"]>
+
+  export type ChunkSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    dumpId?: boolean
+    content?: boolean
+    order?: boolean
+    createdAt?: boolean
+    dump?: boolean | DumpDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chunk"]>
+
+  export type ChunkSelectScalar = {
+    id?: boolean
+    dumpId?: boolean
+    content?: boolean
+    order?: boolean
+    createdAt?: boolean
+  }
+
+  export type ChunkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "dumpId" | "content" | "order" | "createdAt", ExtArgs["result"]["chunk"]>
+  export type ChunkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    dump?: boolean | DumpDefaultArgs<ExtArgs>
+    embedding?: boolean | Chunk$embeddingArgs<ExtArgs>
+  }
+  export type ChunkIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    dump?: boolean | DumpDefaultArgs<ExtArgs>
+  }
+  export type ChunkIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    dump?: boolean | DumpDefaultArgs<ExtArgs>
+  }
+
+  export type $ChunkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Chunk"
+    objects: {
+      dump: Prisma.$DumpPayload<ExtArgs>
+      embedding: Prisma.$EmbeddingPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      dumpId: string
+      content: string
+      order: number
+      createdAt: Date
+    }, ExtArgs["result"]["chunk"]>
+    composites: {}
+  }
+
+  type ChunkGetPayload<S extends boolean | null | undefined | ChunkDefaultArgs> = $Result.GetResult<Prisma.$ChunkPayload, S>
+
+  type ChunkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ChunkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ChunkCountAggregateInputType | true
+    }
+
+  export interface ChunkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Chunk'], meta: { name: 'Chunk' } }
+    /**
+     * Find zero or one Chunk that matches the filter.
+     * @param {ChunkFindUniqueArgs} args - Arguments to find a Chunk
+     * @example
+     * // Get one Chunk
+     * const chunk = await prisma.chunk.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ChunkFindUniqueArgs>(args: SelectSubset<T, ChunkFindUniqueArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Chunk that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ChunkFindUniqueOrThrowArgs} args - Arguments to find a Chunk
+     * @example
+     * // Get one Chunk
+     * const chunk = await prisma.chunk.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ChunkFindUniqueOrThrowArgs>(args: SelectSubset<T, ChunkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Chunk that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkFindFirstArgs} args - Arguments to find a Chunk
+     * @example
+     * // Get one Chunk
+     * const chunk = await prisma.chunk.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ChunkFindFirstArgs>(args?: SelectSubset<T, ChunkFindFirstArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Chunk that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkFindFirstOrThrowArgs} args - Arguments to find a Chunk
+     * @example
+     * // Get one Chunk
+     * const chunk = await prisma.chunk.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ChunkFindFirstOrThrowArgs>(args?: SelectSubset<T, ChunkFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Chunks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Chunks
+     * const chunks = await prisma.chunk.findMany()
+     * 
+     * // Get first 10 Chunks
+     * const chunks = await prisma.chunk.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const chunkWithIdOnly = await prisma.chunk.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ChunkFindManyArgs>(args?: SelectSubset<T, ChunkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Chunk.
+     * @param {ChunkCreateArgs} args - Arguments to create a Chunk.
+     * @example
+     * // Create one Chunk
+     * const Chunk = await prisma.chunk.create({
+     *   data: {
+     *     // ... data to create a Chunk
+     *   }
+     * })
+     * 
+     */
+    create<T extends ChunkCreateArgs>(args: SelectSubset<T, ChunkCreateArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Chunks.
+     * @param {ChunkCreateManyArgs} args - Arguments to create many Chunks.
+     * @example
+     * // Create many Chunks
+     * const chunk = await prisma.chunk.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ChunkCreateManyArgs>(args?: SelectSubset<T, ChunkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Chunks and returns the data saved in the database.
+     * @param {ChunkCreateManyAndReturnArgs} args - Arguments to create many Chunks.
+     * @example
+     * // Create many Chunks
+     * const chunk = await prisma.chunk.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Chunks and only return the `id`
+     * const chunkWithIdOnly = await prisma.chunk.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ChunkCreateManyAndReturnArgs>(args?: SelectSubset<T, ChunkCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Chunk.
+     * @param {ChunkDeleteArgs} args - Arguments to delete one Chunk.
+     * @example
+     * // Delete one Chunk
+     * const Chunk = await prisma.chunk.delete({
+     *   where: {
+     *     // ... filter to delete one Chunk
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ChunkDeleteArgs>(args: SelectSubset<T, ChunkDeleteArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Chunk.
+     * @param {ChunkUpdateArgs} args - Arguments to update one Chunk.
+     * @example
+     * // Update one Chunk
+     * const chunk = await prisma.chunk.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ChunkUpdateArgs>(args: SelectSubset<T, ChunkUpdateArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Chunks.
+     * @param {ChunkDeleteManyArgs} args - Arguments to filter Chunks to delete.
+     * @example
+     * // Delete a few Chunks
+     * const { count } = await prisma.chunk.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ChunkDeleteManyArgs>(args?: SelectSubset<T, ChunkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Chunks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Chunks
+     * const chunk = await prisma.chunk.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ChunkUpdateManyArgs>(args: SelectSubset<T, ChunkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Chunks and returns the data updated in the database.
+     * @param {ChunkUpdateManyAndReturnArgs} args - Arguments to update many Chunks.
+     * @example
+     * // Update many Chunks
+     * const chunk = await prisma.chunk.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Chunks and only return the `id`
+     * const chunkWithIdOnly = await prisma.chunk.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ChunkUpdateManyAndReturnArgs>(args: SelectSubset<T, ChunkUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Chunk.
+     * @param {ChunkUpsertArgs} args - Arguments to update or create a Chunk.
+     * @example
+     * // Update or create a Chunk
+     * const chunk = await prisma.chunk.upsert({
+     *   create: {
+     *     // ... data to create a Chunk
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Chunk we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ChunkUpsertArgs>(args: SelectSubset<T, ChunkUpsertArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Chunks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkCountArgs} args - Arguments to filter Chunks to count.
+     * @example
+     * // Count the number of Chunks
+     * const count = await prisma.chunk.count({
+     *   where: {
+     *     // ... the filter for the Chunks we want to count
+     *   }
+     * })
+    **/
+    count<T extends ChunkCountArgs>(
+      args?: Subset<T, ChunkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ChunkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Chunk.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ChunkAggregateArgs>(args: Subset<T, ChunkAggregateArgs>): Prisma.PrismaPromise<GetChunkAggregateType<T>>
+
+    /**
+     * Group by Chunk.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChunkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ChunkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ChunkGroupByArgs['orderBy'] }
+        : { orderBy?: ChunkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ChunkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChunkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Chunk model
+   */
+  readonly fields: ChunkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Chunk.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ChunkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    dump<T extends DumpDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DumpDefaultArgs<ExtArgs>>): Prisma__DumpClient<$Result.GetResult<Prisma.$DumpPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    embedding<T extends Chunk$embeddingArgs<ExtArgs> = {}>(args?: Subset<T, Chunk$embeddingArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Chunk model
+   */
+  interface ChunkFieldRefs {
+    readonly id: FieldRef<"Chunk", 'String'>
+    readonly dumpId: FieldRef<"Chunk", 'String'>
+    readonly content: FieldRef<"Chunk", 'String'>
+    readonly order: FieldRef<"Chunk", 'Int'>
+    readonly createdAt: FieldRef<"Chunk", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Chunk findUnique
+   */
+  export type ChunkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * Filter, which Chunk to fetch.
+     */
+    where: ChunkWhereUniqueInput
+  }
+
+  /**
+   * Chunk findUniqueOrThrow
+   */
+  export type ChunkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * Filter, which Chunk to fetch.
+     */
+    where: ChunkWhereUniqueInput
+  }
+
+  /**
+   * Chunk findFirst
+   */
+  export type ChunkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * Filter, which Chunk to fetch.
+     */
+    where?: ChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Chunks to fetch.
+     */
+    orderBy?: ChunkOrderByWithRelationInput | ChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Chunks.
+     */
+    cursor?: ChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Chunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Chunks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Chunks.
+     */
+    distinct?: ChunkScalarFieldEnum | ChunkScalarFieldEnum[]
+  }
+
+  /**
+   * Chunk findFirstOrThrow
+   */
+  export type ChunkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * Filter, which Chunk to fetch.
+     */
+    where?: ChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Chunks to fetch.
+     */
+    orderBy?: ChunkOrderByWithRelationInput | ChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Chunks.
+     */
+    cursor?: ChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Chunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Chunks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Chunks.
+     */
+    distinct?: ChunkScalarFieldEnum | ChunkScalarFieldEnum[]
+  }
+
+  /**
+   * Chunk findMany
+   */
+  export type ChunkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * Filter, which Chunks to fetch.
+     */
+    where?: ChunkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Chunks to fetch.
+     */
+    orderBy?: ChunkOrderByWithRelationInput | ChunkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Chunks.
+     */
+    cursor?: ChunkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Chunks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Chunks.
+     */
+    skip?: number
+    distinct?: ChunkScalarFieldEnum | ChunkScalarFieldEnum[]
+  }
+
+  /**
+   * Chunk create
+   */
+  export type ChunkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Chunk.
+     */
+    data: XOR<ChunkCreateInput, ChunkUncheckedCreateInput>
+  }
+
+  /**
+   * Chunk createMany
+   */
+  export type ChunkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Chunks.
+     */
+    data: ChunkCreateManyInput | ChunkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Chunk createManyAndReturn
+   */
+  export type ChunkCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * The data used to create many Chunks.
+     */
+    data: ChunkCreateManyInput | ChunkCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Chunk update
+   */
+  export type ChunkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Chunk.
+     */
+    data: XOR<ChunkUpdateInput, ChunkUncheckedUpdateInput>
+    /**
+     * Choose, which Chunk to update.
+     */
+    where: ChunkWhereUniqueInput
+  }
+
+  /**
+   * Chunk updateMany
+   */
+  export type ChunkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Chunks.
+     */
+    data: XOR<ChunkUpdateManyMutationInput, ChunkUncheckedUpdateManyInput>
+    /**
+     * Filter which Chunks to update
+     */
+    where?: ChunkWhereInput
+    /**
+     * Limit how many Chunks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Chunk updateManyAndReturn
+   */
+  export type ChunkUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * The data used to update Chunks.
+     */
+    data: XOR<ChunkUpdateManyMutationInput, ChunkUncheckedUpdateManyInput>
+    /**
+     * Filter which Chunks to update
+     */
+    where?: ChunkWhereInput
+    /**
+     * Limit how many Chunks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Chunk upsert
+   */
+  export type ChunkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Chunk to update in case it exists.
+     */
+    where: ChunkWhereUniqueInput
+    /**
+     * In case the Chunk found by the `where` argument doesn't exist, create a new Chunk with this data.
+     */
+    create: XOR<ChunkCreateInput, ChunkUncheckedCreateInput>
+    /**
+     * In case the Chunk was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ChunkUpdateInput, ChunkUncheckedUpdateInput>
+  }
+
+  /**
+   * Chunk delete
+   */
+  export type ChunkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+    /**
+     * Filter which Chunk to delete.
+     */
+    where: ChunkWhereUniqueInput
+  }
+
+  /**
+   * Chunk deleteMany
+   */
+  export type ChunkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Chunks to delete
+     */
+    where?: ChunkWhereInput
+    /**
+     * Limit how many Chunks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Chunk.embedding
+   */
+  export type Chunk$embeddingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    where?: EmbeddingWhereInput
+  }
+
+  /**
+   * Chunk without action
+   */
+  export type ChunkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chunk
+     */
+    select?: ChunkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chunk
+     */
+    omit?: ChunkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChunkInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Embedding
+   */
+
+  export type AggregateEmbedding = {
+    _count: EmbeddingCountAggregateOutputType | null
+    _min: EmbeddingMinAggregateOutputType | null
+    _max: EmbeddingMaxAggregateOutputType | null
+  }
+
+  export type EmbeddingMinAggregateOutputType = {
+    id: string | null
+    chunkId: string | null
+    createdAt: Date | null
+  }
+
+  export type EmbeddingMaxAggregateOutputType = {
+    id: string | null
+    chunkId: string | null
+    createdAt: Date | null
+  }
+
+  export type EmbeddingCountAggregateOutputType = {
+    id: number
+    chunkId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type EmbeddingMinAggregateInputType = {
+    id?: true
+    chunkId?: true
+    createdAt?: true
+  }
+
+  export type EmbeddingMaxAggregateInputType = {
+    id?: true
+    chunkId?: true
+    createdAt?: true
+  }
+
+  export type EmbeddingCountAggregateInputType = {
+    id?: true
+    chunkId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type EmbeddingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Embedding to aggregate.
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Embeddings to fetch.
+     */
+    orderBy?: EmbeddingOrderByWithRelationInput | EmbeddingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EmbeddingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Embeddings
+    **/
+    _count?: true | EmbeddingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EmbeddingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EmbeddingMaxAggregateInputType
+  }
+
+  export type GetEmbeddingAggregateType<T extends EmbeddingAggregateArgs> = {
+        [P in keyof T & keyof AggregateEmbedding]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEmbedding[P]>
+      : GetScalarType<T[P], AggregateEmbedding[P]>
+  }
+
+
+
+
+  export type EmbeddingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EmbeddingWhereInput
+    orderBy?: EmbeddingOrderByWithAggregationInput | EmbeddingOrderByWithAggregationInput[]
+    by: EmbeddingScalarFieldEnum[] | EmbeddingScalarFieldEnum
+    having?: EmbeddingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EmbeddingCountAggregateInputType | true
+    _min?: EmbeddingMinAggregateInputType
+    _max?: EmbeddingMaxAggregateInputType
+  }
+
+  export type EmbeddingGroupByOutputType = {
+    id: string
+    chunkId: string
+    createdAt: Date
+    _count: EmbeddingCountAggregateOutputType | null
+    _min: EmbeddingMinAggregateOutputType | null
+    _max: EmbeddingMaxAggregateOutputType | null
+  }
+
+  type GetEmbeddingGroupByPayload<T extends EmbeddingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EmbeddingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EmbeddingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EmbeddingGroupByOutputType[P]>
+            : GetScalarType<T[P], EmbeddingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EmbeddingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    chunkId?: boolean
+    createdAt?: boolean
+    chunk?: boolean | ChunkDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["embedding"]>
+
+
+  export type EmbeddingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    chunkId?: boolean
+    createdAt?: boolean
+    chunk?: boolean | ChunkDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["embedding"]>
+
+  export type EmbeddingSelectScalar = {
+    id?: boolean
+    chunkId?: boolean
+    createdAt?: boolean
+  }
+
+  export type EmbeddingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chunkId" | "createdAt", ExtArgs["result"]["embedding"]>
+  export type EmbeddingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chunk?: boolean | ChunkDefaultArgs<ExtArgs>
+  }
+  export type EmbeddingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chunk?: boolean | ChunkDefaultArgs<ExtArgs>
+  }
+
+  export type $EmbeddingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Embedding"
+    objects: {
+      chunk: Prisma.$ChunkPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      chunkId: string
+      createdAt: Date
+    }, ExtArgs["result"]["embedding"]>
+    composites: {}
+  }
+
+  type EmbeddingGetPayload<S extends boolean | null | undefined | EmbeddingDefaultArgs> = $Result.GetResult<Prisma.$EmbeddingPayload, S>
+
+  type EmbeddingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EmbeddingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EmbeddingCountAggregateInputType | true
+    }
+
+  export interface EmbeddingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Embedding'], meta: { name: 'Embedding' } }
+    /**
+     * Find zero or one Embedding that matches the filter.
+     * @param {EmbeddingFindUniqueArgs} args - Arguments to find a Embedding
+     * @example
+     * // Get one Embedding
+     * const embedding = await prisma.embedding.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EmbeddingFindUniqueArgs>(args: SelectSubset<T, EmbeddingFindUniqueArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Embedding that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EmbeddingFindUniqueOrThrowArgs} args - Arguments to find a Embedding
+     * @example
+     * // Get one Embedding
+     * const embedding = await prisma.embedding.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EmbeddingFindUniqueOrThrowArgs>(args: SelectSubset<T, EmbeddingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Embedding that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingFindFirstArgs} args - Arguments to find a Embedding
+     * @example
+     * // Get one Embedding
+     * const embedding = await prisma.embedding.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EmbeddingFindFirstArgs>(args?: SelectSubset<T, EmbeddingFindFirstArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Embedding that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingFindFirstOrThrowArgs} args - Arguments to find a Embedding
+     * @example
+     * // Get one Embedding
+     * const embedding = await prisma.embedding.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EmbeddingFindFirstOrThrowArgs>(args?: SelectSubset<T, EmbeddingFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Embeddings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Embeddings
+     * const embeddings = await prisma.embedding.findMany()
+     * 
+     * // Get first 10 Embeddings
+     * const embeddings = await prisma.embedding.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const embeddingWithIdOnly = await prisma.embedding.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EmbeddingFindManyArgs>(args?: SelectSubset<T, EmbeddingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Delete a Embedding.
+     * @param {EmbeddingDeleteArgs} args - Arguments to delete one Embedding.
+     * @example
+     * // Delete one Embedding
+     * const Embedding = await prisma.embedding.delete({
+     *   where: {
+     *     // ... filter to delete one Embedding
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EmbeddingDeleteArgs>(args: SelectSubset<T, EmbeddingDeleteArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Embedding.
+     * @param {EmbeddingUpdateArgs} args - Arguments to update one Embedding.
+     * @example
+     * // Update one Embedding
+     * const embedding = await prisma.embedding.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EmbeddingUpdateArgs>(args: SelectSubset<T, EmbeddingUpdateArgs<ExtArgs>>): Prisma__EmbeddingClient<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Embeddings.
+     * @param {EmbeddingDeleteManyArgs} args - Arguments to filter Embeddings to delete.
+     * @example
+     * // Delete a few Embeddings
+     * const { count } = await prisma.embedding.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EmbeddingDeleteManyArgs>(args?: SelectSubset<T, EmbeddingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Embeddings
+     * const embedding = await prisma.embedding.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EmbeddingUpdateManyArgs>(args: SelectSubset<T, EmbeddingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Embeddings and returns the data updated in the database.
+     * @param {EmbeddingUpdateManyAndReturnArgs} args - Arguments to update many Embeddings.
+     * @example
+     * // Update many Embeddings
+     * const embedding = await prisma.embedding.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Embeddings and only return the `id`
+     * const embeddingWithIdOnly = await prisma.embedding.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EmbeddingUpdateManyAndReturnArgs>(args: SelectSubset<T, EmbeddingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmbeddingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+
+    /**
+     * Count the number of Embeddings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingCountArgs} args - Arguments to filter Embeddings to count.
+     * @example
+     * // Count the number of Embeddings
+     * const count = await prisma.embedding.count({
+     *   where: {
+     *     // ... the filter for the Embeddings we want to count
+     *   }
+     * })
+    **/
+    count<T extends EmbeddingCountArgs>(
+      args?: Subset<T, EmbeddingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EmbeddingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Embedding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EmbeddingAggregateArgs>(args: Subset<T, EmbeddingAggregateArgs>): Prisma.PrismaPromise<GetEmbeddingAggregateType<T>>
+
+    /**
+     * Group by Embedding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmbeddingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EmbeddingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EmbeddingGroupByArgs['orderBy'] }
+        : { orderBy?: EmbeddingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EmbeddingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEmbeddingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Embedding model
+   */
+  readonly fields: EmbeddingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Embedding.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EmbeddingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    chunk<T extends ChunkDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChunkDefaultArgs<ExtArgs>>): Prisma__ChunkClient<$Result.GetResult<Prisma.$ChunkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Embedding model
+   */
+  interface EmbeddingFieldRefs {
+    readonly id: FieldRef<"Embedding", 'String'>
+    readonly chunkId: FieldRef<"Embedding", 'String'>
+    readonly createdAt: FieldRef<"Embedding", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Embedding findUnique
+   */
+  export type EmbeddingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * Filter, which Embedding to fetch.
+     */
+    where: EmbeddingWhereUniqueInput
+  }
+
+  /**
+   * Embedding findUniqueOrThrow
+   */
+  export type EmbeddingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * Filter, which Embedding to fetch.
+     */
+    where: EmbeddingWhereUniqueInput
+  }
+
+  /**
+   * Embedding findFirst
+   */
+  export type EmbeddingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * Filter, which Embedding to fetch.
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Embeddings to fetch.
+     */
+    orderBy?: EmbeddingOrderByWithRelationInput | EmbeddingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Embeddings.
+     */
+    cursor?: EmbeddingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Embeddings.
+     */
+    distinct?: EmbeddingScalarFieldEnum | EmbeddingScalarFieldEnum[]
+  }
+
+  /**
+   * Embedding findFirstOrThrow
+   */
+  export type EmbeddingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * Filter, which Embedding to fetch.
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Embeddings to fetch.
+     */
+    orderBy?: EmbeddingOrderByWithRelationInput | EmbeddingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Embeddings.
+     */
+    cursor?: EmbeddingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Embeddings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Embeddings.
+     */
+    distinct?: EmbeddingScalarFieldEnum | EmbeddingScalarFieldEnum[]
+  }
+
+  /**
+   * Embedding findMany
+   */
+  export type EmbeddingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * Filter, which Embeddings to fetch.
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Embeddings to fetch.
+     */
+    orderBy?: EmbeddingOrderByWithRelationInput | EmbeddingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Embeddings.
+     */
+    cursor?: EmbeddingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Embeddings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Embeddings.
+     */
+    skip?: number
+    distinct?: EmbeddingScalarFieldEnum | EmbeddingScalarFieldEnum[]
+  }
+
+  /**
+   * Embedding update
+   */
+  export type EmbeddingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Embedding.
+     */
+    data: XOR<EmbeddingUpdateInput, EmbeddingUncheckedUpdateInput>
+    /**
+     * Choose, which Embedding to update.
+     */
+    where: EmbeddingWhereUniqueInput
+  }
+
+  /**
+   * Embedding updateMany
+   */
+  export type EmbeddingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Embeddings.
+     */
+    data: XOR<EmbeddingUpdateManyMutationInput, EmbeddingUncheckedUpdateManyInput>
+    /**
+     * Filter which Embeddings to update
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * Limit how many Embeddings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Embedding updateManyAndReturn
+   */
+  export type EmbeddingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * The data used to update Embeddings.
+     */
+    data: XOR<EmbeddingUpdateManyMutationInput, EmbeddingUncheckedUpdateManyInput>
+    /**
+     * Filter which Embeddings to update
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * Limit how many Embeddings to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Embedding delete
+   */
+  export type EmbeddingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
+    /**
+     * Filter which Embedding to delete.
+     */
+    where: EmbeddingWhereUniqueInput
+  }
+
+  /**
+   * Embedding deleteMany
+   */
+  export type EmbeddingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Embeddings to delete
+     */
+    where?: EmbeddingWhereInput
+    /**
+     * Limit how many Embeddings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Embedding without action
+   */
+  export type EmbeddingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Embedding
+     */
+    select?: EmbeddingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Embedding
+     */
+    omit?: EmbeddingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EmbeddingInclude<ExtArgs> | null
   }
 
 
@@ -1891,14 +4097,33 @@ export namespace Prisma {
   export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-  export const PostScalarFieldEnum: {
+  export const DumpScalarFieldEnum: {
     id: 'id',
-    name: 'name',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    content: 'content',
+    createdAt: 'createdAt'
   };
 
-  export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
+  export type DumpScalarFieldEnum = (typeof DumpScalarFieldEnum)[keyof typeof DumpScalarFieldEnum]
+
+
+  export const ChunkScalarFieldEnum: {
+    id: 'id',
+    dumpId: 'dumpId',
+    content: 'content',
+    order: 'order',
+    createdAt: 'createdAt'
+  };
+
+  export type ChunkScalarFieldEnum = (typeof ChunkScalarFieldEnum)[keyof typeof ChunkScalarFieldEnum]
+
+
+  export const EmbeddingScalarFieldEnum: {
+    id: 'id',
+    chunkId: 'chunkId',
+    createdAt: 'createdAt'
+  };
+
+  export type EmbeddingScalarFieldEnum = (typeof EmbeddingScalarFieldEnum)[keyof typeof EmbeddingScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -1920,20 +4145,6 @@ export namespace Prisma {
   /**
    * Field references
    */
-
-
-  /**
-   * Reference to a field of type 'Int'
-   */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
-   * Reference to a field of type 'Int[]'
-   */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
 
 
   /**
@@ -1965,6 +4176,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1981,110 +4206,282 @@ export namespace Prisma {
    */
 
 
-  export type PostWhereInput = {
-    AND?: PostWhereInput | PostWhereInput[]
-    OR?: PostWhereInput[]
-    NOT?: PostWhereInput | PostWhereInput[]
-    id?: IntFilter<"Post"> | number
-    name?: StringFilter<"Post"> | string
-    createdAt?: DateTimeFilter<"Post"> | Date | string
-    updatedAt?: DateTimeFilter<"Post"> | Date | string
+  export type DumpWhereInput = {
+    AND?: DumpWhereInput | DumpWhereInput[]
+    OR?: DumpWhereInput[]
+    NOT?: DumpWhereInput | DumpWhereInput[]
+    id?: StringFilter<"Dump"> | string
+    content?: StringFilter<"Dump"> | string
+    createdAt?: DateTimeFilter<"Dump"> | Date | string
+    chunks?: ChunkListRelationFilter
   }
 
-  export type PostOrderByWithRelationInput = {
+  export type DumpOrderByWithRelationInput = {
     id?: SortOrder
-    name?: SortOrder
+    content?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    chunks?: ChunkOrderByRelationAggregateInput
   }
 
-  export type PostWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: PostWhereInput | PostWhereInput[]
-    OR?: PostWhereInput[]
-    NOT?: PostWhereInput | PostWhereInput[]
-    name?: StringFilter<"Post"> | string
-    createdAt?: DateTimeFilter<"Post"> | Date | string
-    updatedAt?: DateTimeFilter<"Post"> | Date | string
+  export type DumpWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DumpWhereInput | DumpWhereInput[]
+    OR?: DumpWhereInput[]
+    NOT?: DumpWhereInput | DumpWhereInput[]
+    content?: StringFilter<"Dump"> | string
+    createdAt?: DateTimeFilter<"Dump"> | Date | string
+    chunks?: ChunkListRelationFilter
   }, "id">
 
-  export type PostOrderByWithAggregationInput = {
+  export type DumpOrderByWithAggregationInput = {
     id?: SortOrder
-    name?: SortOrder
+    content?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: PostCountOrderByAggregateInput
-    _avg?: PostAvgOrderByAggregateInput
-    _max?: PostMaxOrderByAggregateInput
-    _min?: PostMinOrderByAggregateInput
-    _sum?: PostSumOrderByAggregateInput
+    _count?: DumpCountOrderByAggregateInput
+    _max?: DumpMaxOrderByAggregateInput
+    _min?: DumpMinOrderByAggregateInput
   }
 
-  export type PostScalarWhereWithAggregatesInput = {
-    AND?: PostScalarWhereWithAggregatesInput | PostScalarWhereWithAggregatesInput[]
-    OR?: PostScalarWhereWithAggregatesInput[]
-    NOT?: PostScalarWhereWithAggregatesInput | PostScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Post"> | number
-    name?: StringWithAggregatesFilter<"Post"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string
+  export type DumpScalarWhereWithAggregatesInput = {
+    AND?: DumpScalarWhereWithAggregatesInput | DumpScalarWhereWithAggregatesInput[]
+    OR?: DumpScalarWhereWithAggregatesInput[]
+    NOT?: DumpScalarWhereWithAggregatesInput | DumpScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Dump"> | string
+    content?: StringWithAggregatesFilter<"Dump"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Dump"> | Date | string
   }
 
-  export type PostCreateInput = {
-    name: string
+  export type ChunkWhereInput = {
+    AND?: ChunkWhereInput | ChunkWhereInput[]
+    OR?: ChunkWhereInput[]
+    NOT?: ChunkWhereInput | ChunkWhereInput[]
+    id?: StringFilter<"Chunk"> | string
+    dumpId?: StringFilter<"Chunk"> | string
+    content?: StringFilter<"Chunk"> | string
+    order?: IntFilter<"Chunk"> | number
+    createdAt?: DateTimeFilter<"Chunk"> | Date | string
+    dump?: XOR<DumpScalarRelationFilter, DumpWhereInput>
+    embedding?: XOR<EmbeddingNullableScalarRelationFilter, EmbeddingWhereInput> | null
+  }
+
+  export type ChunkOrderByWithRelationInput = {
+    id?: SortOrder
+    dumpId?: SortOrder
+    content?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    dump?: DumpOrderByWithRelationInput
+    embedding?: EmbeddingOrderByWithRelationInput
+  }
+
+  export type ChunkWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ChunkWhereInput | ChunkWhereInput[]
+    OR?: ChunkWhereInput[]
+    NOT?: ChunkWhereInput | ChunkWhereInput[]
+    dumpId?: StringFilter<"Chunk"> | string
+    content?: StringFilter<"Chunk"> | string
+    order?: IntFilter<"Chunk"> | number
+    createdAt?: DateTimeFilter<"Chunk"> | Date | string
+    dump?: XOR<DumpScalarRelationFilter, DumpWhereInput>
+    embedding?: XOR<EmbeddingNullableScalarRelationFilter, EmbeddingWhereInput> | null
+  }, "id">
+
+  export type ChunkOrderByWithAggregationInput = {
+    id?: SortOrder
+    dumpId?: SortOrder
+    content?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    _count?: ChunkCountOrderByAggregateInput
+    _avg?: ChunkAvgOrderByAggregateInput
+    _max?: ChunkMaxOrderByAggregateInput
+    _min?: ChunkMinOrderByAggregateInput
+    _sum?: ChunkSumOrderByAggregateInput
+  }
+
+  export type ChunkScalarWhereWithAggregatesInput = {
+    AND?: ChunkScalarWhereWithAggregatesInput | ChunkScalarWhereWithAggregatesInput[]
+    OR?: ChunkScalarWhereWithAggregatesInput[]
+    NOT?: ChunkScalarWhereWithAggregatesInput | ChunkScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Chunk"> | string
+    dumpId?: StringWithAggregatesFilter<"Chunk"> | string
+    content?: StringWithAggregatesFilter<"Chunk"> | string
+    order?: IntWithAggregatesFilter<"Chunk"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Chunk"> | Date | string
+  }
+
+  export type EmbeddingWhereInput = {
+    AND?: EmbeddingWhereInput | EmbeddingWhereInput[]
+    OR?: EmbeddingWhereInput[]
+    NOT?: EmbeddingWhereInput | EmbeddingWhereInput[]
+    id?: StringFilter<"Embedding"> | string
+    chunkId?: StringFilter<"Embedding"> | string
+    createdAt?: DateTimeFilter<"Embedding"> | Date | string
+    chunk?: XOR<ChunkScalarRelationFilter, ChunkWhereInput>
+  }
+
+  export type EmbeddingOrderByWithRelationInput = {
+    id?: SortOrder
+    chunkId?: SortOrder
+    createdAt?: SortOrder
+    chunk?: ChunkOrderByWithRelationInput
+  }
+
+  export type EmbeddingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    chunkId?: string
+    AND?: EmbeddingWhereInput | EmbeddingWhereInput[]
+    OR?: EmbeddingWhereInput[]
+    NOT?: EmbeddingWhereInput | EmbeddingWhereInput[]
+    createdAt?: DateTimeFilter<"Embedding"> | Date | string
+    chunk?: XOR<ChunkScalarRelationFilter, ChunkWhereInput>
+  }, "id" | "chunkId">
+
+  export type EmbeddingOrderByWithAggregationInput = {
+    id?: SortOrder
+    chunkId?: SortOrder
+    createdAt?: SortOrder
+    _count?: EmbeddingCountOrderByAggregateInput
+    _max?: EmbeddingMaxOrderByAggregateInput
+    _min?: EmbeddingMinOrderByAggregateInput
+  }
+
+  export type EmbeddingScalarWhereWithAggregatesInput = {
+    AND?: EmbeddingScalarWhereWithAggregatesInput | EmbeddingScalarWhereWithAggregatesInput[]
+    OR?: EmbeddingScalarWhereWithAggregatesInput[]
+    NOT?: EmbeddingScalarWhereWithAggregatesInput | EmbeddingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Embedding"> | string
+    chunkId?: StringWithAggregatesFilter<"Embedding"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Embedding"> | Date | string
+  }
+
+  export type DumpCreateInput = {
+    id?: string
+    content: string
     createdAt?: Date | string
-    updatedAt?: Date | string
+    chunks?: ChunkCreateNestedManyWithoutDumpInput
   }
 
-  export type PostUncheckedCreateInput = {
-    id?: number
-    name: string
+  export type DumpUncheckedCreateInput = {
+    id?: string
+    content: string
     createdAt?: Date | string
-    updatedAt?: Date | string
+    chunks?: ChunkUncheckedCreateNestedManyWithoutDumpInput
   }
 
-  export type PostUpdateInput = {
-    name?: StringFieldUpdateOperationsInput | string
+  export type DumpUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chunks?: ChunkUpdateManyWithoutDumpNestedInput
   }
 
-  export type PostUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
+  export type DumpUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chunks?: ChunkUncheckedUpdateManyWithoutDumpNestedInput
   }
 
-  export type PostCreateManyInput = {
-    id?: number
-    name: string
+  export type DumpCreateManyInput = {
+    id?: string
+    content: string
     createdAt?: Date | string
-    updatedAt?: Date | string
   }
 
-  export type PostUpdateManyMutationInput = {
-    name?: StringFieldUpdateOperationsInput | string
+  export type DumpUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type PostUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
+  export type DumpUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
+  export type ChunkCreateInput = {
+    id?: string
+    content: string
+    order: number
+    createdAt?: Date | string
+    dump: DumpCreateNestedOneWithoutChunksInput
+    embedding?: EmbeddingCreateNestedOneWithoutChunkInput
+  }
+
+  export type ChunkUncheckedCreateInput = {
+    id?: string
+    dumpId: string
+    content: string
+    order: number
+    createdAt?: Date | string
+    embedding?: EmbeddingUncheckedCreateNestedOneWithoutChunkInput
+  }
+
+  export type ChunkUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dump?: DumpUpdateOneRequiredWithoutChunksNestedInput
+    embedding?: EmbeddingUpdateOneWithoutChunkNestedInput
+  }
+
+  export type ChunkUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    dumpId?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    embedding?: EmbeddingUncheckedUpdateOneWithoutChunkNestedInput
+  }
+
+  export type ChunkCreateManyInput = {
+    id?: string
+    dumpId: string
+    content: string
+    order: number
+    createdAt?: Date | string
+  }
+
+  export type ChunkUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChunkUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    dumpId?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmbeddingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chunk?: ChunkUpdateOneRequiredWithoutEmbeddingNestedInput
+  }
+
+  export type EmbeddingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chunkId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmbeddingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmbeddingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chunkId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -2113,49 +4510,32 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type PostCountOrderByAggregateInput = {
+  export type ChunkListRelationFilter = {
+    every?: ChunkWhereInput
+    some?: ChunkWhereInput
+    none?: ChunkWhereInput
+  }
+
+  export type ChunkOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DumpCountOrderByAggregateInput = {
     id?: SortOrder
-    name?: SortOrder
+    content?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
   }
 
-  export type PostAvgOrderByAggregateInput = {
+  export type DumpMaxOrderByAggregateInput = {
     id?: SortOrder
-  }
-
-  export type PostMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
+    content?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
   }
 
-  export type PostMinOrderByAggregateInput = {
+  export type DumpMinOrderByAggregateInput = {
     id?: SortOrder
-    name?: SortOrder
+    content?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type PostSumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -2190,12 +4570,160 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type DumpScalarRelationFilter = {
+    is?: DumpWhereInput
+    isNot?: DumpWhereInput
+  }
+
+  export type EmbeddingNullableScalarRelationFilter = {
+    is?: EmbeddingWhereInput | null
+    isNot?: EmbeddingWhereInput | null
+  }
+
+  export type ChunkCountOrderByAggregateInput = {
+    id?: SortOrder
+    dumpId?: SortOrder
+    content?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ChunkAvgOrderByAggregateInput = {
+    order?: SortOrder
+  }
+
+  export type ChunkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    dumpId?: SortOrder
+    content?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ChunkMinOrderByAggregateInput = {
+    id?: SortOrder
+    dumpId?: SortOrder
+    content?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ChunkSumOrderByAggregateInput = {
+    order?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type ChunkScalarRelationFilter = {
+    is?: ChunkWhereInput
+    isNot?: ChunkWhereInput
+  }
+
+  export type EmbeddingCountOrderByAggregateInput = {
+    id?: SortOrder
+    chunkId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EmbeddingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    chunkId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EmbeddingMinOrderByAggregateInput = {
+    id?: SortOrder
+    chunkId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ChunkCreateNestedManyWithoutDumpInput = {
+    create?: XOR<ChunkCreateWithoutDumpInput, ChunkUncheckedCreateWithoutDumpInput> | ChunkCreateWithoutDumpInput[] | ChunkUncheckedCreateWithoutDumpInput[]
+    connectOrCreate?: ChunkCreateOrConnectWithoutDumpInput | ChunkCreateOrConnectWithoutDumpInput[]
+    createMany?: ChunkCreateManyDumpInputEnvelope
+    connect?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+  }
+
+  export type ChunkUncheckedCreateNestedManyWithoutDumpInput = {
+    create?: XOR<ChunkCreateWithoutDumpInput, ChunkUncheckedCreateWithoutDumpInput> | ChunkCreateWithoutDumpInput[] | ChunkUncheckedCreateWithoutDumpInput[]
+    connectOrCreate?: ChunkCreateOrConnectWithoutDumpInput | ChunkCreateOrConnectWithoutDumpInput[]
+    createMany?: ChunkCreateManyDumpInputEnvelope
+    connect?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type ChunkUpdateManyWithoutDumpNestedInput = {
+    create?: XOR<ChunkCreateWithoutDumpInput, ChunkUncheckedCreateWithoutDumpInput> | ChunkCreateWithoutDumpInput[] | ChunkUncheckedCreateWithoutDumpInput[]
+    connectOrCreate?: ChunkCreateOrConnectWithoutDumpInput | ChunkCreateOrConnectWithoutDumpInput[]
+    upsert?: ChunkUpsertWithWhereUniqueWithoutDumpInput | ChunkUpsertWithWhereUniqueWithoutDumpInput[]
+    createMany?: ChunkCreateManyDumpInputEnvelope
+    set?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    disconnect?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    delete?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    connect?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    update?: ChunkUpdateWithWhereUniqueWithoutDumpInput | ChunkUpdateWithWhereUniqueWithoutDumpInput[]
+    updateMany?: ChunkUpdateManyWithWhereWithoutDumpInput | ChunkUpdateManyWithWhereWithoutDumpInput[]
+    deleteMany?: ChunkScalarWhereInput | ChunkScalarWhereInput[]
+  }
+
+  export type ChunkUncheckedUpdateManyWithoutDumpNestedInput = {
+    create?: XOR<ChunkCreateWithoutDumpInput, ChunkUncheckedCreateWithoutDumpInput> | ChunkCreateWithoutDumpInput[] | ChunkUncheckedCreateWithoutDumpInput[]
+    connectOrCreate?: ChunkCreateOrConnectWithoutDumpInput | ChunkCreateOrConnectWithoutDumpInput[]
+    upsert?: ChunkUpsertWithWhereUniqueWithoutDumpInput | ChunkUpsertWithWhereUniqueWithoutDumpInput[]
+    createMany?: ChunkCreateManyDumpInputEnvelope
+    set?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    disconnect?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    delete?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    connect?: ChunkWhereUniqueInput | ChunkWhereUniqueInput[]
+    update?: ChunkUpdateWithWhereUniqueWithoutDumpInput | ChunkUpdateWithWhereUniqueWithoutDumpInput[]
+    updateMany?: ChunkUpdateManyWithWhereWithoutDumpInput | ChunkUpdateManyWithWhereWithoutDumpInput[]
+    deleteMany?: ChunkScalarWhereInput | ChunkScalarWhereInput[]
+  }
+
+  export type DumpCreateNestedOneWithoutChunksInput = {
+    create?: XOR<DumpCreateWithoutChunksInput, DumpUncheckedCreateWithoutChunksInput>
+    connectOrCreate?: DumpCreateOrConnectWithoutChunksInput
+    connect?: DumpWhereUniqueInput
+  }
+
+  export type EmbeddingCreateNestedOneWithoutChunkInput = {
+    connect?: EmbeddingWhereUniqueInput
+  }
+
+  export type EmbeddingUncheckedCreateNestedOneWithoutChunkInput = {
+    connect?: EmbeddingWhereUniqueInput
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -2206,15 +4734,34 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type NestedIntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
+  export type DumpUpdateOneRequiredWithoutChunksNestedInput = {
+    create?: XOR<DumpCreateWithoutChunksInput, DumpUncheckedCreateWithoutChunksInput>
+    connectOrCreate?: DumpCreateOrConnectWithoutChunksInput
+    upsert?: DumpUpsertWithoutChunksInput
+    connect?: DumpWhereUniqueInput
+    update?: XOR<XOR<DumpUpdateToOneWithWhereWithoutChunksInput, DumpUpdateWithoutChunksInput>, DumpUncheckedUpdateWithoutChunksInput>
+  }
+
+  export type EmbeddingUpdateOneWithoutChunkNestedInput = {
+    disconnect?: EmbeddingWhereInput | boolean
+    delete?: EmbeddingWhereInput | boolean
+    connect?: EmbeddingWhereUniqueInput
+    update?: XOR<XOR<EmbeddingUpdateToOneWithWhereWithoutChunkInput, EmbeddingUpdateWithoutChunkInput>, EmbeddingUncheckedUpdateWithoutChunkInput>
+  }
+
+  export type EmbeddingUncheckedUpdateOneWithoutChunkNestedInput = {
+    disconnect?: EmbeddingWhereInput | boolean
+    delete?: EmbeddingWhereInput | boolean
+    connect?: EmbeddingWhereUniqueInput
+    update?: XOR<XOR<EmbeddingUpdateToOneWithWhereWithoutChunkInput, EmbeddingUpdateWithoutChunkInput>, EmbeddingUncheckedUpdateWithoutChunkInput>
+  }
+
+  export type ChunkUpdateOneRequiredWithoutEmbeddingNestedInput = {
+    create?: XOR<ChunkCreateWithoutEmbeddingInput, ChunkUncheckedCreateWithoutEmbeddingInput>
+    connectOrCreate?: ChunkCreateOrConnectWithoutEmbeddingInput
+    upsert?: ChunkUpsertWithoutEmbeddingInput
+    connect?: ChunkWhereUniqueInput
+    update?: XOR<XOR<ChunkUpdateToOneWithWhereWithoutEmbeddingInput, ChunkUpdateWithoutEmbeddingInput>, ChunkUncheckedUpdateWithoutEmbeddingInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -2240,6 +4787,48 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -2269,35 +4858,190 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[] | ListStringFieldRefInput<$PrismaModel>
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedStringFilter<$PrismaModel>
-    _max?: NestedStringFilter<$PrismaModel>
+  export type ChunkCreateWithoutDumpInput = {
+    id?: string
+    content: string
+    order: number
+    createdAt?: Date | string
+    embedding?: EmbeddingCreateNestedOneWithoutChunkInput
   }
 
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
+  export type ChunkUncheckedCreateWithoutDumpInput = {
+    id?: string
+    content: string
+    order: number
+    createdAt?: Date | string
+    embedding?: EmbeddingUncheckedCreateNestedOneWithoutChunkInput
+  }
+
+  export type ChunkCreateOrConnectWithoutDumpInput = {
+    where: ChunkWhereUniqueInput
+    create: XOR<ChunkCreateWithoutDumpInput, ChunkUncheckedCreateWithoutDumpInput>
+  }
+
+  export type ChunkCreateManyDumpInputEnvelope = {
+    data: ChunkCreateManyDumpInput | ChunkCreateManyDumpInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ChunkUpsertWithWhereUniqueWithoutDumpInput = {
+    where: ChunkWhereUniqueInput
+    update: XOR<ChunkUpdateWithoutDumpInput, ChunkUncheckedUpdateWithoutDumpInput>
+    create: XOR<ChunkCreateWithoutDumpInput, ChunkUncheckedCreateWithoutDumpInput>
+  }
+
+  export type ChunkUpdateWithWhereUniqueWithoutDumpInput = {
+    where: ChunkWhereUniqueInput
+    data: XOR<ChunkUpdateWithoutDumpInput, ChunkUncheckedUpdateWithoutDumpInput>
+  }
+
+  export type ChunkUpdateManyWithWhereWithoutDumpInput = {
+    where: ChunkScalarWhereInput
+    data: XOR<ChunkUpdateManyMutationInput, ChunkUncheckedUpdateManyWithoutDumpInput>
+  }
+
+  export type ChunkScalarWhereInput = {
+    AND?: ChunkScalarWhereInput | ChunkScalarWhereInput[]
+    OR?: ChunkScalarWhereInput[]
+    NOT?: ChunkScalarWhereInput | ChunkScalarWhereInput[]
+    id?: StringFilter<"Chunk"> | string
+    dumpId?: StringFilter<"Chunk"> | string
+    content?: StringFilter<"Chunk"> | string
+    order?: IntFilter<"Chunk"> | number
+    createdAt?: DateTimeFilter<"Chunk"> | Date | string
+  }
+
+  export type DumpCreateWithoutChunksInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+  }
+
+  export type DumpUncheckedCreateWithoutChunksInput = {
+    id?: string
+    content: string
+    createdAt?: Date | string
+  }
+
+  export type DumpCreateOrConnectWithoutChunksInput = {
+    where: DumpWhereUniqueInput
+    create: XOR<DumpCreateWithoutChunksInput, DumpUncheckedCreateWithoutChunksInput>
+  }
+
+  export type DumpUpsertWithoutChunksInput = {
+    update: XOR<DumpUpdateWithoutChunksInput, DumpUncheckedUpdateWithoutChunksInput>
+    create: XOR<DumpCreateWithoutChunksInput, DumpUncheckedCreateWithoutChunksInput>
+    where?: DumpWhereInput
+  }
+
+  export type DumpUpdateToOneWithWhereWithoutChunksInput = {
+    where?: DumpWhereInput
+    data: XOR<DumpUpdateWithoutChunksInput, DumpUncheckedUpdateWithoutChunksInput>
+  }
+
+  export type DumpUpdateWithoutChunksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DumpUncheckedUpdateWithoutChunksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmbeddingUpdateToOneWithWhereWithoutChunkInput = {
+    where?: EmbeddingWhereInput
+    data: XOR<EmbeddingUpdateWithoutChunkInput, EmbeddingUncheckedUpdateWithoutChunkInput>
+  }
+
+  export type EmbeddingUpdateWithoutChunkInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmbeddingUncheckedUpdateWithoutChunkInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChunkCreateWithoutEmbeddingInput = {
+    id?: string
+    content: string
+    order: number
+    createdAt?: Date | string
+    dump: DumpCreateNestedOneWithoutChunksInput
+  }
+
+  export type ChunkUncheckedCreateWithoutEmbeddingInput = {
+    id?: string
+    dumpId: string
+    content: string
+    order: number
+    createdAt?: Date | string
+  }
+
+  export type ChunkCreateOrConnectWithoutEmbeddingInput = {
+    where: ChunkWhereUniqueInput
+    create: XOR<ChunkCreateWithoutEmbeddingInput, ChunkUncheckedCreateWithoutEmbeddingInput>
+  }
+
+  export type ChunkUpsertWithoutEmbeddingInput = {
+    update: XOR<ChunkUpdateWithoutEmbeddingInput, ChunkUncheckedUpdateWithoutEmbeddingInput>
+    create: XOR<ChunkCreateWithoutEmbeddingInput, ChunkUncheckedCreateWithoutEmbeddingInput>
+    where?: ChunkWhereInput
+  }
+
+  export type ChunkUpdateToOneWithWhereWithoutEmbeddingInput = {
+    where?: ChunkWhereInput
+    data: XOR<ChunkUpdateWithoutEmbeddingInput, ChunkUncheckedUpdateWithoutEmbeddingInput>
+  }
+
+  export type ChunkUpdateWithoutEmbeddingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dump?: DumpUpdateOneRequiredWithoutChunksNestedInput
+  }
+
+  export type ChunkUncheckedUpdateWithoutEmbeddingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    dumpId?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChunkCreateManyDumpInput = {
+    id?: string
+    content: string
+    order: number
+    createdAt?: Date | string
+  }
+
+  export type ChunkUpdateWithoutDumpInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    embedding?: EmbeddingUpdateOneWithoutChunkNestedInput
+  }
+
+  export type ChunkUncheckedUpdateWithoutDumpInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    embedding?: EmbeddingUncheckedUpdateOneWithoutChunkNestedInput
+  }
+
+  export type ChunkUncheckedUpdateManyWithoutDumpInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    content?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

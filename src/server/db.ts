@@ -1,14 +1,23 @@
 import { env } from "@/env";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma";
+import pg from "pg";
+
+const pool = new pg.Pool({
+	connectionString: env.DATABASE_URL,
+});
+
+const adapter = new PrismaPg(pool);
 
 const createPrismaClient = () =>
-  new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  });
+	new PrismaClient({
+		adapter,
+		log:
+			env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+	});
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: ReturnType<typeof createPrismaClient> | undefined;
+	prisma: ReturnType<typeof createPrismaClient> | undefined;
 };
 
 export const db = globalForPrisma.prisma ?? createPrismaClient();
