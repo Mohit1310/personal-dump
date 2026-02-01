@@ -19,6 +19,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@google/genai": "^1.39.0",
 		"@prisma/client": "^7.3.0",
 		"@t3-oss/env-nextjs": "^0.13.10",
 		"next": "^16.1.6",
