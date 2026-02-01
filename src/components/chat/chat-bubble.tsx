@@ -54,7 +54,7 @@ export function ChatBubble({ role, content, sources }: ChatBubbleProps) {
 						"rounded-2xl px-4 py-3 shadow-sm",
 						isAssistant
 							? "border border-border bg-muted text-foreground"
-							: "bg-primary text-primary-foreground",
+							: "bg-primary",
 					)}
 				>
 					<div className="prose prose-sm dark:prose-invert max-w-none">
@@ -63,7 +63,9 @@ export function ChatBubble({ role, content, sources }: ChatBubbleProps) {
 								{content}
 							</ReactMarkdown>
 						) : (
-							<p className="whitespace-pre-wrap">{content}</p>
+							<p className="whitespace-pre-wrap text-primary-foreground">
+								{content}
+							</p>
 						)}
 					</div>
 				</div>

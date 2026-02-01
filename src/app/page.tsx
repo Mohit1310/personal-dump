@@ -17,7 +17,7 @@ export default function HomePage() {
 			<div className="pointer-events-none absolute top-1/4 -left-20 h-80 w-80 rounded-full bg-primary/10 blur-[100px]" />
 			<div className="pointer-events-none absolute -right-20 bottom-1/4 h-80 w-80 rounded-full bg-accent-custom/10 blur-[100px]" />
 
-			<div className="fade-in slide-in-from-bottom-8 container relative z-10 flex animate-in flex-col items-center justify-center gap-12 px-4 py-16 text-center duration-1000">
+			<div className="fade-in slide-in-from-bottom-8 container relative z-10 mt-10 flex animate-in flex-col items-center justify-center gap-5 px-4 py-4 text-center duration-1000">
 				<div className="space-y-4">
 					<div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-bold text-primary text-xs uppercase tracking-widest">
 						<Sparkles className="h-3 w-3" />
