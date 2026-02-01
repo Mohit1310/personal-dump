@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { embedQuery } from "@/lib/embeddings/embedQuery";
 import { vectorSearch } from "@/lib/retrieval/vectorSearch";
+import { generateAnswer } from "@/lib/rag/generateAnswer";
 
 const searchSchema = z.object({
 	query: z.string().min(1, "Query is required"),
@@ -28,7 +29,13 @@ export async function POST(req: Request) {
 		// 2. Perform vector search
 		const results = await vectorSearch(queryVector, topK);
 
-		return NextResponse.json({ results });
+		// 3. Generate answer using RAG
+		const answer = await generateAnswer({ userQuery: query, chunks: results });
+
+		return NextResponse.json({
+			answer,
+			sources: results,
+		});
 	} catch (error) {
 		console.error("Search API Error:", error);
 		return NextResponse.json(
