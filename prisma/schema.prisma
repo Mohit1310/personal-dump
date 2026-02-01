@@ -2,20 +2,39 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  extensions = [vector]
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Dump {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
 
-    @@index([name])
+  chunks    Chunk[]
+}
+
+model Chunk {
+  id        String   @id @default(uuid())
+  dumpId    String
+  content   String
+  order     Int
+  createdAt DateTime @default(now())
+
+  dump      Dump     @relation(fields: [dumpId], references: [id], onDelete: Cascade)
+  embedding Embedding?
+}
+
+model Embedding {
+  id        String   @id @default(uuid())
+  chunkId   String   @unique
+  vector    Unsupported("vector")
+  createdAt DateTime @default(now())
+
+  chunk     Chunk    @relation(fields: [chunkId], references: [id], onDelete: Cascade)
 }
