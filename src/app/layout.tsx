@@ -3,8 +3,8 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Navigation } from "@/components/navigation";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
 	title: "Personal Dump",
@@ -21,13 +21,13 @@ export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
+		<html className={`${geist.variable}`} lang="en" suppressHydrationWarning>
 			<body>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="dark"
-					enableSystem
 					disableTransitionOnChange
+					enableSystem
 				>
 					<Navigation />
 					{children}

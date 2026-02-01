@@ -15,7 +15,7 @@ export function chunkText(
 	let startIndex = 0;
 
 	while (startIndex < text.length) {
-		let endIndex = startIndex + targetSize;
+		const endIndex = startIndex + targetSize;
 
 		if (endIndex >= text.length) {
 			chunks.push(text.substring(startIndex));

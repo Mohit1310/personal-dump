@@ -1,10 +1,10 @@
 "use client";
 
+import { Loader2, NotebookPen, Send } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { Loader2, Send, NotebookPen } from "lucide-react";
 
 export default function DumpPage() {
 	const [content, setContent] = useState("");
@@ -46,41 +46,41 @@ export default function DumpPage() {
 	};
 
 	return (
-		<main className="min-h-screen bg-background text-foreground flex flex-col items-center py-12 px-4">
-			<div className="w-full max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+		<main className="flex min-h-screen flex-col items-center bg-background px-4 py-12 text-foreground">
+			<div className="fade-in slide-in-from-bottom-4 w-full max-w-4xl animate-in space-y-8 duration-700">
 				<div className="space-y-2 text-center">
-					<div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 mb-2">
-						<NotebookPen className="w-8 h-8 text-primary" />
+					<div className="mb-2 inline-flex items-center justify-center rounded-2xl bg-primary/10 p-3">
+						<NotebookPen className="h-8 w-8 text-primary" />
 					</div>
-					<h1 className="text-4xl font-bold tracking-tight">Dump Knowledge</h1>
-					<p className="text-muted-foreground max-w-lg mx-auto">
+					<h1 className="font-bold text-4xl tracking-tight">Dump Knowledge</h1>
+					<p className="mx-auto max-w-lg text-muted-foreground">
 						Paste anything you want to remember—notes, code snippets, or error
 						logs. We'll chunk it and index it for your chat assistant.
 					</p>
 				</div>
 
-				<div className="relative group">
-					<div className="absolute -inset-0.5 bg-linear-to-r from-primary to-accent-custom rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
-					<div className="relative bg-card border border-border/50 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm">
+				<div className="group relative">
+					<div className="absolute -inset-0.5 rounded-xl bg-linear-to-r from-primary to-accent-custom opacity-20 blur transition duration-1000 group-hover:opacity-30"></div>
+					<div className="relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-2xl backdrop-blur-sm">
 						<Textarea
-							value={content}
+							className="min-h-[400px] resize-none border-none bg-transparent p-6 text-lg focus-visible:ring-0"
+							disabled={isLoading}
 							onChange={(e) => setContent(e.target.value)}
 							onKeyDown={handleKeyDown}
 							placeholder="Paste your knowledge here... (Cmd/Ctrl + Enter to save)"
-							className="min-h-[400px] border-none focus-visible:ring-0 p-6 text-lg bg-transparent resize-none"
-							disabled={isLoading}
+							value={content}
 						/>
 
-						<div className="border-t border-border/50 p-4 bg-muted/30 flex items-center justify-between gap-4">
+						<div className="flex items-center justify-between gap-4 border-border/50 border-t bg-muted/30 p-4">
 							<div className="flex items-center gap-2">
-								<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-2">
+								<span className="px-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
 									Type:
 								</span>
 								<select
-									value={type}
-									onChange={(e) => setType(e.target.value as typeof type)}
-									className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer hover:text-primary transition-colors"
+									className="cursor-pointer bg-transparent font-medium text-sm transition-colors hover:text-primary focus:outline-none"
 									disabled={isLoading}
+									onChange={(e) => setType(e.target.value as typeof type)}
+									value={type}
 								>
 									<option value="note">Note</option>
 									<option value="error">Error</option>
@@ -89,18 +89,18 @@ export default function DumpPage() {
 							</div>
 
 							<div className="flex items-center gap-4">
-								<span className="text-xs text-muted-foreground hidden sm:inline">
+								<span className="hidden text-muted-foreground text-xs sm:inline">
 									{content.length > 0 ? `${content.length} characters` : ""}
 								</span>
 								<Button
-									onClick={handleSave}
-									disabled={isLoading}
 									className="gap-2 px-6 shadow-lg shadow-primary/20"
+									disabled={isLoading}
+									onClick={handleSave}
 								>
 									{isLoading ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
+										<Loader2 className="h-4 w-4 animate-spin" />
 									) : (
-										<Send className="w-4 h-4" />
+										<Send className="h-4 w-4" />
 									)}
 									{isLoading ? "Saving..." : "Save Dump"}
 								</Button>
@@ -109,15 +109,15 @@ export default function DumpPage() {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 					{[
 						{ label: "Quick Note", desc: "Fleeting thoughts" },
 						{ label: "Code Snippet", desc: "Reference logic" },
 						{ label: "Error Log", desc: "Debugging context" },
 					].map((item) => (
 						<div
+							className="rounded-xl border border-border/50 bg-card/50 p-4 text-center text-sm"
 							key={item.label}
-							className="p-4 rounded-xl border border-border/50 bg-card/50 text-center text-sm"
 						>
 							<div className="font-semibold">{item.label}</div>
 							<div className="text-muted-foreground text-xs">{item.desc}</div>

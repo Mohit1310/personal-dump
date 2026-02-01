@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { db } from "@/server/db";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { chunkText } from "@/lib/processing/chunk-text";
+import { db } from "@/server/db";
 
 const dumpSchema = z.object({
 	content: z.string().min(1, "Content is required"),
