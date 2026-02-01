@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { embedQuery } from "@/lib/embeddings/embedQuery";
-import { vectorSearch } from "@/lib/retrieval/vectorSearch";
-import { generateAnswer } from "@/lib/rag/generateAnswer";
+import { embedQuery } from "@/lib/embeddings/embed-query";
+import { vectorSearch } from "@/lib/retrieval/vector-search";
+import { generateAnswer } from "@/lib/rag/generate-answer";
 
 const searchSchema = z.object({
 	query: z.string().min(1, "Query is required"),
