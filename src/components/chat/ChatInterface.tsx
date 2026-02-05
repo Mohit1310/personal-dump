@@ -1,29 +1,17 @@
 "use client";
 
-import { MessageSquare, Sparkles, Trash2 } from "lucide-react";
+import { ArrowRight, Brain, Loader, MessageSquare, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader } from "@/components/ai-elements/loader";
-import {
-	Message,
-	MessageContent,
-	MessageResponse,
-} from "@/components/ai-elements/message";
-import {
-	PromptInput,
-	PromptInputFooter,
-	PromptInputSubmit,
-	PromptInputTextarea,
-	PromptInputTools,
-} from "@/components/ai-elements/prompt-input";
+import { MessageResponse } from "@/components/ai-elements/message";
 import {
 	Source,
 	Sources,
 	SourcesContent,
 	SourcesTrigger,
 } from "@/components/ai-elements/sources";
-import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatMessage {
 	id: string;
@@ -40,14 +28,7 @@ const SUGGESTIONS = [
 ];
 
 export function ChatInterface() {
-	const [messages, setMessages] = useState<ChatMessage[]>([
-		{
-			id: "initial",
-			role: "assistant",
-			content:
-				"Hello! I'm your personal knowledge assistant. Ask me anything about your stored dumps.",
-		},
-	]);
+	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -104,7 +85,7 @@ export function ChatInterface() {
 			);
 		} catch (error) {
 			console.error(error);
-			toast.error("Failed to get an answer. Please try again.");
+			toast.error("Query failed.");
 			setMessages((prev) =>
 				prev.filter((msg) => msg.id !== assistantPlaceholder.id),
 			);
@@ -118,130 +99,153 @@ export function ChatInterface() {
 			{
 				id: "initial",
 				role: "assistant",
-				content: "Chat cleared. Ask me something else!",
+				content: "Memory cleared. Ready for new input.",
 			},
 		]);
 	};
 
 	return (
-		<div className="relative mx-auto flex w-full max-w-4xl flex-col border-border/50 border-x bg-background/50 shadow-2xl backdrop-blur-3xl">
+		<div className="mx-auto flex h-full max-w-5xl flex-col border-border border-x bg-background shadow-2xl">
 			{/* Header */}
-			<header className="sticky top-0 z-10 flex items-center justify-between border-border/50 border-b bg-background/80 px-6 py-4 backdrop-blur-sm">
+			<header className="z-10 flex items-center justify-between border-border border-b bg-background px-6 py-4">
 				<div className="flex items-center gap-3">
-					<div className="rounded-lg bg-primary/10 p-2">
-						<Sparkles className="h-5 w-5 text-primary" />
+					<div className="bg-primary p-1.5 text-primary-foreground">
+						<Brain className="h-4 w-4" />
 					</div>
 					<div>
-						<h1 className="font-bold tracking-tight">Knowledge Chat</h1>
-						<div className="flex items-center gap-1.5">
-							<div className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
-							<span className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
-								Online
-							</span>
+						<h1 className="font-bold text-sm uppercase tracking-tight">
+							Terminal Link
+						</h1>
+						<div className="flex items-center gap-2 font-mono text-muted-foreground text-xs">
+							<span className="flex h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+							<span>STATUS: CONNECTED</span>
+							<span className="text-border">|</span>
+							<span>MODEL: GEMINI_FLASH</span>
 						</div>
 					</div>
 				</div>
 				<Button
+					className="h-10 w-10 rounded-none hover:bg-destructive hover:text-white"
 					onClick={clearChat}
-					size="icon-sm"
-					title="Clear Chat"
+					size="icon"
+					title="Clear"
 					variant="ghost"
 				>
-					<Trash2 className="h-4 w-4 text-muted-foreground" />
+					<Trash2 className="h-4 w-4" />
 				</Button>
 			</header>
 
 			{/* Messages */}
-			<div className="scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent flex-1 overflow-y-auto p-6">
+			<div className="flex-1 overflow-y-auto px-6 py-8">
 				{messages.length <= 1 && (
-					<div className="flex flex-col items-center justify-center space-y-6 opacity-60">
-						<div className="rounded-full border border-border bg-muted/50 p-6">
-							<MessageSquare className="h-12 w-12 text-muted-foreground" />
-						</div>
-						<div className="space-y-2 text-center">
-							<h2 className="font-semibold text-xl">
-								Start searching your knowledge
-							</h2>
-							<p className="text-muted-foreground text-sm">
-								Ask questions about your notes, errors, and solutions.
+					<div className="flex h-full flex-col items-center justify-center space-y-8 opacity-40 transition-opacity hover:opacity-100">
+						<MessageSquare className="h-16 w-16 text-muted-foreground" />
+						<div className="space-y-1 text-center">
+							<h2 className="font-bold text-xl">AWAITING INPUT</h2>
+							<p className="font-mono text-muted-foreground text-sm">
+								Ask naturally. I will retrieve context.
 							</p>
 						</div>
-						<Suggestions className="max-w-md justify-center">
+
+						<div className="flex flex-wrap justify-center gap-2">
 							{SUGGESTIONS.map((s) => (
-								<Suggestion
+								<button
+									className="border border-border bg-muted/10 px-4 py-2 font-mono text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
 									key={s}
-									onClick={(suggestion) => setInput(suggestion)}
-									suggestion={s}
-								/>
+									onClick={() => setInput(s)}
+									type="button"
+								>
+									{s}
+								</button>
 							))}
-						</Suggestions>
+						</div>
 					</div>
 				)}
 
-				{messages.map((msg) => (
-					<div className="py-3" key={msg.id}>
-						<Message from={msg.role}>
-							<MessageContent>
+				<div className="space-y-6">
+					{messages.map((msg) => (
+						<div
+							className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+							key={msg.id}
+						>
+							<div
+								className={`max-w-[85%] ${msg.role === "user" ? "bg-primary text-primary-foreground" : ""} p-6 shadow-sm`}
+							>
+								{/* Content */}
 								{msg.isLoading ? (
-									<div className="flex items-center gap-2 py-2">
-										<Loader size={16} />
-										<span className="text-muted-foreground text-sm">
-											Thinking...
-										</span>
+									<div className="flex items-center gap-2 font-mono text-sm">
+										<Loader className="h-4 w-4 animate-spin" />
+										<span>COMPUTING_RESPONSE...</span>
 									</div>
 								) : msg.role === "assistant" ? (
-									<MessageResponse>{msg.content}</MessageResponse>
+									<MessageResponse className="">{msg.content}</MessageResponse>
 								) : (
-									<p className="whitespace-pre-wrap">{msg.content}</p>
+									<div className="">{msg.content}</div>
 								)}
-							</MessageContent>
 
-							{/* Sources for assistant messages */}
-							{msg.role === "assistant" &&
-								msg.sources &&
-								msg.sources.length > 0 && (
-									<Sources>
-										<SourcesTrigger count={msg.sources.length} />
-										<SourcesContent>
-											{msg.sources.map((source, i) => (
-												<Source key={source.id} title={`Source ${i + 1}`}>
-													<span className="line-clamp-2 text-muted-foreground text-xs">
-														{source.content}
-													</span>
-												</Source>
-											))}
-										</SourcesContent>
-									</Sources>
-								)}
-						</Message>
-					</div>
-				))}
-				<div ref={messagesEndRef} />
+								{/* Assistant Sources */}
+								{msg.role === "assistant" &&
+									msg.sources &&
+									msg.sources.length > 0 && (
+										<div className="mt-4 border-border/50 border-t pt-4">
+											<Sources>
+												<SourcesTrigger
+													className="font-mono text-[10px] text-muted-foreground uppercase hover:text-primary"
+													count={msg.sources.length}
+												/>
+												<SourcesContent className="w-full">
+													{msg.sources.map((source, i) => (
+														<Source
+															className="line-clamp-2 border border-border bg-background/50 p-2 font-mono text-muted-foreground text-xs hover:bg-muted/50"
+															key={source.id}
+															title={`[${i + 1}] ${source.content}`}
+														/>
+													))}
+												</SourcesContent>
+											</Sources>
+										</div>
+									)}
+							</div>
+						</div>
+					))}
+					<div ref={messagesEndRef} />
+				</div>
 			</div>
 
 			{/* Input Area */}
-			<div className="border-border/50 border-t bg-background/80 p-6 backdrop-blur-md">
-				<div className="relative">
-					<div className="absolute -inset-1 rounded-2xl bg-linear-to-r from-primary to-accent-custom opacity-5 blur" />
-					<PromptInput
-						className="relative rounded-xl border border-border bg-card shadow-lg"
-						onSubmit={(message) => {
-							void handleSend(message.text);
-						}}
-					>
-						<PromptInputTextarea
+			<div className="border-border border-t bg-background p-6">
+				<div className="swiss-card bg-background transition-all focus-within:border-primary focus-within:shadow-[4px_4px_0px_0px_var(--primary)]">
+					<div className="flex gap-2 p-1">
+						<Textarea
+							className="max-h-[200px] min-h-[60px] flex-1 resize-none border-none bg-transparent pt-3 font-mono text-base shadow-none placeholder:text-muted-foreground/40 focus-visible:ring-0"
 							onChange={(e) => setInput(e.target.value)}
-							placeholder="Ask your knowledge..."
+							onKeyDown={(e) => {
+								if (e.key === "Enter" && !e.shiftKey) {
+									e.preventDefault();
+									handleSend();
+								}
+							}}
+							placeholder="Enter command or query..."
 							value={input}
 						/>
-						<PromptInputFooter>
-							<PromptInputTools />
-							<PromptInputSubmit disabled={isLoading || !input.trim()} />
-						</PromptInputFooter>
-					</PromptInput>
-					<p className="mt-3 text-center font-medium text-[10px] text-muted-foreground uppercase tracking-tighter opacity-50">
-						Powered by RAG & Gemini AI
-					</p>
+						<div className="flex items-end pr-1 pb-1">
+							<Button
+								className="h-10 w-10 rounded-none bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
+								disabled={isLoading || !input.trim()}
+								onClick={() => handleSend()}
+								size="icon"
+							>
+								{isLoading ? (
+									<Loader className="h-4 w-4 animate-spin" />
+								) : (
+									<ArrowRight className="h-4 w-4" />
+								)}
+							</Button>
+						</div>
+					</div>
+				</div>
+				<div className="mt-3 text-center font-mono text-[10px] text-muted-foreground opacity-50">
+					PERSONAL_DUMP_OS v1.0 • SECURE CONNECTION
 				</div>
 			</div>
 		</div>

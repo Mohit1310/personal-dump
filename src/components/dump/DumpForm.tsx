@@ -1,15 +1,22 @@
 "use client";
 
-import { Loader2, Send } from "lucide-react";
+import { Check, Loader2, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+const DUMP_TYPES = [
+	{ value: "note", label: "Note", char: "N" },
+	{ value: "error", label: "Error", char: "E" },
+	{ value: "solution", label: "Solution", char: "S" },
+] as const;
+
 export function DumpForm() {
 	const [content, setContent] = useState("");
 	const [type, setType] = useState<"note" | "error" | "solution">("note");
 	const [isLoading, setIsLoading] = useState(false);
+	const [showSuccess, setShowSuccess] = useState(false);
 
 	const handleSave = async () => {
 		if (!content.trim()) {
@@ -29,6 +36,8 @@ export function DumpForm() {
 				throw new Error("Failed to save dump");
 			}
 
+			setShowSuccess(true);
+			setTimeout(() => setShowSuccess(false), 2000);
 			toast.success("Knowledge stored successfully!");
 			setContent("");
 		} catch (error) {
@@ -46,72 +55,63 @@ export function DumpForm() {
 	};
 
 	return (
-		<>
-			<div className="group relative">
-				<div className="absolute -inset-0.5 rounded-xl bg-linear-to-r from-primary to-accent-custom opacity-20 blur transition duration-1000 group-hover:opacity-30"></div>
-				<div className="relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-2xl backdrop-blur-sm">
-					<Textarea
-						className="min-h-[400px] resize-none border-none bg-transparent p-6 text-lg focus-visible:ring-0"
-						disabled={isLoading}
-						onChange={(e) => setContent(e.target.value)}
-						onKeyDown={handleKeyDown}
-						placeholder="Paste your knowledge here... (Cmd/Ctrl + Enter to save)"
-						value={content}
-					/>
-
-					<div className="flex items-center justify-between gap-4 border-border/50 border-t bg-muted/30 p-4">
-						<div className="flex items-center gap-2">
-							<span className="px-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-								Type:
-							</span>
-							<select
-								className="cursor-pointer bg-transparent font-medium text-sm transition-colors hover:text-primary focus:outline-none"
-								disabled={isLoading}
-								onChange={(e) => setType(e.target.value as typeof type)}
-								value={type}
-							>
-								<option value="note">Note</option>
-								<option value="error">Error</option>
-								<option value="solution">Solution</option>
-							</select>
-						</div>
-
-						<div className="flex items-center gap-4">
-							<span className="hidden text-muted-foreground text-xs sm:inline">
-								{content.length > 0 ? `${content.length} characters` : ""}
-							</span>
-							<Button
-								className="gap-2 px-6 shadow-lg shadow-primary/20"
-								disabled={isLoading}
-								onClick={handleSave}
-							>
-								{isLoading ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<Send className="h-4 w-4" />
-								)}
-								{isLoading ? "Saving..." : "Save Dump"}
-							</Button>
-						</div>
-					</div>
+		<div className="swiss-card overflow-hidden bg-card p-0">
+			{/* Toolbar */}
+			<div className="flex items-center gap-4 border-border border-b bg-muted/20 p-4">
+				<span className="mr-2 font-mono text-muted-foreground text-xs uppercase tracking-widest">
+					DATA_TYPE:
+				</span>
+				<div className="flex gap-2">
+					{DUMP_TYPES.map((t) => (
+						<button
+							className={`border px-4 py-1.5 font-medium text-sm transition-all${
+								type === t.value
+									? "border-primary bg-primary text-primary-foreground"
+									: "border-border bg-background text-muted-foreground hover:border-sidebar-foreground"
+							}
+							`}
+							key={t.value}
+							onClick={() => setType(t.value)}
+						>
+							{t.label}
+						</button>
+					))}
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-				{[
-					{ label: "Quick Note", desc: "Fleeting thoughts" },
-					{ label: "Code Snippet", desc: "Reference logic" },
-					{ label: "Error Log", desc: "Debugging context" },
-				].map((item) => (
-					<div
-						className="rounded-xl border border-border/50 bg-card/50 p-4 text-center text-sm"
-						key={item.label}
-					>
-						<div className="font-semibold">{item.label}</div>
-						<div className="text-muted-foreground text-xs">{item.desc}</div>
-					</div>
-				))}
+			{/* Editor */}
+			<Textarea
+				className="min-h-[400px] w-full resize-none rounded-none border-none bg-transparent p-6 font-mono text-base leading-relaxed placeholder:text-muted-foreground/30 focus-visible:ring-0"
+				disabled={isLoading}
+				onChange={(e) => setContent(e.target.value)}
+				onKeyDown={handleKeyDown}
+				placeholder="// Input stream ready...
+// Paste snippets, logs, or notes here."
+				value={content}
+			/>
+
+			{/* Footer Actions */}
+			<div className="flex items-center justify-between border-border border-t bg-muted/10 p-4">
+				<div className="font-mono text-muted-foreground text-xs">
+					CHARS: {content.length}
+				</div>
+
+				<Button
+					className={`h-12 rounded-none px-8 font-medium transition-all${showSuccess ? "bg-emerald-600 hover:bg-emerald-700" : "bg-primary hover:bg-primary/90"}
+					`}
+					disabled={isLoading || !content.trim()}
+					onClick={handleSave}
+				>
+					{isLoading ? (
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					) : showSuccess ? (
+						<Check className="mr-2 h-4 w-4" />
+					) : (
+						<Send className="mr-2 h-4 w-4" />
+					)}
+					{isLoading ? "PROCESSING" : showSuccess ? "SAVED" : "DUMP DATA"}
+				</Button>
 			</div>
-		</>
+		</div>
 	);
 }

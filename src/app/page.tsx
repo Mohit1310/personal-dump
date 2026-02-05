@@ -1,98 +1,113 @@
-import {
-	MessageSquare,
-	NotebookPen,
-	Search,
-	Shield,
-	Sparkles,
-	Zap,
-} from "lucide-react";
+import { ArrowRight, MessageSquare, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
 	return (
-		<main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background text-foreground">
-			{/* Decorative background elements */}
-			<div className="pointer-events-none absolute top-0 left-0 h-full w-full bg-[radial-gradient(circle_at_50%_0%,rgba(46,2,109,0.15),transparent_50%)]" />
-			<div className="pointer-events-none absolute top-1/4 -left-20 h-80 w-80 rounded-full bg-primary/10 blur-[100px]" />
-			<div className="pointer-events-none absolute -right-20 bottom-1/4 h-80 w-80 rounded-full bg-accent-custom/10 blur-[100px]" />
+		<main className="relative flex min-h-screen flex-col bg-background pt-20 text-foreground">
+			{/* Grid Background */}
+			<div className="absolute inset-0 -z-10 bg-grid-pattern opacity-20" />
 
-			<div className="fade-in slide-in-from-bottom-8 container relative z-10 mt-10 flex animate-in flex-col items-center justify-center gap-5 px-4 py-4 text-center duration-1000">
-				<div className="space-y-4">
-					<div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-bold text-primary text-xs uppercase tracking-widest">
-						<Sparkles className="h-3 w-3" />
-						Your Second Brain
+			<div className="container mx-auto max-w-5xl px-6 py-20">
+				{/* Hero Section */}
+				<div className="mb-24 flex flex-col gap-6">
+					<div className="inline-block w-fit border border-border bg-muted/20 px-3 py-1 font-mono text-muted-foreground text-xs uppercase tracking-widest">
+						v1.0.0 — Second Brain
 					</div>
-					<h1 className="font-extrabold text-6xl tracking-tight sm:text-[5rem] lg:text-[6rem]">
-						Personal <span className="text-primary">Dump</span>
+
+					<h1 className="font-bold font-sans text-6xl text-primary leading-[0.9] tracking-tighter sm:text-8xl">
+						PERSONAL
+						<br />
+						<span className="text-muted-foreground">DUMP_</span>
 					</h1>
-					<p className="mx-auto max-w-2xl text-muted-foreground text-xl leading-relaxed">
-						Storage for your messy thoughts, error logs, and code snippets.
-						Organized by AI, retrieved through a simple chat interface.
+
+					<p className="mt-4 max-w-xl font-light text-muted-foreground text-xl leading-relaxed">
+						A minimalist vault for your messy thoughts, error logs, and code
+						snippets.
+						<strong className="font-medium text-foreground">
+							{" "}
+							Indexed by AI. Retrieved by Chat.
+						</strong>
 					</p>
+
+					<div className="mt-4">
+						<Link href="/dump">
+							<Button
+								className="h-14 rounded-none bg-primary px-8 text-base text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+								size="lg"
+							>
+								Start Dumping <ArrowRight className="ml-2 h-4 w-4" />
+							</Button>
+						</Link>
+					</div>
 				</div>
 
-				<div className="grid w-full max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
+				{/* Feature Grid */}
+				<div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+					{/* Knowledge Dump Card */}
 					<Link className="group" href="/dump">
-						<div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-border/50 bg-card p-8 text-left shadow-xl transition-all hover:border-primary/50 hover:bg-muted/50 hover:shadow-2xl hover:shadow-primary/5">
-							<div className="absolute top-0 right-0 p-8 opacity-5 transition-opacity group-hover:opacity-10">
-								<NotebookPen className="h-24 w-24 rotate-12" />
-							</div>
-							<div className="w-fit rounded-2xl bg-primary/10 p-3">
-								<NotebookPen className="h-6 w-6 text-primary" />
-							</div>
-							<div>
-								<h3 className="mb-2 font-bold text-2xl">Knowledge Dump</h3>
-								<p className="text-muted-foreground">
-									Paste your raw text, code, or logs. We'll chunk and index it
-									using vector embeddings.
+						<div className="swiss-card flex h-full min-h-[300px] flex-col justify-between p-8 hover:border-accent hover:shadow-[6px_6px_0px_0px_var(--accent)]">
+							<div className="space-y-4">
+								<div className="flex h-12 w-12 items-center justify-center border border-border bg-muted/20 transition-colors group-hover:border-accent group-hover:bg-accent group-hover:text-accent-foreground">
+									<NotebookPen className="h-6 w-6" />
+								</div>
+								<h3 className="font-bold text-2xl tracking-tight">
+									Input Phase
+								</h3>
+								<p className="text-muted-foreground leading-relaxed">
+									Paste raw text, code blocks (`ctrl+v`), or logs. We
+									automatically chunk and vector-index everything.
 								</p>
+							</div>
+							<div className="mt-8 flex items-center justify-between border-border border-t pt-4">
+								<span className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
+									/dump
+								</span>
+								<ArrowRight className="h-5 w-5 -translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
 							</div>
 						</div>
 					</Link>
 
+					{/* Chat Card */}
 					<Link className="group" href="/chat">
-						<div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-border/50 bg-card p-8 text-left shadow-xl transition-all hover:border-primary/50 hover:bg-muted/50 hover:shadow-2xl hover:shadow-primary/5">
-							<div className="absolute top-0 right-0 p-8 opacity-5 transition-opacity group-hover:opacity-10">
-								<MessageSquare className="h-24 w-24 -rotate-12" />
-							</div>
-							<div className="w-fit rounded-2xl bg-accent-custom/10 p-3">
-								<MessageSquare className="h-6 w-6 text-accent-custom" />
-							</div>
-							<div>
-								<h3 className="mb-2 font-bold text-2xl">AI Chat</h3>
-								<p className="text-muted-foreground">
-									Ask questions and get answers grounded in your personal data.
-									Powered by Gemini 2.5 Flash.
+						<div className="swiss-card flex h-full min-h-[300px] flex-col justify-between p-8 hover:border-accent hover:shadow-[6px_6px_0px_0px_var(--accent)]">
+							<div className="space-y-4">
+								<div className="flex h-12 w-12 items-center justify-center border border-border bg-muted/20 transition-colors group-hover:border-accent group-hover:bg-accent group-hover:text-accent-foreground">
+									<MessageSquare className="h-6 w-6" />
+								</div>
+								<h3 className="font-bold text-2xl tracking-tight">
+									Query Phase
+								</h3>
+								<p className="text-muted-foreground leading-relaxed">
+									Ask questions. Get answers grounded in your data. Powered by
+									Gemini Flash for speed.
 								</p>
+							</div>
+							<div className="mt-8 flex items-center justify-between border-border border-t pt-4">
+								<span className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
+									/chat
+								</span>
+								<ArrowRight className="h-5 w-5 -translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
 							</div>
 						</div>
 					</Link>
 				</div>
 
-				<div className="mt-8 flex w-full max-w-4xl flex-wrap justify-center gap-8 border-border/50 border-t py-8 text-muted-foreground/60">
-					<div className="flex items-center gap-2 font-medium text-sm">
-						<Search className="h-4 w-4" />
-						Vector Search
+				{/* Footer Meta */}
+				<div className="mt-24 flex flex-wrap gap-8 border-border border-t pt-8 font-mono text-muted-foreground text-sm">
+					<div className="flex items-center gap-2">
+						<div className="h-2 w-2 rounded-full bg-foreground" />
+						VECTOR_SEARCH_ENABLED
 					</div>
-					<div className="flex items-center gap-2 font-medium text-sm">
-						<Zap className="h-4 w-4" />
-						Real-time RAG
+					<div className="flex items-center gap-2">
+						<div className="h-2 w-2 rounded-full bg-foreground" />
+						RAG_OPTIMIZED
 					</div>
-					<div className="flex items-center gap-2 font-medium text-sm">
-						<Shield className="h-4 w-4" />
-						Private Storage
+					<div className="flex items-center gap-2">
+						<div className="h-2 w-2 rounded-full bg-foreground" />
+						LOCAL_STORAGE
 					</div>
 				</div>
-
-				<Link href="/dump">
-					<Button
-						className="h-14 rounded-full bg-primary px-10 text-primary-foreground shadow-primary/20 shadow-xl transition-transform hover:scale-105"
-						size="lg"
-					>
-						Get Started
-					</Button>
-				</Link>
 			</div>
 		</main>
 	);
