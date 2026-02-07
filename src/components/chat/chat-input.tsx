@@ -29,6 +29,8 @@ import {
 interface ChatInputProps {
 	onSubmit: (text: string, modelId: string) => void;
 	inputValue: string;
+	isModelSelectorOpen: boolean;
+	onModelSelectorOpenChange: (isOpen: boolean) => void;
 	onInputChange: (value: string) => void;
 	status: "submitted" | "streaming" | "ready" | "error";
 }
@@ -38,10 +40,11 @@ const DEFAULT_MODEL = "qwen/qwen3-32b";
 const ChatInput = ({
 	onSubmit,
 	inputValue,
+	isModelSelectorOpen,
+	onModelSelectorOpenChange,
 	onInputChange,
 	status,
 }: ChatInputProps) => {
-	const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
 	const [availableModels, setAvailableModels] = useState<string[]>([
 		DEFAULT_MODEL,
@@ -91,7 +94,7 @@ const ChatInput = ({
 					<PromptInputFooter>
 						<PromptInputTools>
 							<ModelSelector
-								onOpenChange={setIsModelSelectorOpen}
+								onOpenChange={onModelSelectorOpenChange}
 								open={isModelSelectorOpen}
 							>
 								<ModelSelectorTrigger asChild>
@@ -109,7 +112,7 @@ const ChatInput = ({
 													key={modelId}
 													onSelect={() => {
 														setSelectedModel(modelId);
-														setIsModelSelectorOpen(false);
+														onModelSelectorOpenChange(false);
 													}}
 													value={modelId}
 												>

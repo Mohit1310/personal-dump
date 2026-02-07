@@ -87,6 +87,7 @@ function splitCompletionOutput(raw: string) {
 export function ChatInterface() {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const [inputValue, setInputValue] = useState("");
+	const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
 
 	const { messages, sendMessage, status, setMessages } = useChat({
 		transport: new DefaultChatTransport({
@@ -105,6 +106,20 @@ export function ChatInterface() {
 		if (messageCount === 0) return;
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messageCount]);
+
+	useEffect(() => {
+		const onKeyDown = (event: KeyboardEvent) => {
+			if ((event.ctrlKey || event.metaKey) && event.code === "Slash") {
+				event.preventDefault();
+				setIsModelSelectorOpen(true);
+			}
+		};
+
+		window.addEventListener("keydown", onKeyDown);
+		return () => {
+			window.removeEventListener("keydown", onKeyDown);
+		};
+	}, []);
 
 	const handleSend = (text: string = inputValue, modelId: string = DEFAULT_MODEL) => {
 		const query = text.trim();
@@ -309,6 +324,8 @@ export function ChatInterface() {
 			<div className="border-border border-t bg-background p-6">
 				<ChatInput
 					inputValue={inputValue}
+					isModelSelectorOpen={isModelSelectorOpen}
+					onModelSelectorOpenChange={setIsModelSelectorOpen}
 					onInputChange={setInputValue}
 					onSubmit={handleSend}
 					status={status}
