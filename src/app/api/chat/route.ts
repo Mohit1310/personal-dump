@@ -1,6 +1,12 @@
 // import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createGroq } from "@ai-sdk/groq";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+	convertToModelMessages,
+	createUIMessageStream,
+	createUIMessageStreamResponse,
+	streamText,
+	type UIMessage,
+} from "ai";
 import { env } from "@/env";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { type SearchResult, vectorSearch } from "@/lib/retrieval/vector-search";
@@ -81,17 +87,47 @@ export async function POST(req: Request) {
 				// Continue without context if retrieval fails
 			}
 		}
+		console.log("chunks", chunks);
 
-		// Stream response using AI SDK
-		const result = streamText({
-			model: model("openai/gpt-oss-120b"),
-			system: buildSystemPrompt(chunks),
-			messages: await convertToModelMessages(messages),
+		// Create custom stream to send sources after LLM response
+		const stream = createUIMessageStream({
+			execute: async ({ writer }) => {
+				// Stream the LLM response first
+				const result = streamText({
+					model: model("openai/gpt-oss-120b"),
+					system: buildSystemPrompt(chunks),
+					messages: await convertToModelMessages(messages),
+				});
+
+				// Consume the LLM stream - this creates the message with text
+				const llmStream = result.toUIMessageStream();
+				const reader = llmStream.getReader();
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					writer.write(value);
+				}
+
+				// Now write source-document parts (added to the same message after text)
+				for (const chunk of chunks) {
+					writer.write({
+						type: "source-document",
+						sourceId: chunk.id,
+						mediaType: "text/plain",
+						title: `Chunk ${chunks.indexOf(chunk) + 1}`,
+						providerMetadata: {
+							custom: {
+								content: chunk.content,
+								distance: chunk.distance,
+								score: 1 - chunk.distance,
+							},
+						},
+					});
+				}
+			},
 		});
 
-		return result.toUIMessageStreamResponse({
-			sendSources: true,
-		});
+		return createUIMessageStreamResponse({ stream });
 	} catch (error) {
 		console.error("Chat API Error:", error);
 		return new Response(

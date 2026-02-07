@@ -1,13 +1,30 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import type { SourceDocumentUIPart } from "ai";
 import { DefaultChatTransport } from "ai";
 import { ArrowRight, Brain, Loader, MessageSquare, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MessageResponse } from "@/components/ai-elements/message";
+import {
+	Sources,
+	SourcesContent,
+	SourcesTrigger,
+} from "@/components/ai-elements/sources";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+
+/** Extended source type with custom metadata from RAG chunks */
+interface RAGSource extends SourceDocumentUIPart {
+	providerMetadata?: {
+		custom?: {
+			content?: string;
+			distance?: number;
+			score?: number;
+		};
+	};
+}
 
 const SUGGESTIONS = [
 	"What was that error I saw earlier?",
@@ -136,18 +153,59 @@ export function ChatInterface() {
 									</div>
 								) : (
 									<>
-										{/* Render message parts for streaming */}
+										{/* Render text parts for streaming */}
 										{msg.parts.map((part, index) => {
 											if (part.type === "text") {
 												return (
-													<MessageResponse className="" key={index}>
+													<MessageResponse key={index}>
 														{part.text}
 													</MessageResponse>
 												);
 											}
-											// Handle other part types if needed
 											return null;
 										})}
+
+										{/* Render sources */}
+										{(() => {
+											const sources = msg.parts.filter(
+												(p): p is RAGSource => p.type === "source-document",
+											);
+											if (sources.length === 0) return null;
+											return (
+												<Sources>
+													<SourcesTrigger count={sources.length} />
+													<SourcesContent>
+														{sources.map((source, i) => (
+															<div
+																className="rounded-md border border-border bg-muted/50 p-3 text-xs"
+																key={source.sourceId}
+															>
+																<div className="mb-1 flex justify-between font-semibold">
+																	<span>
+																		{source.title || `Source ${i + 1}`}
+																	</span>
+																	{source.providerMetadata?.custom?.score !==
+																		undefined && (
+																		<span className="opacity-50">
+																			Score:{" "}
+																			{source.providerMetadata.custom.score.toFixed(
+																				3,
+																			)}
+																		</span>
+																	)}
+																</div>
+																{source.providerMetadata?.custom?.content && (
+																	<p className="line-clamp-3 text-muted-foreground">
+																		{source.providerMetadata.custom.content}
+																	</p>
+																)}
+															</div>
+														))}
+													</SourcesContent>
+												</Sources>
+											);
+										})()}
+
 										{/* Show loading indicator when streaming and no text yet */}
 										{status === "streaming" &&
 											msg.id === messages[messages.length - 1]?.id &&
@@ -165,7 +223,7 @@ export function ChatInterface() {
 					{/* Show loading placeholder when waiting for response */}
 					{status === "submitted" && (
 						<div className="flex justify-start">
-							<div className="p-6 shadow-sm">
+							<div className="max-w-[85%] p-6 shadow-sm">
 								<div className="flex items-center gap-2 font-mono text-sm">
 									<Loader className="h-4 w-4 animate-spin" />
 									<span>COMPUTING_RESPONSE...</span>
