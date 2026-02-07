@@ -72,6 +72,7 @@ export function DumpForm() {
 							`}
 							key={t.value}
 							onClick={() => setType(t.value)}
+							type="button"
 						>
 							{t.label}
 						</button>

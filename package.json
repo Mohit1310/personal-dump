@@ -19,6 +19,9 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@ai-sdk/google": "^3.0.22",
+		"@ai-sdk/groq": "^3.0.22",
+		"@ai-sdk/react": "^3.0.77",
 		"@google/genai": "^1.39.0",
 		"@prisma/adapter-pg": "^7.3.0",
 		"@prisma/client": "^7.3.0",
