@@ -20,7 +20,6 @@ import {
 	PromptInputBody,
 	PromptInputButton,
 	PromptInputFooter,
-	PromptInputProvider,
 	PromptInputSubmit,
 	PromptInputTextarea,
 	PromptInputTools,
@@ -77,78 +76,76 @@ const ChatInput = ({
 
 	return (
 		<div className="size-full">
-			<PromptInputProvider>
-				<PromptInput
-					globalDrop
-					multiple
-					onSubmit={({ text }: PromptInputMessage) =>
-						onSubmit(text, selectedModel)
-					}
-				>
-					<PromptInputBody>
-						<PromptInputTextarea
-							autoFocus
-							id={CHAT_INPUT_TEXTAREA_ID}
-							onChange={(e) => onInputChange(e.target.value)}
-							placeholder="Enter command or query..."
-							value={inputValue}
-						/>
-					</PromptInputBody>
-					<PromptInputFooter>
-						<PromptInputTools>
-							<ModelSelector
-								onOpenChange={onModelSelectorOpenChange}
-								open={isModelSelectorOpen}
-							>
-								<ModelSelectorTrigger asChild>
-									<PromptInputButton className="w-full px-2">
-										<ModelSelectorName>{selectedModel}</ModelSelectorName>
-									</PromptInputButton>
-								</ModelSelectorTrigger>
-								<ModelSelectorContent>
-									<ModelSelectorInput placeholder="Search models..." />
-									<ModelSelectorList>
-										<ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
-										<ModelSelectorGroup heading="Groq Models">
-											{availableModels.map((modelId) => (
-												<ModelSelectorItem
-													key={modelId}
-													onSelect={() => {
-														setSelectedModel(modelId);
-														onModelSelectorOpenChange(false);
-													}}
-													value={modelId}
-												>
-													<ModelSelectorLogo provider="groq" />
-													<ModelSelectorName>{modelId}</ModelSelectorName>
-													{selectedModel === modelId && (
-														<Check className="size-4 text-white" />
-													)}
-												</ModelSelectorItem>
-											))}
+			<PromptInput
+				globalDrop
+				multiple
+				onSubmit={({ text }: PromptInputMessage) =>
+					onSubmit(text, selectedModel)
+				}
+			>
+				<PromptInputBody>
+					<PromptInputTextarea
+						autoFocus
+						id={CHAT_INPUT_TEXTAREA_ID}
+						onChange={(e) => onInputChange(e.target.value)}
+						placeholder="Enter command or query..."
+						value={inputValue}
+					/>
+				</PromptInputBody>
+				<PromptInputFooter>
+					<PromptInputTools>
+						<ModelSelector
+							onOpenChange={onModelSelectorOpenChange}
+							open={isModelSelectorOpen}
+						>
+							<ModelSelectorTrigger asChild>
+								<PromptInputButton className="w-full px-2">
+									<ModelSelectorName>{selectedModel}</ModelSelectorName>
+								</PromptInputButton>
+							</ModelSelectorTrigger>
+							<ModelSelectorContent>
+								<ModelSelectorInput placeholder="Search models..." />
+								<ModelSelectorList>
+									<ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+									<ModelSelectorGroup heading="Groq Models">
+										{availableModels.map((modelId) => (
+											<ModelSelectorItem
+												key={modelId}
+												onSelect={() => {
+													setSelectedModel(modelId);
+													onModelSelectorOpenChange(false);
+												}}
+												value={modelId}
+											>
+												<ModelSelectorLogo provider="groq" />
+												<ModelSelectorName>{modelId}</ModelSelectorName>
+												{selectedModel === modelId && (
+													<Check className="size-4 text-white" />
+												)}
+											</ModelSelectorItem>
+										))}
+									</ModelSelectorGroup>
+									{/* {["OpenAI", "Anthropic", "Google"].map((chef) => (
+										<ModelSelectorGroup heading={chef} key={chef}>
+											{models
+												.filter((m) => m.chef === chef)
+												.map((m) => (
+													<ModelItem
+														key={m.id}
+														m={m}
+														onSelect={handleModelSelect}
+														selectedModel={model}
+													/>
+												))}
 										</ModelSelectorGroup>
-										{/* {["OpenAI", "Anthropic", "Google"].map((chef) => (
-											<ModelSelectorGroup heading={chef} key={chef}>
-												{models
-													.filter((m) => m.chef === chef)
-													.map((m) => (
-														<ModelItem
-															key={m.id}
-															m={m}
-															onSelect={handleModelSelect}
-															selectedModel={model}
-														/>
-													))}
-											</ModelSelectorGroup>
-										))} */}
-									</ModelSelectorList>
-								</ModelSelectorContent>
-							</ModelSelector>
-						</PromptInputTools>
-						<PromptInputSubmit status={status} />
-					</PromptInputFooter>
-				</PromptInput>
-			</PromptInputProvider>
+									))} */}
+								</ModelSelectorList>
+							</ModelSelectorContent>
+						</ModelSelector>
+					</PromptInputTools>
+					<PromptInputSubmit status={status} />
+				</PromptInputFooter>
+			</PromptInput>
 		</div>
 	);
 };

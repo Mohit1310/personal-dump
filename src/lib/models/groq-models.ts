@@ -36,7 +36,9 @@ export async function getGroqModelIds(): Promise<string[]> {
 		const parsed = groqModelsResponseSchema.parse(await response.json());
 		const uniqueSortedIds = Array.from(
 			new Set(parsed.data.map((m) => m.id)),
-		).sort((a, b) => a.localeCompare(b));
+		)
+			.filter((id) => !id.toLowerCase().includes("canopylabs"))
+			.sort((a, b) => a.localeCompare(b));
 
 		cachedModels =
 			uniqueSortedIds.length > 0 ? uniqueSortedIds : [DEFAULT_GROQ_MODEL];

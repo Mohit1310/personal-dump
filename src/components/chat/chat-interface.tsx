@@ -212,14 +212,20 @@ export function ChatInterface() {
 						</div>
 
 						<div className="flex flex-wrap justify-center gap-2">
-							{SUGGESTIONS.map((s) => (
+							{SUGGESTIONS.map((suggestion) => (
 								<button
 									className="border border-border bg-muted/10 px-4 py-2 font-mono text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
-									key={s}
-									onClick={() => setInputValue(s)}
+									key={suggestion}
+									onClick={() => {
+										setInputValue(suggestion);
+										const input = document.getElementById(
+											CHAT_INPUT_TEXTAREA_ID,
+										) as HTMLTextAreaElement | null;
+										input?.focus();
+									}}
 									type="button"
 								>
-									{s}
+									{suggestion}
 								</button>
 							))}
 						</div>
