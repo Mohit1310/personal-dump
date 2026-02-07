@@ -18,7 +18,7 @@ import {
 	SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Button } from "@/components/ui/button";
-import ChatInput from "./chat-input";
+import ChatInput, { CHAT_INPUT_TEXTAREA_ID } from "./chat-input";
 
 /** Extended source type with custom metadata from RAG chunks */
 interface RAGSource extends SourceDocumentUIPart {
@@ -108,20 +108,48 @@ export function ChatInterface() {
 	}, [messageCount]);
 
 	useEffect(() => {
+		const isModelSelectorShortcut = (event: KeyboardEvent) => {
+			if (!(event.ctrlKey || event.metaKey) || event.altKey) {
+				return false;
+			}
+
+			return (
+				event.code === "Slash" ||
+				event.code === "NumpadDivide" ||
+				event.key === "/" ||
+				event.key === "?"
+			);
+		};
+
+		const isFocusInputShortcut = (event: KeyboardEvent) =>
+			event.shiftKey && (event.key === "Escape" || event.key === "Esc");
+
 		const onKeyDown = (event: KeyboardEvent) => {
-			if ((event.ctrlKey || event.metaKey) && event.code === "Slash") {
+			if (isModelSelectorShortcut(event)) {
 				event.preventDefault();
 				setIsModelSelectorOpen(true);
+				return;
+			}
+
+			if (isFocusInputShortcut(event)) {
+				event.preventDefault();
+				const input = document.getElementById(
+					CHAT_INPUT_TEXTAREA_ID,
+				) as HTMLTextAreaElement | null;
+				input?.focus();
 			}
 		};
 
-		window.addEventListener("keydown", onKeyDown);
+		window.addEventListener("keydown", onKeyDown, { capture: true });
 		return () => {
-			window.removeEventListener("keydown", onKeyDown);
+			window.removeEventListener("keydown", onKeyDown, { capture: true });
 		};
 	}, []);
 
-	const handleSend = (text: string = inputValue, modelId: string = DEFAULT_MODEL) => {
+	const handleSend = (
+		text: string = inputValue,
+		modelId: string = DEFAULT_MODEL,
+	) => {
 		const query = text.trim();
 		if (!query || status !== "ready") return;
 
@@ -325,8 +353,8 @@ export function ChatInterface() {
 				<ChatInput
 					inputValue={inputValue}
 					isModelSelectorOpen={isModelSelectorOpen}
-					onModelSelectorOpenChange={setIsModelSelectorOpen}
 					onInputChange={setInputValue}
+					onModelSelectorOpenChange={setIsModelSelectorOpen}
 					onSubmit={handleSend}
 					status={status}
 				/>

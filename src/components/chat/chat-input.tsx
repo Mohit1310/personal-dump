@@ -36,6 +36,7 @@ interface ChatInputProps {
 }
 
 const DEFAULT_MODEL = "qwen/qwen3-32b";
+export const CHAT_INPUT_TEXTAREA_ID = "chat-input-textarea";
 
 const ChatInput = ({
 	onSubmit,
@@ -86,6 +87,8 @@ const ChatInput = ({
 				>
 					<PromptInputBody>
 						<PromptInputTextarea
+							autoFocus
+							id={CHAT_INPUT_TEXTAREA_ID}
 							onChange={(e) => onInputChange(e.target.value)}
 							placeholder="Enter command or query..."
 							value={inputValue}
