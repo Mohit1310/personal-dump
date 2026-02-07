@@ -3,17 +3,22 @@
 import { useChat } from "@ai-sdk/react";
 import type { SourceDocumentUIPart } from "ai";
 import { DefaultChatTransport } from "ai";
-import { ArrowRight, Brain, Loader, MessageSquare, Trash2 } from "lucide-react";
+import { Brain, Loader, MessageSquare, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MessageResponse } from "@/components/ai-elements/message";
+import {
+	Reasoning,
+	ReasoningContent,
+	ReasoningTrigger,
+} from "@/components/ai-elements/reasoning";
 import {
 	Sources,
 	SourcesContent,
 	SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import ChatInput from "./chat-input";
 
 /** Extended source type with custom metadata from RAG chunks */
 interface RAGSource extends SourceDocumentUIPart {
@@ -31,6 +36,7 @@ const SUGGESTIONS = [
 	"Summarize my recent notes",
 	"How do I fix X in Y?",
 ];
+const DEFAULT_MODEL = "qwen/qwen3-32b";
 
 /**
  * Extracts text content from a message's parts
@@ -42,6 +48,40 @@ function getMessageText(parts: Array<{ type: string; text?: string }>): string {
 		}
 	}
 	return "";
+}
+
+function splitCompletionOutput(raw: string) {
+	if (!raw) {
+		return { reasoning: "", message: "" };
+	}
+
+	const reasoningChunks: string[] = [];
+	let message = raw.replace(
+		/<think>([\s\S]*?)<\/think>/g,
+		(_, chunk: string) => {
+			const trimmed = chunk.trim();
+			if (trimmed) {
+				reasoningChunks.push(trimmed);
+			}
+			return "";
+		},
+	);
+
+	const unclosedThink = message.match(/<think>([\s\S]*)$/);
+	if (unclosedThink?.[1]) {
+		const trimmed = unclosedThink[1].trim();
+		if (trimmed) {
+			reasoningChunks.push(trimmed);
+		}
+		message = message.replace(/<think>[\s\S]*$/, "");
+	}
+
+	message = message.replace(/<\/think>/g, "").trim();
+
+	return {
+		reasoning: reasoningChunks.join("\n\n").trim(),
+		message,
+	};
 }
 
 export function ChatInterface() {
@@ -58,24 +98,32 @@ export function ChatInterface() {
 		},
 	});
 
+	const messageCount = messages.length;
+
 	// Scroll to bottom when messages change
 	useEffect(() => {
+		if (messageCount === 0) return;
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages]);
+	}, [messageCount]);
 
-	const handleSend = (text: string = inputValue) => {
+	const handleSend = (text: string = inputValue, modelId: string = DEFAULT_MODEL) => {
 		const query = text.trim();
 		if (!query || status !== "ready") return;
 
-		sendMessage({ text: query });
+		sendMessage(
+			{ text: query },
+			{
+				body: {
+					model: modelId,
+				},
+			},
+		);
 		setInputValue("");
 	};
 
 	const clearChat = () => {
 		setMessages([]);
 	};
-
-	const isLoading = status === "streaming" || status === "submitted";
 
 	return (
 		<div className="mx-auto flex h-full max-w-5xl flex-col border-border border-x bg-background shadow-2xl">
@@ -92,20 +140,20 @@ export function ChatInterface() {
 						<div className="flex items-center gap-2 font-mono text-muted-foreground text-xs">
 							<span className="flex h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
 							<span>STATUS: CONNECTED</span>
-							<span className="text-border">|</span>
-							<span>MODEL: GEMINI_FLASH</span>
 						</div>
 					</div>
 				</div>
-				<Button
-					className="h-10 w-10 rounded-none hover:bg-destructive hover:text-white"
-					onClick={clearChat}
-					size="icon"
-					title="Clear"
-					variant="ghost"
-				>
-					<Trash2 className="h-4 w-4" />
-				</Button>
+				<div className="flex items-center gap-2">
+					<Button
+						className="h-10 w-10 rounded-none hover:bg-destructive hover:text-white"
+						onClick={clearChat}
+						size="icon"
+						title="Clear"
+						variant="ghost"
+					>
+						<Trash2 className="h-4 w-4" />
+					</Button>
+				</div>
 			</header>
 
 			{/* Messages */}
@@ -142,7 +190,7 @@ export function ChatInterface() {
 							key={msg.id}
 						>
 							<div
-								className={`${msg.role === "user" ? "bg-primary text-primary-foreground" : ""} p-6 shadow-sm`}
+								className={`${msg.role === "user" ? "bg-primary text-primary-foreground" : ""} px-4 py-2 shadow-sm`}
 							>
 								{/* Content */}
 								{msg.role === "user" ? (
@@ -154,16 +202,38 @@ export function ChatInterface() {
 								) : (
 									<>
 										{/* Render text parts for streaming */}
-										{msg.parts.map((part, index) => {
-											if (part.type === "text") {
-												return (
-													<MessageResponse key={index}>
-														{part.text}
-													</MessageResponse>
-												);
-											}
-											return null;
-										})}
+										{(() => {
+											const textContent = msg.parts
+												.filter(
+													(part): part is { type: "text"; text: string } =>
+														part.type === "text" &&
+														typeof part.text === "string",
+												)
+												.map((part) => part.text)
+												.join("");
+											const { reasoning, message } =
+												splitCompletionOutput(textContent);
+											const isCurrentStreamingMessage =
+												status === "streaming" &&
+												msg.id === messages[messages.length - 1]?.id;
+											const hasThinkingMarkup = textContent.includes("<think>");
+
+											return (
+												<>
+													{(reasoning ||
+														(isCurrentStreamingMessage &&
+															hasThinkingMarkup)) && (
+														<Reasoning isStreaming={isCurrentStreamingMessage}>
+															<ReasoningTrigger />
+															<ReasoningContent>{reasoning}</ReasoningContent>
+														</Reasoning>
+													)}
+													{message && (
+														<MessageResponse>{message}</MessageResponse>
+													)}
+												</>
+											);
+										})()}
 
 										{/* Render sources */}
 										{(() => {
@@ -237,39 +307,12 @@ export function ChatInterface() {
 
 			{/* Input Area */}
 			<div className="border-border border-t bg-background p-6">
-				<div className="swiss-card bg-background transition-all focus-within:border-primary focus-within:shadow-[4px_4px_0px_0px_var(--primary)]">
-					<div className="flex gap-2 p-1">
-						<Textarea
-							className="max-h-[200px] min-h-[60px] flex-1 resize-none border-none bg-transparent pt-3 font-mono text-base shadow-none placeholder:text-muted-foreground/40 focus-visible:ring-0"
-							onChange={(e) => setInputValue(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter" && !e.shiftKey) {
-									e.preventDefault();
-									handleSend();
-								}
-							}}
-							placeholder="Enter command or query..."
-							value={inputValue}
-						/>
-						<div className="flex items-end pr-1 pb-1">
-							<Button
-								className="h-10 w-10 rounded-none bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
-								disabled={isLoading || !inputValue.trim()}
-								onClick={() => handleSend()}
-								size="icon"
-							>
-								{isLoading ? (
-									<Loader className="h-4 w-4 animate-spin" />
-								) : (
-									<ArrowRight className="h-4 w-4" />
-								)}
-							</Button>
-						</div>
-					</div>
-				</div>
-				<div className="mt-3 text-center font-mono text-[10px] text-muted-foreground opacity-50">
-					PERSONAL_DUMP_OS v1.0 • STREAMING ENABLED
-				</div>
+				<ChatInput
+					inputValue={inputValue}
+					onInputChange={setInputValue}
+					onSubmit={handleSend}
+					status={status}
+				/>
 			</div>
 		</div>
 	);

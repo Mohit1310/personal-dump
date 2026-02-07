@@ -7,8 +7,10 @@ import {
 	streamText,
 	type UIMessage,
 } from "ai";
+import { z } from "zod";
 import { env } from "@/env";
 import { embedQuery } from "@/lib/embeddings/embed-query";
+import { DEFAULT_GROQ_MODEL, getGroqModelIds } from "@/lib/models/groq-models";
 import { type SearchResult, vectorSearch } from "@/lib/retrieval/vector-search";
 
 // Allow streaming responses up to 30 seconds
@@ -66,9 +68,21 @@ function getMessageText(msg: UIMessage): string {
 	return "";
 }
 
+const chatRequestSchema = z.object({
+	messages: z.array(z.custom<UIMessage>()),
+	model: z.string().optional(),
+});
+
 export async function POST(req: Request) {
 	try {
-		const { messages }: { messages: UIMessage[] } = await req.json();
+		const { messages, model: requestedModel } = chatRequestSchema.parse(
+			await req.json(),
+		);
+		const groqModels = await getGroqModelIds();
+		const selectedModel =
+			requestedModel && groqModels.includes(requestedModel)
+				? requestedModel
+				: (groqModels[0] ?? DEFAULT_GROQ_MODEL);
 
 		// Get the last user message for RAG retrieval
 		const lastUserMessage = [...messages]
@@ -94,7 +108,7 @@ export async function POST(req: Request) {
 			execute: async ({ writer }) => {
 				// Stream the LLM response first
 				const result = streamText({
-					model: model("openai/gpt-oss-120b"),
+					model: model(selectedModel),
 					system: buildSystemPrompt(chunks),
 					messages: await convertToModelMessages(messages),
 				});
