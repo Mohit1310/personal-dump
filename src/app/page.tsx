@@ -33,7 +33,7 @@ export default function HomePage() {
 					<div className="mt-4">
 						<Link href="/dump">
 							<Button
-								className="h-14 rounded-none bg-primary px-8 text-base text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+								className="h-14 cursor-pointer rounded-none bg-primary px-8 text-base text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
 								size="lg"
 							>
 								Start Dumping <ArrowRight className="ml-2 h-4 w-4" />
@@ -55,8 +55,8 @@ export default function HomePage() {
 									Input Phase
 								</h3>
 								<p className="text-muted-foreground leading-relaxed">
-									Paste raw text, code blocks (`ctrl+v`), or logs. We
-									automatically chunk and vector-index everything.
+									Paste raw text, code blocks, or logs. We automatically chunk
+									and vector-index everything.
 								</p>
 							</div>
 							<div className="mt-8 flex items-center justify-between border-border border-t pt-4">
@@ -80,7 +80,7 @@ export default function HomePage() {
 								</h3>
 								<p className="text-muted-foreground leading-relaxed">
 									Ask questions. Get answers grounded in your data. Powered by
-									Gemini Flash for speed.
+									Groq for speed.
 								</p>
 							</div>
 							<div className="mt-8 flex items-center justify-between border-border border-t pt-4">
@@ -102,10 +102,6 @@ export default function HomePage() {
 					<div className="flex items-center gap-2">
 						<div className="h-2 w-2 rounded-full bg-foreground" />
 						RAG_OPTIMIZED
-					</div>
-					<div className="flex items-center gap-2">
-						<div className="h-2 w-2 rounded-full bg-foreground" />
-						LOCAL_STORAGE
 					</div>
 				</div>
 			</div>

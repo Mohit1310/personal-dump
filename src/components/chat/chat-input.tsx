@@ -34,7 +34,7 @@ interface ChatInputProps {
 	status: "submitted" | "streaming" | "ready" | "error";
 }
 
-const DEFAULT_MODEL = "qwen/qwen3-32b";
+const DEFAULT_MODEL = "openai/gpt-oss-120b";
 export const CHAT_INPUT_TEXTAREA_ID = "chat-input-textarea";
 
 const ChatInput = ({
@@ -114,6 +114,12 @@ const ChatInput = ({
 												onSelect={() => {
 													setSelectedModel(modelId);
 													onModelSelectorOpenChange(false);
+													requestAnimationFrame(() => {
+														const input = document.getElementById(
+															CHAT_INPUT_TEXTAREA_ID,
+														) as HTMLTextAreaElement | null;
+														input?.focus();
+													});
 												}}
 												value={modelId}
 											>
