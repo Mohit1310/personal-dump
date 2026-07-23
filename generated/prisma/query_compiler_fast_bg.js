@@ -1,3 +1,4 @@
+"use strict";
 var h = Object.defineProperty;
 var T = Object.getOwnPropertyDescriptor;
 var M = Object.getOwnPropertyNames;
@@ -7,7 +8,7 @@ var D = (e, t) => {
 	},
 	O = (e, t, n, _) => {
 		if ((t && typeof t == "object") || typeof t == "function")
-			for (const r of M(t))
+			for (let r of M(t))
 				!j.call(e, r) &&
 					r !== n &&
 					h(e, r, {
@@ -88,14 +89,14 @@ function R(e, t) {
 	);
 }
 function m(e, t) {
-	return (e = e >>> 0), R(e, t);
+	return ((e = e >>> 0), R(e, t));
 }
 let f = 0;
 const g = new TextEncoder();
 "encodeInto" in g ||
-	(g.encodeInto = (e, t) => {
+	(g.encodeInto = function (e, t) {
 		const n = g.encode(e);
-		return t.set(n), { read: e.length, written: n.length };
+		return (t.set(n), { read: e.length, written: n.length });
 	});
 function l(e, t, n) {
 	if (n === void 0) {
@@ -119,12 +120,13 @@ function l(e, t, n) {
 		s[r + c] = i;
 	}
 	if (c !== _) {
-		c !== 0 && (e = e.slice(c)), (r = n(r, _, (_ = c + e.length * 3), 1) >>> 0);
+		(c !== 0 && (e = e.slice(c)),
+			(r = n(r, _, (_ = c + e.length * 3), 1) >>> 0));
 		const i = a().subarray(r + c, r + _),
 			d = g.encodeInto(e, i);
-		(c += d.written), (r = n(r, _, c, 1) >>> 0);
+		((c += d.written), (r = n(r, _, c, 1) >>> 0));
 	}
-	return (f = c), r;
+	return ((f = c), r);
 }
 let b = null;
 function u() {
@@ -156,7 +158,7 @@ function I(e) {
 		let s = "[";
 		r > 0 && (s += I(e[0]));
 		for (let c = 1; c < r; c++) s += ", " + I(e[c]);
-		return (s += "]"), s;
+		return ((s += "]"), s);
 	}
 	const n = /\[object ([^\]]+)\]/.exec(toString.call(e));
 	let _;
@@ -174,11 +176,11 @@ ${e.stack}`
 		: _;
 }
 function $(e, t) {
-	return (e = e >>> 0), a().subarray(e / 1, e / 1 + t);
+	return ((e = e >>> 0), a().subarray(e / 1, e / 1 + t));
 }
 function w(e) {
 	const t = o.__wbindgen_externrefs.get(e);
-	return o.__externref_table_dealloc(e), t;
+	return (o.__externref_table_dealloc(e), t);
 }
 const E =
 	typeof FinalizationRegistry > "u"
@@ -187,7 +189,7 @@ const E =
 class F {
 	__destroy_into_raw() {
 		const t = this.__wbg_ptr;
-		return (this.__wbg_ptr = 0), E.unregister(this), t;
+		return ((this.__wbg_ptr = 0), E.unregister(this), t);
 	}
 	free() {
 		const t = this.__destroy_into_raw();
@@ -228,7 +230,7 @@ function k(e, t) {
 	const n = String(t),
 		_ = l(n, o.__wbindgen_malloc, o.__wbindgen_realloc),
 		r = f;
-	u().setInt32(e + 4 * 1, r, !0), u().setInt32(e + 4 * 0, _, !0);
+	(u().setInt32(e + 4 * 1, r, !0), u().setInt32(e + 4 * 0, _, !0));
 }
 function W(e) {
 	const t = e,
@@ -239,7 +241,7 @@ function V(e, t) {
 	const n = I(t),
 		_ = l(n, o.__wbindgen_malloc, o.__wbindgen_realloc),
 		r = f;
-	u().setInt32(e + 4 * 1, r, !0), u().setInt32(e + 4 * 0, _, !0);
+	(u().setInt32(e + 4 * 1, r, !0), u().setInt32(e + 4 * 0, _, !0));
 }
 function z(e, t) {
 	return e in t;
@@ -260,15 +262,15 @@ function Y(e, t) {
 function G(e, t) {
 	const n = t,
 		_ = typeof n == "number" ? n : void 0;
-	u().setFloat64(e + 8 * 1, x(_) ? 0 : _, !0),
-		u().setInt32(e + 4 * 0, !x(_), !0);
+	(u().setFloat64(e + 8 * 1, x(_) ? 0 : _, !0),
+		u().setInt32(e + 4 * 0, !x(_), !0));
 }
 function J(e, t) {
 	const n = t,
 		_ = typeof n == "string" ? n : void 0;
 	var r = x(_) ? 0 : l(_, o.__wbindgen_malloc, o.__wbindgen_realloc),
 		s = f;
-	u().setInt32(e + 4 * 1, s, !0), u().setInt32(e + 4 * 0, r, !0);
+	(u().setInt32(e + 4 * 1, s, !0), u().setInt32(e + 4 * 0, r, !0));
 }
 function X(e, t) {
 	throw new Error(m(e, t));
@@ -325,7 +327,7 @@ function se() {
 	return new Map();
 }
 function ue() {
-	return [];
+	return new Array();
 }
 function fe(e, t, n) {
 	Uint8Array.prototype.set.call($(e, t), n);
@@ -357,11 +359,11 @@ function ye(e) {
 function me() {
 	const e = o.__wbindgen_externrefs,
 		t = e.grow(4);
-	e.set(0, void 0),
+	(e.set(0, void 0),
 		e.set(t + 0, void 0),
 		e.set(t + 1, null),
 		e.set(t + 2, !0),
-		e.set(t + 3, !1);
+		e.set(t + 3, !1));
 }
 0 &&
 	(module.exports = {

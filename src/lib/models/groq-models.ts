@@ -34,9 +34,7 @@ export async function getGroqModelIds(): Promise<string[]> {
 		}
 
 		const parsed = groqModelsResponseSchema.parse(await response.json());
-		const uniqueSortedIds = Array.from(
-			new Set(parsed.data.map((m) => m.id)),
-		)
+		const uniqueSortedIds = Array.from(new Set(parsed.data.map((m) => m.id)))
 			.filter((id) => !id.toLowerCase().includes("canopylabs"))
 			.sort((a, b) => a.localeCompare(b));
 

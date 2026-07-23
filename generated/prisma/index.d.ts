@@ -435,14 +435,14 @@ export namespace Prisma {
 	/**
 	 * Is T a Record?
 	 */
-	type IsObject<T> =
+	type IsObject<T extends any> =
 		T extends Array<any>
 			? False
 			: T extends Date
 				? False
 				: T extends Uint8Array
 					? False
-					: T extends bigint
+					: T extends BigInt
 						? False
 						: T extends object
 							? True
@@ -451,7 +451,7 @@ export namespace Prisma {
 	/**
 	 * If it's T[], return T
 	 */
-	export type UnEnumerate<T> = T extends Array<infer U> ? U : T;
+	export type UnEnumerate<T extends unknown> = T extends Array<infer U> ? U : T;
 
 	/**
 	 * From ts-toolbelt
@@ -488,9 +488,7 @@ export namespace Prisma {
 
 	/** Helper Types for "Merge" **/
 	export type IntersectOf<U extends Union> = (
-		U extends unknown
-			? (k: U) => void
-			: never
+		U extends unknown ? (k: U) => void : never
 	) extends (k: infer I) => void
 		? I
 		: never;
@@ -525,7 +523,7 @@ export namespace Prisma {
 		0: AtLoose<O, K>;
 	}[strict];
 
-	export type ComputeRaw<A> = A extends Function
+	export type ComputeRaw<A extends any> = A extends Function
 		? A
 		: {
 				[K in keyof A]: A[K];
@@ -580,7 +578,7 @@ export namespace Prisma {
 		1: 0;
 	}[B];
 
-	export type Extends<A1, A2> = [A1] extends [never]
+	export type Extends<A1 extends any, A2 extends any> = [A1] extends [never]
 		? 0 // anything `never` is false
 		: A1 extends A2
 			? 1
@@ -676,11 +674,10 @@ export namespace Prisma {
 
 	export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 
-	interface TypeMapCb<ClientOptions = {}>
-		extends $Utils.Fn<
-			{ extArgs: $Extensions.InternalArgs },
-			$Utils.Record<string, any>
-		> {
+	interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<
+		{ extArgs: $Extensions.InternalArgs },
+		$Utils.Record<string, any>
+	> {
 		returns: Prisma.TypeMap<
 			this["params"]["extArgs"],
 			ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}
@@ -1821,9 +1818,9 @@ export namespace Prisma {
 				Extends<"skip", Keys<T>>,
 				Extends<"take", Keys<T>>
 			>,
-			OrderByArg extends True extends HasSelectOrTake
+			OrderByArg extends (True extends HasSelectOrTake
 				? { orderBy: DumpGroupByArgs["orderBy"] }
-				: { orderBy?: DumpGroupByArgs["orderBy"] },
+				: { orderBy?: DumpGroupByArgs["orderBy"] }),
 			OrderFields extends ExcludeUnderscoreKeys<
 				Keys<MaybeTupleToUnion<T["orderBy"]>>
 			>,
@@ -1831,8 +1828,8 @@ export namespace Prisma {
 			ByValid extends Has<ByFields, OrderFields>,
 			HavingFields extends GetHavingFields<T["having"]>,
 			HavingValid extends Has<ByFields, HavingFields>,
-			ByEmpty extends T["by"] extends never[] ? True : False,
-			InputErrors extends ByEmpty extends True
+			ByEmpty extends (T["by"] extends never[] ? True : False),
+			InputErrors extends (ByEmpty extends True
 				? `Error: "by" must not be empty.`
 				: HavingValid extends False
 					? {
@@ -1873,7 +1870,7 @@ export namespace Prisma {
 										[P in OrderFields]: P extends ByFields
 											? never
 											: `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
-									}[OrderFields],
+									}[OrderFields]),
 		>(
 			args: SubsetIntersection<T, DumpGroupByArgs, OrderByArg> & InputErrors,
 		): {} extends InputErrors
@@ -3163,9 +3160,9 @@ export namespace Prisma {
 				Extends<"skip", Keys<T>>,
 				Extends<"take", Keys<T>>
 			>,
-			OrderByArg extends True extends HasSelectOrTake
+			OrderByArg extends (True extends HasSelectOrTake
 				? { orderBy: ChunkGroupByArgs["orderBy"] }
-				: { orderBy?: ChunkGroupByArgs["orderBy"] },
+				: { orderBy?: ChunkGroupByArgs["orderBy"] }),
 			OrderFields extends ExcludeUnderscoreKeys<
 				Keys<MaybeTupleToUnion<T["orderBy"]>>
 			>,
@@ -3173,8 +3170,8 @@ export namespace Prisma {
 			ByValid extends Has<ByFields, OrderFields>,
 			HavingFields extends GetHavingFields<T["having"]>,
 			HavingValid extends Has<ByFields, HavingFields>,
-			ByEmpty extends T["by"] extends never[] ? True : False,
-			InputErrors extends ByEmpty extends True
+			ByEmpty extends (T["by"] extends never[] ? True : False),
+			InputErrors extends (ByEmpty extends True
 				? `Error: "by" must not be empty.`
 				: HavingValid extends False
 					? {
@@ -3215,7 +3212,7 @@ export namespace Prisma {
 										[P in OrderFields]: P extends ByFields
 											? never
 											: `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
-									}[OrderFields],
+									}[OrderFields]),
 		>(
 			args: SubsetIntersection<T, ChunkGroupByArgs, OrderByArg> & InputErrors,
 		): {} extends InputErrors
@@ -4347,9 +4344,9 @@ export namespace Prisma {
 				Extends<"skip", Keys<T>>,
 				Extends<"take", Keys<T>>
 			>,
-			OrderByArg extends True extends HasSelectOrTake
+			OrderByArg extends (True extends HasSelectOrTake
 				? { orderBy: EmbeddingGroupByArgs["orderBy"] }
-				: { orderBy?: EmbeddingGroupByArgs["orderBy"] },
+				: { orderBy?: EmbeddingGroupByArgs["orderBy"] }),
 			OrderFields extends ExcludeUnderscoreKeys<
 				Keys<MaybeTupleToUnion<T["orderBy"]>>
 			>,
@@ -4357,8 +4354,8 @@ export namespace Prisma {
 			ByValid extends Has<ByFields, OrderFields>,
 			HavingFields extends GetHavingFields<T["having"]>,
 			HavingValid extends Has<ByFields, HavingFields>,
-			ByEmpty extends T["by"] extends never[] ? True : False,
-			InputErrors extends ByEmpty extends True
+			ByEmpty extends (T["by"] extends never[] ? True : False),
+			InputErrors extends (ByEmpty extends True
 				? `Error: "by" must not be empty.`
 				: HavingValid extends False
 					? {
@@ -4399,7 +4396,7 @@ export namespace Prisma {
 										[P in OrderFields]: P extends ByFields
 											? never
 											: `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
-									}[OrderFields],
+									}[OrderFields]),
 		>(
 			args: SubsetIntersection<T, EmbeddingGroupByArgs, OrderByArg> &
 				InputErrors,

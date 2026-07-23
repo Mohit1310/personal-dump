@@ -1004,7 +1004,7 @@ export declare type DynamicQueryExtensionArgs<
 							: P extends keyof TypeMap["model"][ModelKey<
 										TypeMap,
 										K
-									>]["operations"]
+								  >]["operations"]
 								? DynamicQueryExtensionCb<
 										TypeMap,
 										"model",
@@ -1589,67 +1589,68 @@ export declare type GetFindResult<
 	P extends OperationPayload,
 	A,
 	GlobalOmitOptions,
-> = Equals<A, any> extends 1
-	? DefaultSelection<P, A, GlobalOmitOptions>
-	: A extends
-				| ({
-						select: infer S extends object;
-				  } & Record<string, unknown>)
-				| ({
-						include: infer I extends object;
-				  } & Record<string, unknown>)
-		? {
-				[K in keyof S | keyof I as (S & I)[K] extends
-					| false
-					| undefined
-					| Skip
-					| null
-					? never
-					: K]: (S & I)[K] extends object
-					? P extends SelectablePayloadFields<K, (infer O)[]>
-						? O extends OperationPayload
-							? GetFindResult<O, (S & I)[K], GlobalOmitOptions>[]
-							: never
-						: P extends SelectablePayloadFields<K, infer O | null>
+> =
+	Equals<A, any> extends 1
+		? DefaultSelection<P, A, GlobalOmitOptions>
+		: A extends
+					| ({
+							select: infer S extends object;
+					  } & Record<string, unknown>)
+					| ({
+							include: infer I extends object;
+					  } & Record<string, unknown>)
+			? {
+					[K in keyof S | keyof I as (S & I)[K] extends
+						| false
+						| undefined
+						| Skip
+						| null
+						? never
+						: K]: (S & I)[K] extends object
+						? P extends SelectablePayloadFields<K, (infer O)[]>
 							? O extends OperationPayload
-								?
-										| GetFindResult<O, (S & I)[K], GlobalOmitOptions>
-										| (SelectField<P, K> & null)
+								? GetFindResult<O, (S & I)[K], GlobalOmitOptions>[]
 								: never
-							: K extends "_count"
-								? Count<GetFindResult<P, (S & I)[K], GlobalOmitOptions>>
-								: never
-					: P extends SelectablePayloadFields<K, (infer O)[]>
-						? O extends OperationPayload
-							? DefaultSelection<O, {}, GlobalOmitOptions>[]
-							: never
-						: P extends SelectablePayloadFields<K, infer O | null>
-							? O extends OperationPayload
-								?
-										| DefaultSelection<O, {}, GlobalOmitOptions>
-										| (SelectField<P, K> & null)
-								: never
-							: P extends {
-										scalars: {
-											[k in K]: infer O;
-										};
-									}
-								? O
+							: P extends SelectablePayloadFields<K, (infer O) | null>
+								? O extends OperationPayload
+									?
+											| GetFindResult<O, (S & I)[K], GlobalOmitOptions>
+											| (SelectField<P, K> & null)
+									: never
 								: K extends "_count"
-									? Count<P["objects"]>
-									: never;
-			} & (A extends {
-				include: any;
-			} & Record<string, unknown>
-				? DefaultSelection<
-						P,
-						A & {
-							omit: A["omit"];
-						},
-						GlobalOmitOptions
-					>
-				: unknown)
-		: DefaultSelection<P, A, GlobalOmitOptions>;
+									? Count<GetFindResult<P, (S & I)[K], GlobalOmitOptions>>
+									: never
+						: P extends SelectablePayloadFields<K, (infer O)[]>
+							? O extends OperationPayload
+								? DefaultSelection<O, {}, GlobalOmitOptions>[]
+								: never
+							: P extends SelectablePayloadFields<K, (infer O) | null>
+								? O extends OperationPayload
+									?
+											| DefaultSelection<O, {}, GlobalOmitOptions>
+											| (SelectField<P, K> & null)
+									: never
+								: P extends {
+											scalars: {
+												[k in K]: infer O;
+											};
+									  }
+									? O
+									: K extends "_count"
+										? Count<P["objects"]>
+										: never;
+				} & (A extends {
+					include: any;
+				} & Record<string, unknown>
+					? DefaultSelection<
+							P,
+							A & {
+								omit: A["omit"];
+							},
+							GlobalOmitOptions
+						>
+					: unknown)
+			: DefaultSelection<P, A, GlobalOmitOptions>;
 
 export declare type GetGroupByResult<
 	P extends OperationPayload,
@@ -1664,7 +1665,7 @@ export declare type GetGroupByResult<
 		>
 	: A extends {
 				by: string;
-			}
+		  }
 		? Array<
 				GetAggregateResult<P, A> & {
 					[K in A["by"]]: P["scalars"][K];
@@ -1704,9 +1705,7 @@ export declare type GetPayloadResultExtensionObject<
 };
 
 export declare function getPrismaClient(config: GetPrismaClientConfig): {
-	new (
-		optionsArg: PrismaClientOptions,
-	): {
+	new (optionsArg: PrismaClientOptions): {
 		_originalClient: any;
 		_runtimeDataModel: RuntimeDataModel;
 		_requestHandler: RequestHandler;
@@ -2017,8 +2016,7 @@ declare type InMemoryOps = {
  * Matches a JSON array.
  * Unlike \`JsonArray\`, readonly arrays are assignable to this type.
  */
-export declare interface InputJsonArray
-	extends ReadonlyArray<InputJsonValue | null> {}
+export declare interface InputJsonArray extends ReadonlyArray<InputJsonValue | null> {}
 
 /**
  * Matches a JSON object.
@@ -3533,7 +3531,7 @@ export declare type SelectField<
 	? P["objects"][K]
 	: P extends {
 				composites: Record<K, any>;
-			}
+		  }
 		? P["composites"][K]
 		: never;
 
@@ -3890,9 +3888,9 @@ export declare interface SqlCommenterContext {
  * }
  * ```
  */
-export declare type SqlCommenterPlugin = (
-	context: SqlCommenterContext,
-) => SqlCommenterTags;
+export declare interface SqlCommenterPlugin {
+	(context: SqlCommenterContext): SqlCommenterTags;
+}
 
 /**
  * Prisma query type corresponding to this SQL query.
@@ -3959,8 +3957,10 @@ declare interface SqlDriverAdapter extends SqlQueryable {
 	dispose(): Promise<void>;
 }
 
-export declare interface SqlDriverAdapterFactory
-	extends DriverAdapterFactory<SqlQuery, SqlResultSet> {
+export declare interface SqlDriverAdapterFactory extends DriverAdapterFactory<
+	SqlQuery,
+	SqlResultSet
+> {
 	connect(): Promise<SqlDriverAdapter>;
 }
 
@@ -4155,7 +4155,7 @@ export declare type UnwrapPayload<P> = {} extends P
 				: P[K] extends {
 							scalars: infer S;
 							composites: infer C;
-						} | null
+					  } | null
 					? (S & UnwrapPayload<C>) | Select<P[K], null>
 					: never;
 		};
@@ -4285,3 +4285,5 @@ export declare const warnOnce: (
 	message: string,
 	...args: unknown[]
 ) => void;
+
+export {};

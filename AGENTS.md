@@ -4,6 +4,7 @@ This project is a **personal knowledge dump and retrieval system** built using a
 **Retrieval-Augmented Generation (RAG)** architecture.
 
 The system allows the user to:
+
 - Dump unstructured knowledge (text, code, errors, solutions)
 - Chunk and embed that knowledge
 - Store it in PostgreSQL
@@ -35,6 +36,7 @@ The system is intentionally designed with **clear responsibility boundaries**
 Accept and normalize raw user input.
 
 **Inputs**
+
 - Free-form text from the Dump UI (`/dump`)
 - Text may include:
   - Code
@@ -44,9 +46,11 @@ Accept and normalize raw user input.
   - Notes
 
 **Outputs**
+
 - Normalized text ready for chunking
 
 **Rules**
+
 - Do not infer structure
 - Do not modify meaning
 - Preserve original formatting
@@ -59,18 +63,22 @@ Accept and normalize raw user input.
 Split normalized text into semantically meaningful chunks.
 
 **Inputs**
+
 - Normalized dump text
 
 **Outputs**
+
 - Ordered list of chunks
 
 **Chunking Rules**
+
 - Do not split inside code blocks
 - Prefer paragraph-based splits
 - Keep error and solution together where possible
 - Enforce maximum token/length limits suitable for embeddings
 
 **Non-Goals**
+
 - No summarization
 - No rewriting
 
@@ -82,16 +90,20 @@ Split normalized text into semantically meaningful chunks.
 Generate vector embeddings for chunks and queries.
 
 **Inputs**
+
 - Chunk text (write path)
 - Query text (read path)
 
 **Outputs**
+
 - Vector embeddings
 
 **Model**
+
 - Gemini Embedding Model
 
 **Rules**
+
 - One embedding per chunk
 - Server-side only
 - Deterministic calls
@@ -104,16 +116,19 @@ Generate vector embeddings for chunks and queries.
 Persist all data in PostgreSQL.
 
 **Stored Entities**
+
 - Dump: raw input and metadata
 - Chunk: processed text linked to a dump
 - Embedding: vector linked to a chunk
 
 **Technology**
+
 - Prisma ORM
 - pgvector extension
 - Raw SQL used only for vector similarity search
 
 **Rules**
+
 - Append-only storage
 - No deletes or overwrites in v1
 
@@ -125,17 +140,21 @@ Persist all data in PostgreSQL.
 Find the most relevant stored knowledge for a user query.
 
 **Inputs**
+
 - Natural language query
 
 **Process**
+
 1. Embed the query
 2. Perform vector similarity search using pgvector
 3. Retrieve top-K most relevant chunks
 
 **Outputs**
+
 - Ranked list of relevant chunks
 
 **Search Characteristics**
+
 - Semantic similarity (cosine distance)
 - No keyword-only search
 - No external data sources
@@ -148,19 +167,23 @@ Find the most relevant stored knowledge for a user query.
 Generate a clean, well-formatted answer using retrieved chunks only.
 
 **Inputs**
+
 - User question
 - Retrieved chunks
 
 **Outputs**
+
 - Markdown-formatted answer
 
 **Formatting Rules**
+
 - Code in fenced code blocks
 - Errors clearly labeled
 - Solutions presented step-by-step
 - Group related chunks logically
 
 **Strict Constraint**
+
 - The answer MUST NOT include information not present in the retrieved chunks
 
 ---
@@ -171,10 +194,12 @@ Generate a clean, well-formatted answer using retrieved chunks only.
 Handle user interaction and routing.
 
 **Surfaces**
+
 - `/dump`: knowledge ingestion UI
 - `/chat`: query and retrieval UI
 
 **Rules**
+
 - Dump UI does not perform retrieval
 - Chat UI does not perform storage
 - Clear separation of concerns
@@ -189,7 +214,7 @@ User → Dump UI
 → Dump Ingestion Agent  
 → Chunking Agent  
 → Embedding Agent  
-→ Storage Agent  
+→ Storage Agent
 
 ---
 
@@ -199,7 +224,7 @@ User → Chat UI
 → Embedding Agent (query)  
 → Retrieval Agent  
 → Answer Generation Agent  
-→ User  
+→ User
 
 ---
 

@@ -136,3 +136,5 @@ declare function validator<
 	operation: O,
 	prop: P,
 ): <S>(select: Exact<S, Args<C[M], O>[P]>) => S;
+
+export {};
