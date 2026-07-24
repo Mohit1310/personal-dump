@@ -63,7 +63,8 @@ const parseStackFrame = (line: string): StackFrame => {
 	// Pattern: at functionName (filePath:line:column)
 	const withParensMatch = trimmed.match(STACK_FRAME_WITH_PARENS_REGEX);
 	if (withParensMatch) {
-		const [, functionName, filePath, lineNum, colNum] = withParensMatch;
+		const [, functionName, matchedFilePath, lineNum, colNum] = withParensMatch;
+		const filePath = matchedFilePath ?? "";
 		const isInternal =
 			filePath.includes("node_modules") ||
 			filePath.startsWith("node:") ||
@@ -119,15 +120,15 @@ const parseStackTrace = (trace: string): ParsedStackTrace => {
 		};
 	}
 
-	const firstLine = lines[0].trim();
+	const firstLine = lines[0]?.trim() ?? "";
 	let errorType: string | null = null;
 	let errorMessage = firstLine;
 
 	// Try to extract error type from "ErrorType: message" format
 	const errorMatch = firstLine.match(ERROR_TYPE_REGEX);
 	if (errorMatch) {
-		errorType = errorMatch[1];
-		errorMessage = errorMatch[2] || "";
+		errorType = errorMatch[1] ?? null;
+		errorMessage = errorMatch[2] ?? "";
 	}
 
 	// Parse stack frames (lines starting with "at")
