@@ -132,6 +132,12 @@ Knowledge Library test's temporary `$transaction` spy left the cached Prisma
 proxy non-callable for later files. The fix restores the captured callable in
 test cleanup only; it changes no production behavior or milestone decision.
 
+Issue [#26](https://github.com/Mohit1310/personal-dump/issues/26) is **in
+progress** as the stacked follow-up to PR #29. It restores production
+prerendering for `/library` by placing its client search-parameter consumer
+behind an accessible loading fallback, with no change to Library filters or
+data-loading behavior.
+
 ## Progress
 
 | Order | Issue | Milestone | Status      | Delivery                                                     |
