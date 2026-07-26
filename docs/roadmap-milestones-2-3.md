@@ -123,6 +123,15 @@ prerequisite, not part of the milestone 2–3 scope.
 | CLI packaging                 | Compile the command-line entry point.                                                                                                                        | `pnpm build:cli`                              |
 | Production packaging          | Next.js production compilation.                                                                                                                              | `pnpm build`                                  |
 
+## Verification harness follow-up
+
+Issue [#25](https://github.com/Mohit1310/personal-dump/issues/25) is **in
+progress** in [PR #29](https://github.com/Mohit1310/personal-dump/pull/29).
+It corrects an order-dependent integration-test harness leak: restoring the
+Knowledge Library test's temporary `$transaction` spy left the cached Prisma
+proxy non-callable for later files. The fix restores the captured callable in
+test cleanup only; it changes no production behavior or milestone decision.
+
 ## Progress
 
 | Order | Issue | Milestone | Status      | Delivery                                                     |
