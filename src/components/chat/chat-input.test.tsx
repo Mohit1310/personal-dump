@@ -25,7 +25,8 @@ describe("ChatInput", () => {
 		const user = userEvent.setup();
 		function Harness() {
 			const [open, setOpen] = useState(false);
-			return <ChatInput {...props({ onSubmit, isModelSelectorOpen: open, onModelSelectorOpenChange: setOpen })} />;
+			const [value, setValue] = useState("");
+			return <ChatInput {...props({ onSubmit, inputValue: value, onInputChange: setValue, isModelSelectorOpen: open, onModelSelectorOpenChange: setOpen })} />;
 		}
 		render(<Harness />);
 		await waitFor(() => expect(screen.getByText("model-a")).toBeInTheDocument());
