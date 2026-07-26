@@ -23,7 +23,6 @@ if (!/(^|[-_])(test|testing|integration)([-_]|$)/i.test(databaseName)) {
 }
 
 process.env.DATABASE_URL = testDatabaseUrl;
-process.env.NODE_ENV = "test";
 process.env.GEMINI_API_KEY ??= "integration-test";
 process.env.GROQ_API_KEY ??= "integration-test";
 
