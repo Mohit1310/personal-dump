@@ -106,7 +106,32 @@ prerequisite, not part of the milestone 2–3 scope.
 | Metadata mutations  | `PATCH /api/dumps/[id]` accepts one or more metadata fields only; `DELETE /api/dumps/[id]` deletes the root dump and relies on database cascades.                                                       | Content changes stay exclusively in #10 while the existing schema keeps dependent chunks and embeddings consistent.                                                              |
 | Content re-indexing | `PUT /api/dumps/[id]` accepts content only, prepares all replacement chunks and embeddings before writes, then updates content and replaces the ordered derived records in one transaction.             | The explicit operation stays separate from metadata edits; provider failures perform no writes, while pgvector or other persistence failures roll back the complete replacement. |
 | Library UI          | `/library` keeps `q`, `type`, `tag`, `source`, and `page` in the URL; free-text fields debounce before fetching, while type and pagination update immediately.                                          | A shareable URL needs no client store, and the existing list API remains the only source of library data.                                                                        |
+| RAG evaluation      | Use 12 synthetic-vector chunks and 10 labeled queries (8 positive, 2 no-answer) at K=3; run the same frozen rankings through the pure evaluator and real pgvector integration fixture.                  | Provider-free vectors make local/CI results deterministic and measure retrieval mechanics; they are not a Gemini embedding-quality benchmark.                                    |
 | Extensibility       | Add no tag table, repository/service layer, metadata generator, or dependency.                                                                                                                          | The current model and route already own the required responsibilities.                                                                                                           |
+
+## Current retrieval baseline
+
+Issue #13 freezes the vector-only retrieval baseline before milestone 3 changes
+the algorithm. The representative corpus covers semantic paraphrases, exact
+errors and identifiers, overlapping notes, irrelevant questions, and
+type/tag/source-scoped questions. Every positive query labels its relevant chunks
+and answer fragments; corpus validation fails when either label or grounded
+fragment is absent.
+
+| Metric                   | Baseline |
+| ------------------------ | -------: |
+| Recall@3                 |  100.00% |
+| Mean reciprocal rank     |   68.75% |
+| No-answer accuracy       |    0.00% |
+| Grounded-answer accuracy |  100.00% |
+
+Recall, reciprocal rank, and grounded-answer accuracy use the 8 positive
+queries. No-answer accuracy uses the 2 negative queries. The current vector
+search always returns its nearest chunks without a relevance threshold, so
+both irrelevant queries fail the no-answer check. Exact-token and
+metadata-scoped cases retrieve the labeled chunk at rank 2, which accounts for
+the lower reciprocal rank and establishes comparison points for issues #14,
+#16, and #17.
 
 ## Verification matrix
 
@@ -118,7 +143,8 @@ prerequisite, not part of the milestone 2–3 scope.
 | Formatting                    | All changed files pass Oxfmt.                                                                                                                                | `pnpm format:check`                           |
 | Lint delta                    | Compare the repository-wide result with the pre-change baseline of 2,874 warnings and 17 errors; no new errors are allowed.                                  | `pnpm lint`                                   |
 | Static correctness            | Strict TypeScript compilation.                                                                                                                               | `pnpm typecheck`                              |
-| RAG regression                | Deterministic no-provider evaluation suite.                                                                                                                  | `pnpm test:eval`                              |
+| RAG regression                | Deterministic no-provider corpus validates labels, Recall@3, MRR, no-answer behavior, grounded fragments, repeatability, and actionable failures.            | `pnpm test:eval`                              |
+| Retrieval baseline            | Real PostgreSQL/pgvector fixture reproduces the frozen 9-query rankings and all four metrics.                                                                | `TEST_DATABASE_URL=... pnpm test:integration` |
 | Browser regression            | Full Playwright suite.                                                                                                                                       | `pnpm test:e2e`                               |
 | CLI packaging                 | Compile the command-line entry point.                                                                                                                        | `pnpm build:cli`                              |
 | Production packaging          | Next.js production compilation.                                                                                                                              | `pnpm build`                                  |
@@ -133,7 +159,7 @@ prerequisite, not part of the milestone 2–3 scope.
 |     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23) |
 |     5 | #11   | 2         | In progress | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24) |
 |     6 | #12   | 2         | Todo        | —                                                            |
-|     7 | #13   | 3         | Todo        | —                                                            |
+|     7 | #13   | 3         | In progress | —                                                            |
 |     8 | #14   | 3         | Todo        | —                                                            |
 |     9 | #15   | 3         | Todo        | —                                                            |
 |    10 | #16   | 3         | Todo        | —                                                            |

@@ -10,10 +10,21 @@ import {
 } from "vitest";
 import { db } from "@/server/db";
 import { vectorSearch } from "@/lib/retrieval/vector-search";
+import {
+	corpus,
+	currentVectorBaseline,
+	currentVectorBaselineMetrics,
+	EVAL_TOP_K,
+	evaluateCorpus,
+} from "../evals/schema";
 
-const vector = (index: number, value = 1) =>
+const expandVector = (values: number[]) =>
 	Array.from({ length: 768 }, (_, dimension) =>
-		dimension === index ? value : 0,
+		dimension < values.length ? values[dimension]! : 0,
+	);
+const vector = (index: number, value = 1) =>
+	expandVector(
+		Array.from({ length: index + 1 }, (_, i) => (i === index ? value : 0)),
 	);
 const vectorText = (values: number[]) => `[${values.join(",")}]`;
 
@@ -22,8 +33,8 @@ async function seedChunk(
 	content: string,
 	values: number[],
 	order: number,
+	chunkId: string = randomUUID(),
 ) {
-	const chunkId = randomUUID();
 	await db.$executeRawUnsafe(
 		`INSERT INTO "Chunk" ("id", "dumpId", "content", "order") VALUES ($1, $2, $3, $4)`,
 		chunkId,
@@ -105,6 +116,45 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 		expect(new Set(results.map(({ content }) => content))).toEqual(
 			new Set(["tie one", "tie two"]),
 		);
+	});
+
+	it("matches the frozen deterministic RAG evaluation baseline", async () => {
+		for (const chunk of corpus.chunks) {
+			const dumpId = `eval-dump-${chunk.id}`;
+			dumpIds.push(dumpId);
+			await db.dump.create({
+				data: {
+					id: dumpId,
+					content: chunk.content,
+					title: chunk.id,
+					...chunk.metadata,
+				},
+			});
+			await seedChunk(
+				dumpId,
+				chunk.content,
+				expandVector(chunk.embedding),
+				0,
+				chunk.id,
+			);
+		}
+
+		const rankings: Record<string, string[]> = {};
+		for (const item of corpus.cases) {
+			rankings[item.id] = (
+				await vectorSearch(expandVector(item.queryEmbedding), EVAL_TOP_K)
+			).map(({ id }) => id);
+		}
+
+		const report = evaluateCorpus(corpus, rankings, EVAL_TOP_K);
+		expect(
+			rankings,
+			`Current pgvector rankings changed:\n${JSON.stringify(rankings, null, 2)}`,
+		).toEqual(currentVectorBaseline);
+		expect(
+			report.metrics,
+			`Metric failures:\n${report.failures.join("\n")}`,
+		).toEqual(currentVectorBaselineMetrics);
 	});
 
 	it("translates database errors", async () => {
