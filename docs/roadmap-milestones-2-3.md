@@ -103,6 +103,7 @@ prerequisite, not part of the milestone 2–3 scope.
 | Content handling   | Preserve content exactly; normalize only metadata.                                                                                                                                                      | Ingestion must not alter code, errors, commands, or formatting.                                                                  |
 | Write behavior     | Generate chunks/embeddings before the existing transaction and persist metadata with the dump inside it.                                                                                                | Keeps PR #6 atomicity while adding no new layer.                                                                                 |
 | Library read API   | `GET /api/dumps` accepts bounded `page`/`pageSize` plus combinable `q`, `type`, `tag`, and `source` filters; it sorts by `createdAt DESC, id DESC`. `GET /api/dumps/[id]` returns metadata and content. | A compact, deterministic contract supports the library UI while list responses and both endpoints exclude chunks and embeddings. |
+| Metadata mutations | `PATCH /api/dumps/[id]` accepts one or more metadata fields only; `DELETE /api/dumps/[id]` deletes the root dump and relies on database cascades.                                                       | Content changes stay exclusively in #10 while the existing schema keeps dependent chunks and embeddings consistent.              |
 | Extensibility      | Add no tag table, repository/service layer, metadata generator, or dependency.                                                                                                                          | The current model and route already own the required responsibilities.                                                           |
 
 ## Verification matrix
@@ -126,7 +127,7 @@ prerequisite, not part of the milestone 2–3 scope.
 | ----: | ----- | --------- | ----------- | ------------------------------------------------------------ |
 |     1 | #7    | 2         | In review   | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20) |
 |     2 | #8    | 2         | In progress | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21) |
-|     3 | #9    | 2         | Todo        | —                                                            |
+|     3 | #9    | 2         | In progress | Pending PR                                                   |
 |     4 | #10   | 2         | Todo        | —                                                            |
 |     5 | #11   | 2         | Todo        | —                                                            |
 |     6 | #12   | 2         | Todo        | —                                                            |

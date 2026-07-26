@@ -1,35 +1,15 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { embedQuery } from "@/lib/embeddings/embed-query";
+import { dumpMetadataSchema } from "@/lib/dump-metadata";
 import { chunkText } from "@/lib/processing/chunk-text";
 import { db } from "@/server/db";
 
-const MAX_TITLE_LENGTH = 200;
-const MAX_TAGS = 20;
-const MAX_TAG_LENGTH = 50;
-const MAX_SOURCE_LENGTH = 500;
-
-const tagSchema = z
-	.string()
-	.trim()
-	.min(1, "Tags cannot be empty")
-	.max(MAX_TAG_LENGTH, `Tags must be at most ${MAX_TAG_LENGTH} characters`)
-	.transform((tag) => tag.toLowerCase().replace(/\s+/g, "-"));
-
-const dumpSchema = z.object({
+const dumpSchema = dumpMetadataSchema.extend({
 	content: z
 		.string()
 		.min(1, "Content is required")
 		.refine((content) => content.trim().length > 0, "Content is required"),
-	title: z.string().trim().max(MAX_TITLE_LENGTH).optional().default(""),
-	type: z.enum(["note", "error", "solution"]).optional().default("note"),
-	tags: z
-		.array(tagSchema)
-		.max(MAX_TAGS)
-		.optional()
-		.default([])
-		.transform((tags) => [...new Set(tags)]),
-	source: z.string().trim().max(MAX_SOURCE_LENGTH).optional().default(""),
 });
 
 export async function POST(req: Request) {
@@ -49,7 +29,13 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const { content, source, tags, title, type } = validatedData.data;
+		const {
+			content,
+			source = "",
+			tags = [],
+			title = "",
+			type = "note",
+		} = validatedData.data;
 
 		// Prepare all external work before opening a database transaction.
 		const chunks = chunkText(content);

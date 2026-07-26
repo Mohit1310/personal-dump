@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { normalizeTag } from "@/lib/dump-metadata";
 import { db } from "@/server/db";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
 				}
 			: {}),
 		...(type ? { type } : {}),
-		...(tag ? { tags: { has: tag.toLowerCase().replace(/\s+/g, "-") } } : {}),
+		...(tag ? { tags: { has: normalizeTag(tag) } } : {}),
 		...(source
 			? { source: { contains: source, mode: "insensitive" as const } }
 			: {}),
