@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DumpForm } from "./DumpForm";
 
-const toast = { error: vi.fn(), success: vi.fn() };
+const { toast } = vi.hoisted(() => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock("sonner", () => ({ toast }));
 
 describe("DumpForm", () => {
@@ -12,6 +12,7 @@ describe("DumpForm", () => {
 		vi.clearAllMocks();
 		vi.stubGlobal("fetch", vi.fn());
 	});
+	afterEach(() => cleanup());
 
 	it("keeps the save action disabled for empty and whitespace input", async () => {
 		const user = userEvent.setup();
@@ -38,7 +39,11 @@ describe("DumpForm", () => {
 		render(<DumpForm />);
 		const input = screen.getByPlaceholderText(/input stream ready/i);
 		await user.type(input, "shortcut");
-		fireEvent.keyDown(input, { key: "Enter", code: "Enter", [`${modifier.toLowerCase()}Key`]: true });
+		if (modifier === "Control") {
+			await userEvent.setup().keyboard("{Control>}{Enter}{/Control}");
+		} else {
+			fireEvent.keyDown(input, { key: "Enter", code: "Enter", metaKey: true });
+		}
 		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
 	});
 
@@ -65,7 +70,7 @@ describe("DumpForm", () => {
 		expect(toast.success).toHaveBeenCalledWith("Knowledge stored successfully!");
 		vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 500 }));
 		await user.type(input, "retry me");
-		await user.click(screen.getByRole("button", { name: /dump data/i }));
+		await user.click(screen.getByRole("button", { name: /saved/i }));
 		await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Failed to store knowledge"));
 		expect(input).toHaveValue("retry me");
 	});

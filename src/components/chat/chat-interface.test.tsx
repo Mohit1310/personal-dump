@@ -1,17 +1,19 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatInterface } from "./chat-interface";
 
 const { sendMessage, setMessages, toast, useChatMock } = vi.hoisted(() => ({ sendMessage: vi.fn(), setMessages: vi.fn(), toast: { error: vi.fn() }, useChatMock: vi.fn() }));
-let chatState = { messages: [] as Array<{ id: string; role: string; parts: Array<{ type: string; text?: string; sourceId?: string; title?: string; providerMetadata?: { custom?: { content?: string; score?: number } } }> }>, status: "ready" as const };
+let chatState: { messages: Array<{ id: string; role: string; parts: Array<{ type: string; text?: string; sourceId?: string; title?: string; providerMetadata?: { custom?: { content?: string; score?: number } } }> }>; status: "ready" | "streaming" } = { messages: [], status: "ready" };
 vi.mock("sonner", () => ({ toast }));
 vi.mock("ai", () => ({ DefaultChatTransport: class { constructor(public options: unknown) {} } }));
 vi.mock("@ai-sdk/react", () => ({ useChat: useChatMock }));
 
 describe("ChatInterface", () => {
+	afterEach(() => cleanup());
 	beforeEach(() => { vi.clearAllMocks(); vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ models: ["model-a"] })))); chatState = { messages: [], status: "ready" }; useChatMock.mockImplementation((options: { onError: (error: Error) => void }) => ({ ...chatState, sendMessage, setMessages, options })); });
+	beforeEach(() => { HTMLElement.prototype.scrollIntoView = vi.fn(); });
 
 	it("shows suggestions and fills the input", async () => {
 		const user = userEvent.setup();
