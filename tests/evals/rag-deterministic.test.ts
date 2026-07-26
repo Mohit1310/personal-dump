@@ -6,6 +6,8 @@ import {
 	currentVectorBaselineMetrics,
 	EVAL_TOP_K,
 	evaluateCorpus,
+	metadataScopedVectorBaseline,
+	metadataScopedVectorMetrics,
 	recallAtK,
 	reciprocalRank,
 	validateCorpus,
@@ -64,6 +66,24 @@ describe("deterministic RAG evaluation", () => {
 			"favorite-color: expected no answer, retrieved [garden-note, user-profile-general, user-profile-identifier]",
 			"travel-visa: expected no answer, retrieved [garden-note, user-profile-general, user-profile-identifier]",
 		]);
+	});
+
+	it("evaluates metadata-scoped rankings without provider calls", () => {
+		const scopedRankings = {
+			...currentVectorBaseline,
+			...metadataScopedVectorBaseline,
+		};
+		const report = evaluateCorpus(corpus, scopedRankings, EVAL_TOP_K);
+		expect(report.metrics).toEqual(metadataScopedVectorMetrics);
+		expect(metadataScopedVectorBaseline).toEqual({
+			"type-scoped-deploy": [
+				"deploy-personal",
+				"auth-runbook",
+				"postgres-startup-fix",
+			],
+			"tag-scoped-timeout": ["timeout-legacy"],
+			"source-scoped-auth": ["auth-runbook"],
+		});
 	});
 
 	it("is repeatable and emits actionable threshold failures", () => {

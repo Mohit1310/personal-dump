@@ -1,3 +1,8 @@
+import {
+	type RetrievalFilters,
+	retrievalFiltersSchema,
+} from "../../src/lib/retrieval/filters";
+
 export interface EvalChunk {
 	id: string;
 	content: string;
@@ -16,11 +21,7 @@ export interface EvalCase {
 	relevantChunkIds: string[];
 	expectedAnswerFragments: string[];
 	mustRefuse?: boolean;
-	scope?: {
-		type?: "note" | "error" | "solution";
-		tag?: string;
-		source?: string;
-	};
+	scope?: RetrievalFilters;
 	tags: string[];
 }
 
@@ -316,6 +317,33 @@ export const currentVectorBaselineMetrics: EvaluationMetrics = {
 	groundedAnswerAccuracy: 1,
 };
 
+export const metadataScopedVectorBaseline: Record<string, string[]> = {
+	"type-scoped-deploy": [
+		"deploy-personal",
+		"auth-runbook",
+		"postgres-startup-fix",
+	],
+	"tag-scoped-timeout": ["timeout-legacy"],
+	"source-scoped-auth": ["auth-runbook"],
+};
+
+export const metadataScopedVectorMetrics: EvaluationMetrics = {
+	recallAtK: 1,
+	meanReciprocalRank: 7 / 8,
+	noAnswerAccuracy: 0,
+	groundedAnswerAccuracy: 1,
+};
+
+const chunkMatchesScope = (
+	chunk: EvalChunk,
+	scope: RetrievalFilters,
+): boolean =>
+	(!scope.type || chunk.metadata.type === scope.type) &&
+	(!scope.tag || chunk.metadata.tags.includes(scope.tag)) &&
+	(!scope.source ||
+		chunk.metadata.source.toLocaleLowerCase() ===
+			scope.source.toLocaleLowerCase());
+
 export function recallAtK(
 	retrieved: string[],
 	relevant: string[],
@@ -347,6 +375,10 @@ export function validateCorpus(evalCorpus: EvalCorpus): void {
 	}
 
 	for (const item of evalCorpus.cases) {
+		const parsedScope = retrievalFiltersSchema.safeParse(item.scope ?? {});
+		if (!parsedScope.success) {
+			problems.push(`${item.id}: invalid metadata scope`);
+		}
 		const missingIds = item.relevantChunkIds.filter(
 			(id) => !knownChunkIds.has(id),
 		);
@@ -360,6 +392,19 @@ export function validateCorpus(evalCorpus: EvalCorpus): void {
 		}
 		if (!item.mustRefuse && item.relevantChunkIds.length === 0) {
 			problems.push(`${item.id}: positive cases need a relevant chunk`);
+		}
+		const outOfScopeIds = item.relevantChunkIds.filter((id) => {
+			const chunk = evalCorpus.chunks.find((candidate) => candidate.id === id);
+			return (
+				chunk &&
+				parsedScope.success &&
+				!chunkMatchesScope(chunk, parsedScope.data)
+			);
+		});
+		if (outOfScopeIds.length > 0) {
+			problems.push(
+				`${item.id}: relevant chunks fall outside metadata scope: ${outOfScopeIds.join(", ")}`,
+			);
 		}
 
 		const relevantContent = evalCorpus.chunks

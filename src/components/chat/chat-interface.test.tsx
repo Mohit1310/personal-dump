@@ -40,11 +40,36 @@ describe("ChatInterface", () => {
 		vi.clearAllMocks();
 		vi.stubGlobal(
 			"fetch",
-			vi
-				.fn()
-				.mockResolvedValue(
-					new Response(JSON.stringify({ models: ["model-a"] })),
-				),
+			vi.fn((input: RequestInfo | URL) => {
+				const url = String(input);
+				return Promise.resolve(
+					new Response(
+						JSON.stringify(
+							url.includes("/api/dumps")
+								? {
+										dumps: [
+											{
+												id: "1",
+												title: "Fix",
+												type: "solution",
+												tags: ["database-setup"],
+												source: "Shell history",
+												createdAt: "2026-01-01",
+												updatedAt: "2026-01-01",
+											},
+										],
+										pagination: {
+											page: 1,
+											pageSize: 100,
+											total: 1,
+											totalPages: 1,
+										},
+									}
+								: { models: ["model-a"] },
+						),
+					),
+				);
+			}),
 		);
 		chatState = { messages: [], status: "ready" };
 		useChatMock.mockImplementation(
@@ -76,8 +101,47 @@ describe("ChatInterface", () => {
 		render(<ChatInterface />);
 		await user.click(screen.getByRole("button", { name: "Submit" }));
 		expect(sendMessage).not.toHaveBeenCalled();
-		await user.click(screen.getByRole("button", { name: "Clear" }));
+		await user.click(
+			screen.getByRole("button", { name: "Clear conversation" }),
+		);
 		expect(setMessages).toHaveBeenCalledWith([]);
+	});
+
+	it("includes the selected knowledge scope once per submission and clears it", async () => {
+		const user = userEvent.setup();
+		render(<ChatInterface />);
+		await user.selectOptions(
+			await screen.findByRole("combobox", { name: "Knowledge type scope" }),
+			"solution",
+		);
+		await user.selectOptions(
+			screen.getByRole("combobox", { name: "Knowledge tag scope" }),
+			"database-setup",
+		);
+		await user.selectOptions(
+			screen.getByRole("combobox", { name: "Knowledge source scope" }),
+			"Shell history",
+		);
+		await user.type(screen.getByPlaceholderText(/enter command/i), "find it");
+		await user.click(screen.getByRole("button", { name: "Submit" }));
+
+		expect(sendMessage).toHaveBeenCalledTimes(1);
+		expect(sendMessage).toHaveBeenCalledWith(
+			{ text: "find it" },
+			{
+				body: {
+					model: "model-a",
+					filters: {
+						type: "solution",
+						tag: "database-setup",
+						source: "Shell history",
+					},
+				},
+			},
+		);
+
+		await user.click(screen.getByRole("button", { name: "Clear scope" }));
+		expect(screen.getByText("All knowledge")).toBeInTheDocument();
 	});
 
 	it("renders streamed answer, reasoning, and sources", async () => {

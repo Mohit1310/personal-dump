@@ -11,6 +11,7 @@ import { z } from "zod";
 import { env } from "@/env";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { DEFAULT_GROQ_MODEL, getGroqModelIds } from "@/lib/models/groq-models";
+import { retrievalFiltersSchema } from "@/lib/retrieval/filters";
 import { type SearchResult, vectorSearch } from "@/lib/retrieval/vector-search";
 
 // Allow streaming responses up to 30 seconds
@@ -71,13 +72,27 @@ function getMessageText(msg: UIMessage): string {
 const chatRequestSchema = z.object({
 	messages: z.array(z.custom<UIMessage>()),
 	model: z.string().optional(),
+	filters: retrievalFiltersSchema.optional(),
 });
 
 export async function POST(req: Request) {
+	let body: unknown;
 	try {
-		const { messages, model: requestedModel } = chatRequestSchema.parse(
-			await req.json(),
+		body = await req.json();
+	} catch {
+		return Response.json({ error: "Invalid input" }, { status: 400 });
+	}
+
+	const parsed = chatRequestSchema.safeParse(body);
+	if (!parsed.success) {
+		return Response.json(
+			{ error: "Invalid input", details: parsed.error.format() },
+			{ status: 400 },
 		);
+	}
+
+	try {
+		const { filters, messages, model: requestedModel } = parsed.data;
 		const groqModels = await getGroqModelIds();
 		const selectedModel =
 			requestedModel && groqModels.includes(requestedModel)
@@ -95,14 +110,12 @@ export async function POST(req: Request) {
 		if (query) {
 			try {
 				const queryVector = await embedQuery(query);
-				chunks = await vectorSearch(queryVector, 8);
+				chunks = await vectorSearch(queryVector, 8, filters);
 			} catch (error) {
 				console.error("RAG retrieval failed:", error);
 				// Continue without context if retrieval fails
 			}
 		}
-		console.log("chunks", chunks);
-
 		// Create custom stream to send sources after LLM response
 		const stream = createUIMessageStream({
 			execute: async ({ writer }) => {

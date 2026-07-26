@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { generateAnswer } from "@/lib/rag/generate-answer";
+import { retrievalFiltersSchema } from "@/lib/retrieval/filters";
 import { vectorSearch } from "@/lib/retrieval/vector-search";
 
 const searchSchema = z.object({
 	query: z.string().trim().min(1, "Query is required"),
 	topK: z.number().int().positive().optional().default(8),
+	filters: retrievalFiltersSchema.optional(),
 });
 
 export async function POST(req: Request) {
@@ -26,13 +28,13 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const { query, topK } = validatedData.data;
+		const { filters, query, topK } = validatedData.data;
 
 		// 1. Generate embedding for the query
 		const queryVector = await embedQuery(query);
 
 		// 2. Perform vector search
-		const results = await vectorSearch(queryVector, topK);
+		const results = await vectorSearch(queryVector, topK, filters);
 
 		// 3. Generate answer using RAG
 		const answer = await generateAnswer({ userQuery: query, chunks: results });

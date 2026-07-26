@@ -22,30 +22,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { DumpType } from "@/lib/dump-metadata";
+import type { DumpSummary, LibraryResponse } from "@/lib/library-contract";
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-type DumpType = "note" | "error" | "solution";
-
-type DumpSummary = {
-	id: string;
-	title: string;
-	type: DumpType;
-	tags: string[];
-	source: string;
-	createdAt: string;
-	updatedAt: string;
-};
-
-type LibraryResponse = {
-	dumps: DumpSummary[];
-	pagination: {
-		page: number;
-		pageSize: number;
-		total: number;
-		totalPages: number;
-	};
-};
 
 type SearchFields = Pick<LibraryFilters, "q" | "tag" | "source">;
 
