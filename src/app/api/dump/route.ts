@@ -31,46 +31,35 @@ export async function POST(req: Request) {
 
 		const { content } = validatedData.data;
 
-		// 1. Create the main Dump record
-		const dump = await db.dump.create({
-			data: {
-				content,
-			},
-		});
-
-		// 2. Chunk the content
+		// Prepare all external work before opening a database transaction.
 		const chunks = chunkText(content);
+		const embeddings = await Promise.all(chunks.map(embedQuery));
 
-		// 3. Process each chunk
-		const chunkPromises = chunks.map(async (chunkContent, index) => {
-			// a. Create the Chunk record
-			const chunk = await db.chunk.create({
+		const dump = await db.$transaction(async (tx) => {
+			const createdDump = await tx.dump.create({
 				data: {
-					dumpId: dump.id,
-					content: chunkContent,
-					order: index,
+					content,
 				},
 			});
 
-			// b. Generate embedding
-			const embeddingVector = await embedQuery(chunkContent);
+			for (const [index, chunkContent] of chunks.entries()) {
+				const chunk = await tx.chunk.create({
+					data: {
+						dumpId: createdDump.id,
+						content: chunkContent,
+						order: index,
+					},
+				});
+				const vectorString = `[${embeddings[index]!.join(",")}]`;
 
-			// c. Store embedding using raw SQL for pgvector compatibility
-			const embeddingId = crypto.randomUUID();
-			const vectorString = `[${embeddingVector.join(",")}]`;
+				await tx.$executeRaw`
+					INSERT INTO "Embedding" (id, "chunkId", vector, "createdAt")
+					VALUES (${crypto.randomUUID()}, ${chunk.id}, ${vectorString}::vector, ${new Date()})
+				`;
+			}
 
-			await db.$executeRawUnsafe(
-				'INSERT INTO "Embedding" (id, "chunkId", vector, "createdAt") VALUES ($1, $2, $3::vector, $4)',
-				embeddingId,
-				chunk.id,
-				vectorString,
-				new Date(),
-			);
-
-			return { chunkId: chunk.id, embeddingId };
+			return createdDump;
 		});
-
-		await Promise.all(chunkPromises);
 
 		return NextResponse.json({
 			success: true,
