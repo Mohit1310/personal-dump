@@ -7,12 +7,13 @@ export const env = createEnv({
 	 * isn't built with invalid env vars.
 	 */
 	server: {
-		DATABASE_URL: z.string().url(),
-		GEMINI_API_KEY: z.string().min(1),
-		GROQ_API_KEY: z.string().min(1),
+		DATABASE_URL: z.string(),
+		GEMINI_API_KEY: z.string(),
+		GROQ_API_KEY: z.string(),
 		NODE_ENV: z
-			.enum(["development", "test", "production"])
-			.default("development"),
+		.enum(["development", "test", "production"])
+		.default("development"),
+		TEST_DATABASE_URL: z.string(),
 	},
 
 	/**
@@ -33,6 +34,7 @@ export const env = createEnv({
 		GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 		GROQ_API_KEY: process.env.GROQ_API_KEY,
 		NODE_ENV: process.env.NODE_ENV,
+		TEST_DATABASE_URL: process.env.TEST_DATABASE_URL,
 		// NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 	},
 	/**

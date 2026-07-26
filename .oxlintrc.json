@@ -8,5 +8,8 @@
 		"perf": "warn",
 		"style": "warn"
 	},
+	"rules": {
+		"sort-keys": "off"
+	},
 	"ignorePatterns": ["generated/**", "node_modules/**", ".next/**"]
 }
