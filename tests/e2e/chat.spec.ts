@@ -67,8 +67,10 @@ test.describe("chat", () => {
 		await page.goto("/chat");
 
 		await page.getByRole("button", { name: models[0] }).click();
-		await page.getByText(models[1], { exact: true }).last().click();
 		const input = page.getByPlaceholder("Enter command or query...");
+		await page.getByText(models[1], { exact: true }).last().click();
+		await expect(page.getByRole("dialog")).toBeHidden();
+		await expect(input).toBeFocused();
 		await input.pressSequentially("Recall this");
 		await expect(input).toHaveValue("Recall this");
 		await input.press("Enter");
