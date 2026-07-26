@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type SearchResult = { id: string; content: string; distance: number };
 type StreamValue = Record<string, unknown>;

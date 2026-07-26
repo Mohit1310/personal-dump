@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const models = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile"];
+const models = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile"] as const;
 
 async function stubModels(page: import("@playwright/test").Page) {
 	await page.route("**/api/models/groq", async (route) => {

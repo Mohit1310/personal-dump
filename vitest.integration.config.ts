@@ -18,7 +18,7 @@ try {
 
 if (!/(^|[-_])(test|testing|integration)([-_]|$)/i.test(databaseName)) {
 	throw new Error(
-		`Refusing integration tests: TEST_DATABASE_URL must point to a test database, got \"${databaseName}\"`,
+		`Refusing integration tests: TEST_DATABASE_URL must point to a test database, got "${databaseName}"`,
 	);
 }
 
