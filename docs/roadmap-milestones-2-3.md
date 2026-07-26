@@ -105,6 +105,7 @@ prerequisite, not part of the milestone 2–3 scope.
 | Library read API    | `GET /api/dumps` accepts bounded `page`/`pageSize` plus combinable `q`, `type`, `tag`, and `source` filters; it sorts by `createdAt DESC, id DESC`. `GET /api/dumps/[id]` returns metadata and content. | A compact, deterministic contract supports the library UI while list responses and both endpoints exclude chunks and embeddings.                                                 |
 | Metadata mutations  | `PATCH /api/dumps/[id]` accepts one or more metadata fields only; `DELETE /api/dumps/[id]` deletes the root dump and relies on database cascades.                                                       | Content changes stay exclusively in #10 while the existing schema keeps dependent chunks and embeddings consistent.                                                              |
 | Content re-indexing | `PUT /api/dumps/[id]` accepts content only, prepares all replacement chunks and embeddings before writes, then updates content and replaces the ordered derived records in one transaction.             | The explicit operation stays separate from metadata edits; provider failures perform no writes, while pgvector or other persistence failures roll back the complete replacement. |
+| Library UI          | `/library` keeps `q`, `type`, `tag`, `source`, and `page` in the URL; free-text fields debounce before fetching, while type and pagination update immediately.                                          | A shareable URL needs no client store, and the existing list API remains the only source of library data.                                                                        |
 | Extensibility       | Add no tag table, repository/service layer, metadata generator, or dependency.                                                                                                                          | The current model and route already own the required responsibilities.                                                                                                           |
 
 ## Verification matrix
@@ -130,7 +131,7 @@ prerequisite, not part of the milestone 2–3 scope.
 |     2 | #8    | 2         | In progress | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21) |
 |     3 | #9    | 2         | In progress | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22) |
 |     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23) |
-|     5 | #11   | 2         | Todo        | —                                                            |
+|     5 | #11   | 2         | In progress | Pending stacked PR                                           |
 |     6 | #12   | 2         | Todo        | —                                                            |
 |     7 | #13   | 3         | Todo        | —                                                            |
 |     8 | #14   | 3         | Todo        | —                                                            |
