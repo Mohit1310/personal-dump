@@ -7,6 +7,13 @@ export function chunkText(
 	targetSize = 2000,
 	overlap = 200,
 ): string[] {
+	if (!Number.isInteger(targetSize) || targetSize <= 0) {
+		throw new RangeError("targetSize must be a positive integer");
+	}
+	if (!Number.isInteger(overlap) || overlap < 0 || overlap >= targetSize) {
+		throw new RangeError("overlap must be an integer from 0 to targetSize - 1");
+	}
+
 	if (text.length <= targetSize) {
 		return [text];
 	}
@@ -47,14 +54,29 @@ export function chunkText(
 			}
 		}
 
-		chunks.push(text.substring(startIndex, startIndex + breakIndex).trim());
-		startIndex += breakIndex - overlap;
+		let endIndex = startIndex + breakIndex;
+		if (fenceAt(text, endIndex)) {
+			const closingFence = text.indexOf("```", endIndex);
+			if (closingFence !== -1) endIndex = closingFence + 3;
+		}
+
+		chunks.push(text.substring(startIndex, endIndex));
+		startIndex = endIndex - overlap;
+		const openingFence = text.lastIndexOf("```", startIndex);
+		const closingFence = text.lastIndexOf("```", startIndex + 1);
+		if (openingFence > closingFence && openingFence >= 0) {
+			startIndex = openingFence;
+		}
 
 		// Safety check to avoid infinite loop
-		if (breakIndex <= overlap) {
-			startIndex = startIndex + targetSize;
+		if (endIndex <= startIndex) {
+			startIndex += targetSize;
 		}
 	}
 
 	return chunks.filter((c) => c.length > 0);
+}
+
+function fenceAt(text: string, position: number): boolean {
+	return (text.substring(0, position).match(/```/g)?.length ?? 0) % 2 === 1;
 }
