@@ -58,6 +58,14 @@ describe("POST /api/dump", () => {
 		);
 		expect((await POST(request("{"))).status).toBe(400);
 	});
+	it("preserves original content formatting", async () => {
+		const content = "  code snippet\n  ";
+		const response = await POST(request({ content }));
+
+		expect(response.status).toBe(200);
+		expect(mocks.dumpCreate).toHaveBeenCalledWith({ data: { content } });
+		expect(mocks.chunkText).toHaveBeenCalledWith(content);
+	});
 	it("ingests ordered chunks with one embedding and write per chunk", async () => {
 		const response = await POST(
 			request({ content: "original", type: "error" }),

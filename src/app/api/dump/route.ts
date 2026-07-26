@@ -5,7 +5,10 @@ import { chunkText } from "@/lib/processing/chunk-text";
 import { db } from "@/server/db";
 
 const dumpSchema = z.object({
-	content: z.string().trim().min(1, "Content is required"),
+	content: z
+		.string()
+		.min(1, "Content is required")
+		.refine((content) => content.trim().length > 0, "Content is required"),
 	type: z.enum(["note", "error", "solution"]).optional().default("note"),
 });
 
