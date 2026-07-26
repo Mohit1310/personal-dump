@@ -10,6 +10,7 @@ const props = (overrides = {}) => ({ inputValue: "", isModelSelectorOpen: false,
 describe("ChatInput", () => {
 	beforeEach(() => {
 		vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
+		HTMLElement.prototype.scrollIntoView = vi.fn();
 	});
 	afterEach(() => cleanup());
 	it("uses the fallback model when loading fails", async () => {
