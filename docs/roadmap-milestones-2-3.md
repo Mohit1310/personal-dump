@@ -133,7 +133,7 @@ prerequisite, not part of the milestone 2–3 scope.
 |     3 | #9    | 2         | In progress | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22) |
 |     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23) |
 |     5 | #11   | 2         | In progress | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24) |
-|     6 | #12   | 2         | In progress | —                                                            |
+|     6 | #12   | 2         | In progress | [PR #28](https://github.com/Mohit1310/personal-dump/pull/28) |
 |     7 | #13   | 3         | Todo        | —                                                            |
 |     8 | #14   | 3         | Todo        | —                                                            |
 |     9 | #15   | 3         | Todo        | —                                                            |
