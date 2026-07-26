@@ -35,38 +35,47 @@ describe("getGroqModelIds", () => {
 	});
 
 	it("caches for five minutes and refreshes after expiry", async () => {
+		let fetchCount = 0;
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
-			.mockResolvedValue(
-				new Response(JSON.stringify({ data: [{ id: "model" }] }), {
-					status: 200,
-				}),
-			);
+			.mockImplementation(async () => {
+				fetchCount += 1;
+				return new Response(
+					JSON.stringify({
+						data: [
+							{ id: fetchCount === 1 ? "model" : "refreshed-model" },
+						],
+					}),
+					{ status: 200 },
+				);
+			});
 		const { getGroqModelIds } = await import("./groq-models");
 		vi.useFakeTimers();
 		const first = await getGroqModelIds();
 		await getGroqModelIds();
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		vi.advanceTimersByTime(5 * 60 * 1000);
-		await getGroqModelIds();
+		const refreshed = await getGroqModelIds();
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 		expect(first).toEqual(["model"]);
+		expect(refreshed).toEqual(["refreshed-model"]);
 	});
 
 	it("falls back for HTTP, malformed, empty, and network failures", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const fetchMock = vi.spyOn(globalThis, "fetch");
 		for (const response of [
 			new Response("{}", { status: 200 }),
 			new Response(JSON.stringify({ data: [] }), { status: 200 }),
 			new Response("", { status: 503 }),
 		]) {
-			vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(response);
+			fetchMock.mockResolvedValueOnce(response);
 			const { DEFAULT_GROQ_MODEL, getGroqModelIds } =
 				await import("./groq-models");
 			expect(await getGroqModelIds()).toEqual([DEFAULT_GROQ_MODEL]);
-			vi.restoreAllMocks();
 			vi.resetModules();
 		}
-		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
+		fetchMock.mockRejectedValueOnce(new Error("offline"));
 		const { DEFAULT_GROQ_MODEL, getGroqModelIds } =
 			await import("./groq-models");
 		expect(await getGroqModelIds()).toEqual([DEFAULT_GROQ_MODEL]);
