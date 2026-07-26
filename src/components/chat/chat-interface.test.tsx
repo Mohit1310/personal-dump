@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatInterface } from "./chat-interface";
 
 const { sendMessage, setMessages, toast, useChatMock } = vi.hoisted(() => ({ sendMessage: vi.fn(), setMessages: vi.fn(), toast: { error: vi.fn() }, useChatMock: vi.fn() }));
-let chatState: { messages: Array<{ id: string; role: string; parts: Array<{ type: string; text?: string; sourceId?: string; title?: string; providerMetadata?: { custom?: { content?: string; score?: number } } }> }>; status: "ready" | "streaming" } = { messages: [], status: "ready" };
+type TestChatStatus = "ready" | "streaming";
+type TestChatState = { messages: Array<{ id: string; role: string; parts: Array<{ type: string; text?: string; sourceId?: string; title?: string; providerMetadata?: { custom?: { content?: string; score?: number } } }> }>; status: TestChatStatus };
+let chatState: TestChatState = { messages: [], status: "ready" };
 vi.mock("sonner", () => ({ toast }));
 vi.mock("ai", () => ({ DefaultChatTransport: class { constructor(public options: unknown) {} } }));
 vi.mock("@ai-sdk/react", () => ({ useChat: useChatMock }));
