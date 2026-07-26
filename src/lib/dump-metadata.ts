@@ -4,11 +4,15 @@ export const MAX_TITLE_LENGTH = 200;
 export const MAX_TAGS = 20;
 export const MAX_TAG_LENGTH = 50;
 export const MAX_SOURCE_LENGTH = 500;
+export const DUMP_TYPES = ["note", "error", "solution"] as const;
+export type DumpType = (typeof DUMP_TYPES)[number];
 
 export const normalizeTag = (tag: string) =>
 	tag.trim().toLowerCase().replace(/\s+/g, "-");
 
-const tagSchema = z
+export const dumpTypeSchema = z.enum(DUMP_TYPES);
+
+export const tagSchema = z
 	.string()
 	.trim()
 	.min(1, "Tags cannot be empty")
@@ -18,7 +22,7 @@ const tagSchema = z
 export const dumpMetadataSchema = z
 	.object({
 		title: z.string().trim().max(MAX_TITLE_LENGTH).optional(),
-		type: z.enum(["note", "error", "solution"]).optional(),
+		type: dumpTypeSchema.optional(),
 		tags: z
 			.array(tagSchema)
 			.max(MAX_TAGS)

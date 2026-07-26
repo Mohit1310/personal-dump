@@ -41,6 +41,16 @@ describe("POST /api/search", () => {
 		expect((await POST(request({ query: "q", topK: "8" }))).status).toBe(400);
 		expect((await POST(request("{"))).status).toBe(400);
 	});
+	it.each([
+		{ type: "memo" },
+		{ tag: "" },
+		{ tag: "x".repeat(51) },
+		{ source: "" },
+		{ source: "x".repeat(501) },
+		{ extra: "value" },
+	])("rejects invalid filters %j", async (filters) => {
+		expect((await POST(request({ query: "q", filters }))).status).toBe(400);
+	});
 	it("defaults topK and returns answer and sources", async () => {
 		const response = await POST(request({ query: "q" }));
 		expect(await response.json()).toEqual({
@@ -48,22 +58,36 @@ describe("POST /api/search", () => {
 			sources: results,
 		});
 		expect(mocks.embedQuery).toHaveBeenCalledWith("q");
-		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2], 8);
+		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2], 8, undefined);
 		expect(mocks.generateAnswer).toHaveBeenCalledWith({
 			userQuery: "q",
 			chunks: results,
 		});
 	});
-	it("passes explicit topK and supports no results", async () => {
+	it("passes normalized filters and supports no results", async () => {
 		mocks.vectorSearch.mockResolvedValue([]);
 		mocks.generateAnswer.mockResolvedValue("no results");
-		const response = await POST(request({ query: "q", topK: 3 }));
+		const response = await POST(
+			request({
+				query: "q",
+				topK: 3,
+				filters: {
+					type: "solution",
+					tag: " Database Setup ",
+					source: " Shell history ",
+				},
+			}),
+		);
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({
 			answer: "no results",
 			sources: [],
 		});
-		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2], 3);
+		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2], 3, {
+			type: "solution",
+			tag: "database-setup",
+			source: "Shell history",
+		});
 	});
 	it.each(["embedQuery", "vectorSearch", "generateAnswer"])(
 		"returns 500 when %s fails",

@@ -132,13 +132,18 @@ describe("POST /api/chat", () => {
 
 	it("rejects an invalid request body", async () => {
 		const response = await POST(request({ messages: "not-an-array" }));
-		expect(response.status).toBe(500);
-		expect(await response.json()).toMatchObject({ error: "Chat failed" });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ error: "Invalid input" });
 	});
 
-	it("extracts the last user message, validates the model, and forwards streamed text and sources", async () => {
+	it("extracts the last user message, forwards normalized scope once, and streams sources", async () => {
 		const payload = await responsePayload({
 			model: "model-b",
+			filters: {
+				type: "solution",
+				tag: " Database Setup ",
+				source: " Shell history ",
+			},
 			messages: [
 				{ role: "user", parts: [{ type: "text", text: "old" }] },
 				{ role: "assistant", parts: [{ type: "text", text: "reply" }] },
@@ -146,6 +151,12 @@ describe("POST /api/chat", () => {
 			],
 		});
 		expect(mocks.embedQuery).toHaveBeenCalledWith("latest");
+		expect(mocks.vectorSearch).toHaveBeenCalledTimes(1);
+		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2, 3], 8, {
+			type: "solution",
+			tag: "database-setup",
+			source: "Shell history",
+		});
 		expect(mocks.modelFactory).toHaveBeenCalledWith("model-b");
 		expect(payload).toContainEqual({ type: "text-delta", delta: "answer" });
 		expect(payload).toContainEqual(
@@ -157,6 +168,27 @@ describe("POST /api/chat", () => {
 				},
 			}),
 		);
+	});
+
+	it.each([
+		{ type: "memo" },
+		{ tag: "" },
+		{ tag: "x".repeat(51) },
+		{ source: "" },
+		{ source: "x".repeat(501) },
+		{ extra: "value" },
+	])("rejects invalid filters %j before provider calls", async (filters) => {
+		const response = await POST(
+			request({
+				filters,
+				messages: [
+					{ role: "user", parts: [{ type: "text", text: "question" }] },
+				],
+			}),
+		);
+		expect(response.status).toBe(400);
+		expect(mocks.getGroqModelIds).not.toHaveBeenCalled();
+		expect(mocks.embedQuery).not.toHaveBeenCalled();
 	});
 
 	it("falls back for an unavailable model and skips retrieval for an empty query", async () => {
@@ -189,6 +221,17 @@ describe("POST /api/chat", () => {
 	it("continues without context when retrieval fails", async () => {
 		mocks.embedQuery.mockRejectedValue(new Error("embedding failed"));
 		await responsePayload({
+			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
+		});
+		expect(latestStreamTextArgs().system).toContain(
+			"no relevant context was found",
+		);
+	});
+
+	it("uses the normal no-context prompt for an empty scoped match", async () => {
+		mocks.vectorSearch.mockResolvedValue([]);
+		await responsePayload({
+			filters: { type: "error" },
 			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
 		});
 		expect(latestStreamTextArgs().system).toContain(

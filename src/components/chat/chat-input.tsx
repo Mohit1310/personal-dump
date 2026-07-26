@@ -24,9 +24,11 @@ import {
 	PromptInputTextarea,
 	PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
+import type { RetrievalFilters } from "@/lib/retrieval/filters";
+import { KnowledgeScopeControls } from "./knowledge-scope-controls";
 
 interface ChatInputProps {
-	onSubmit: (text: string, modelId: string) => void;
+	onSubmit: (text: string, modelId: string, filters?: RetrievalFilters) => void;
 	inputValue: string;
 	isModelSelectorOpen: boolean;
 	onModelSelectorOpenChange: (isOpen: boolean) => void;
@@ -49,6 +51,7 @@ const ChatInput = ({
 	const [availableModels, setAvailableModels] = useState<string[]>([
 		DEFAULT_MODEL,
 	]);
+	const [filters, setFilters] = useState<RetrievalFilters>({});
 
 	useEffect(() => {
 		const loadModels = async () => {
@@ -71,7 +74,7 @@ const ChatInput = ({
 			}
 		};
 
-		loadModels();
+		void loadModels();
 	}, []);
 
 	return (
@@ -80,14 +83,19 @@ const ChatInput = ({
 				globalDrop
 				multiple
 				onSubmit={({ text }: PromptInputMessage) =>
-					onSubmit(text, selectedModel)
+					onSubmit(
+						text,
+						selectedModel,
+						Object.keys(filters).length > 0 ? filters : undefined,
+					)
 				}
 			>
+				<KnowledgeScopeControls filters={filters} onChange={setFilters} />
 				<PromptInputBody>
 					<PromptInputTextarea
 						autoFocus
 						id={CHAT_INPUT_TEXTAREA_ID}
-						onChange={(e) => onInputChange(e.target.value)}
+						onChange={(event) => onInputChange(event.target.value)}
 						placeholder="Enter command or query..."
 						value={inputValue}
 					/>
@@ -131,20 +139,6 @@ const ChatInput = ({
 											</ModelSelectorItem>
 										))}
 									</ModelSelectorGroup>
-									{/* {["OpenAI", "Anthropic", "Google"].map((chef) => (
-										<ModelSelectorGroup heading={chef} key={chef}>
-											{models
-												.filter((m) => m.chef === chef)
-												.map((m) => (
-													<ModelItem
-														key={m.id}
-														m={m}
-														onSelect={handleModelSelect}
-														selectedModel={model}
-													/>
-												))}
-										</ModelSelectorGroup>
-									))} */}
 								</ModelSelectorList>
 							</ModelSelectorContent>
 						</ModelSelector>

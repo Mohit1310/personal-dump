@@ -18,6 +18,7 @@ import {
 	SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import { Button } from "@/components/ui/button";
+import type { RetrievalFilters } from "@/lib/retrieval/filters";
 import ChatInput, { CHAT_INPUT_TEXTAREA_ID } from "./chat-input";
 
 /** Extended source type with custom metadata from RAG chunks */
@@ -149,6 +150,7 @@ export function ChatInterface() {
 	const handleSend = (
 		text: string = inputValue,
 		modelId: string = DEFAULT_MODEL,
+		filters?: RetrievalFilters,
 	) => {
 		const query = text.trim();
 		if (!query || status !== "ready") return;
@@ -158,6 +160,7 @@ export function ChatInterface() {
 			{
 				body: {
 					model: modelId,
+					...(filters ? { filters } : {}),
 				},
 			},
 		);
@@ -188,10 +191,11 @@ export function ChatInterface() {
 				</div>
 				<div className="flex items-center gap-2">
 					<Button
+						aria-label="Clear conversation"
 						className="h-10 w-10 rounded-none hover:bg-destructive hover:text-white"
 						onClick={clearChat}
 						size="icon"
-						title="Clear"
+						title="Clear conversation"
 						variant="ghost"
 					>
 						<Trash2 className="h-4 w-4" />

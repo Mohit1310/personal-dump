@@ -16,6 +16,8 @@ import {
 	currentVectorBaselineMetrics,
 	EVAL_TOP_K,
 	evaluateCorpus,
+	metadataScopedVectorBaseline,
+	metadataScopedVectorMetrics,
 } from "../evals/schema";
 
 const expandVector = (values: number[]) =>
@@ -60,13 +62,24 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 
 	beforeEach(async () => {
 		dumpIds = [randomUUID(), randomUUID()];
-		await db.$executeRawUnsafe(
-			`INSERT INTO "Dump" ("id", "content") VALUES ($1, $2), ($3, $4)`,
-			dumpIds[0],
-			"first dump",
-			dumpIds[1],
-			"second dump",
-		);
+		await db.dump.createMany({
+			data: [
+				{
+					id: dumpIds[0],
+					content: "first dump",
+					type: "solution",
+					tags: ["database", "shared"],
+					source: "Runbook",
+				},
+				{
+					id: dumpIds[1],
+					content: "second dump",
+					type: "error",
+					tags: ["frontend", "shared"],
+					source: "Browser console",
+				},
+			],
+		});
 	});
 
 	afterEach(async () => {
@@ -103,18 +116,112 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 		]);
 	});
 
+	it.each([
+		["type", { type: "solution" as const }, ["first"]],
+		["tag", { tag: "frontend" }, ["second"]],
+		["source", { source: "runbook" }, ["first"]],
+	])(
+		"applies the %s filter before returning results",
+		async (_, filters, expected) => {
+			await seedChunk(dumpIds[0]!, "first", vector(0), 0);
+			await seedChunk(dumpIds[1]!, "second", vector(0), 0);
+
+			const results = await vectorSearch(vector(0), 8, filters);
+
+			expect(results.map(({ content }) => content)).toEqual(expected);
+		},
+	);
+
+	it("combines filters and returns an empty list for a mismatched scope", async () => {
+		await seedChunk(dumpIds[0]!, "matching", vector(0), 0);
+		await seedChunk(dumpIds[1]!, "excluded", vector(0), 0);
+
+		expect(
+			await vectorSearch(vector(0), 8, {
+				type: "solution",
+				tag: "database",
+				source: "RUNBOOK",
+			}),
+		).toEqual([
+			expect.objectContaining({
+				content: "matching",
+			}),
+		]);
+		expect(
+			await vectorSearch(vector(0), 8, {
+				type: "solution",
+				tag: "frontend",
+			}),
+		).toEqual([]);
+	});
+
+	it("filters before ranking and limiting", async () => {
+		await seedChunk(dumpIds[1]!, "nearest but excluded", vector(0), 0);
+		await seedChunk(dumpIds[0]!, "farther but scoped", vector(1), 0);
+
+		const results = await vectorSearch(vector(0), 1, {
+			type: "solution",
+		});
+
+		expect(results).toEqual([
+			expect.objectContaining({ content: "farther but scoped" }),
+		]);
+	});
+
 	it("returns an empty list when there are no embeddings", async () => {
 		expect(await vectorSearch(vector(2))).toEqual([]);
 	});
 
 	it("returns a stable acceptable set for tied distances", async () => {
-		await seedChunk(dumpIds[0]!, "tie one", vector(3), 0);
-		await seedChunk(dumpIds[0]!, "tie two", vector(4), 1);
+		await seedChunk(dumpIds[0]!, "tie two", vector(3), 0, "scope-tie-b");
+		await seedChunk(dumpIds[0]!, "tie one", vector(4), 1, "scope-tie-a");
 
 		const results = await vectorSearch(vector(5), 2);
 
-		expect(new Set(results.map(({ content }) => content))).toEqual(
-			new Set(["tie one", "tie two"]),
+		expect(results.map(({ content }) => content)).toEqual([
+			"tie one",
+			"tie two",
+		]);
+	});
+
+	it("matches the deterministic metadata-scoped evaluation cases", async () => {
+		for (const chunk of corpus.chunks) {
+			const dumpId = `scoped-eval-dump-${chunk.id}`;
+			dumpIds.push(dumpId);
+			await db.dump.create({
+				data: {
+					id: dumpId,
+					content: chunk.content,
+					title: chunk.id,
+					...chunk.metadata,
+				},
+			});
+			await seedChunk(
+				dumpId,
+				chunk.content,
+				expandVector(chunk.embedding),
+				0,
+				chunk.id,
+			);
+		}
+
+		const rankings = { ...currentVectorBaseline };
+		for (const item of corpus.cases.filter(({ scope }) => scope)) {
+			rankings[item.id] = (
+				await vectorSearch(
+					expandVector(item.queryEmbedding),
+					EVAL_TOP_K,
+					item.scope,
+				)
+			).map(({ id }) => id);
+		}
+
+		const scopedRankings = Object.fromEntries(
+			Object.keys(metadataScopedVectorBaseline).map((id) => [id, rankings[id]]),
+		);
+		expect(scopedRankings).toEqual(metadataScopedVectorBaseline);
+		expect(evaluateCorpus(corpus, rankings, EVAL_TOP_K).metrics).toEqual(
+			metadataScopedVectorMetrics,
 		);
 	});
 
@@ -159,6 +266,18 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 
 	it("translates database errors", async () => {
 		await expect(vectorSearch(vector(0), -1)).rejects.toThrow(
+			"Failed to perform vector search",
+		);
+	});
+
+	it.each([
+		{ type: "memo" },
+		{ tag: "" },
+		{ tag: "x".repeat(51) },
+		{ source: "" },
+		{ source: "x".repeat(501) },
+	])("rejects invalid filter input %j", async (filters) => {
+		await expect(vectorSearch(vector(0), 8, filters as never)).rejects.toThrow(
 			"Failed to perform vector search",
 		);
 	});
