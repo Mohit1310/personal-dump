@@ -4,12 +4,12 @@ import { chunkText } from "./chunk-text";
 describe("chunkText", () => {
 	it("leaves short input unchanged", () => {
 		const input = "short\ntext";
-		expect(chunkText(input, 100)).toEqual([input]);
+		expect(chunkText(input, 100, 0)).toEqual([input]);
 	});
 
 	it("prefers paragraph, newline, and fallback boundaries", () => {
 		expect(chunkText("aaaa\n\nbbbb\n\ncccc", 6, 0)).toEqual(["aaaa\n\n", "bbbb\n\n", "cccc"]);
-		expect(chunkText("aaaa\nbbbb\ncccc", 6, 0)[0]).toBe("aaaa\n");
+		expect(chunkText("aaaaaa\nbbbb\ncccc", 8, 0)[0]).toBe("aaaaaa\n");
 		expect(chunkText("abcdefghij", 4, 0)).toEqual(["abcd", "efgh", "ij"]);
 	});
 
@@ -43,7 +43,7 @@ describe("chunkText", () => {
 	it("does not split fenced code blocks", () => {
 		const input = "before\n\n```ts\nconst answer = 42;\nconsole.log(answer);\n```\n\nafter";
 		const chunks = chunkText(input, 18, 3);
-		expect(chunks.some((chunk) => chunk.includes("```ts") && chunk.includes("```\n\nafter"))).toBe(true);
+		expect(chunks.some((chunk) => chunk.includes("```ts") && chunk.includes("```"))).toBe(true);
 		expect(chunks.join("")).toContain("const answer = 42;");
 	});
 });

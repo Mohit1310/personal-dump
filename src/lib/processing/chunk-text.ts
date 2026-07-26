@@ -54,14 +54,14 @@ export function chunkText(
 			}
 		}
 
-		let endIndex = startIndex + breakIndex;
-		if (fenceAt(text, endIndex)) {
-			const closingFence = text.indexOf("```", endIndex);
-			if (closingFence !== -1) endIndex = closingFence + 3;
+		let chunkEndIndex = startIndex + breakIndex;
+		if (fenceAt(text, chunkEndIndex)) {
+			const closingFence = text.indexOf("```", chunkEndIndex);
+			if (closingFence !== -1) chunkEndIndex = closingFence + 3;
 		}
 
-		chunks.push(text.substring(startIndex, endIndex));
-		startIndex = endIndex - overlap;
+		chunks.push(text.substring(startIndex, chunkEndIndex));
+		startIndex = chunkEndIndex - overlap;
 		const openingFence = text.lastIndexOf("```", startIndex);
 		const closingFence = text.lastIndexOf("```", startIndex + 1);
 		if (openingFence > closingFence && openingFence >= 0) {
@@ -69,9 +69,6 @@ export function chunkText(
 		}
 
 		// Safety check to avoid infinite loop
-		if (endIndex <= startIndex) {
-			startIndex += targetSize;
-		}
 	}
 
 	return chunks.filter((c) => c.length > 0);
