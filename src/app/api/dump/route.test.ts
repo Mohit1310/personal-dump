@@ -67,13 +67,58 @@ describe("POST /api/dump", () => {
 		);
 		expect((await POST(request("{"))).status).toBe(400);
 	});
+	it.each([
+		{ title: null },
+		{ title: "t".repeat(201) },
+		{ source: 42 },
+		{ source: "s".repeat(501) },
+		{ tags: "typescript" },
+		{ tags: Array.from({ length: 21 }, (_, index) => `tag-${index}`) },
+		{ tags: [""] },
+		{ tags: ["t".repeat(51)] },
+	])("rejects invalid or excessive metadata %j", async (metadata) => {
+		const response = await POST(request({ content: "ok", ...metadata }));
+
+		expect(response.status).toBe(400);
+		expect(mocks.dumpCreate).not.toHaveBeenCalled();
+	});
 	it("preserves original content formatting", async () => {
 		const content = "  code snippet\n  ";
 		const response = await POST(request({ content }));
 
 		expect(response.status).toBe(200);
-		expect(mocks.dumpCreate).toHaveBeenCalledWith({ data: { content } });
+		expect(mocks.dumpCreate).toHaveBeenCalledWith({
+			data: {
+				content,
+				source: "",
+				tags: [],
+				title: "",
+				type: "note",
+			},
+		});
 		expect(mocks.chunkText).toHaveBeenCalledWith(content);
+	});
+	it("normalizes and persists supplied metadata", async () => {
+		const response = await POST(
+			request({
+				content: "Metadata example",
+				title: "  Prisma fix  ",
+				type: "solution",
+				tags: [" TypeScript ", "database setup", "typescript"],
+				source: "  terminal history  ",
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.dumpCreate).toHaveBeenCalledWith({
+			data: {
+				content: "Metadata example",
+				title: "Prisma fix",
+				type: "solution",
+				tags: ["typescript", "database-setup"],
+				source: "terminal history",
+			},
+		});
 	});
 	it("ingests ordered chunks with one embedding and write per chunk", async () => {
 		const response = await POST(
