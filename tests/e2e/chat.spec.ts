@@ -19,19 +19,22 @@ async function stubChat(page: import("@playwright/test").Page, answer: string) {
 			status: 200,
 			contentType: "text/event-stream",
 			headers: { "x-vercel-ai-ui-message-stream": "v1" },
-			body: [
-				`data: ${JSON.stringify({ type: "text-start", id: "text-1" })}`,
-				`data: ${JSON.stringify({ type: "text-delta", id: "text-1", delta: answer })}`,
-				`data: ${JSON.stringify({ type: "text-end", id: "text-1" })}`,
-				"data: [DONE]",
-			].join("\n\n") + "\n\n",
+			body:
+				[
+					`data: ${JSON.stringify({ type: "text-start", id: "text-1" })}`,
+					`data: ${JSON.stringify({ type: "text-delta", id: "text-1", delta: answer })}`,
+					`data: ${JSON.stringify({ type: "text-end", id: "text-1" })}`,
+					"data: [DONE]",
+				].join("\n\n") + "\n\n",
 		});
 		void body;
 	});
 }
 
 test.describe("chat", () => {
-	test("shows a no-answer response from the intercepted chat stream", async ({ page }) => {
+	test("shows a no-answer response from the intercepted chat stream", async ({
+		page,
+	}) => {
 		await stubModels(page);
 		await stubChat(page, "No relevant knowledge found in your dumps.");
 		await page.goto("/chat");
@@ -42,10 +45,14 @@ test.describe("chat", () => {
 		await page.getByRole("button", { name: "Submit" }).click();
 
 		await expect(page.getByText("Something unknown")).toBeVisible();
-		await expect(page.getByText("No relevant knowledge found in your dumps.")).toBeVisible();
+		await expect(
+			page.getByText("No relevant knowledge found in your dumps."),
+		).toBeVisible();
 	});
 
-	test("sends the selected model and can clear the conversation", async ({ page }) => {
+	test("sends the selected model and can clear the conversation", async ({
+		page,
+	}) => {
 		await stubModels(page);
 		let requestModel = "";
 		await page.route("**/api/chat", async (route) => {

@@ -1,5 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+} from "vitest";
 import { db } from "@/server/db";
 import { vectorSearch } from "@/lib/retrieval/vector-search";
 
@@ -9,7 +17,12 @@ const vector = (index: number, value = 1) =>
 	);
 const vectorText = (values: number[]) => `[${values.join(",")}]`;
 
-async function seedChunk(dumpId: string, content: string, values: number[], order: number) {
+async function seedChunk(
+	dumpId: string,
+	content: string,
+	values: number[],
+	order: number,
+) {
 	const chunkId = randomUUID();
 	await db.$executeRawUnsafe(
 		`INSERT INTO "Chunk" ("id", "dumpId", "content", "order") VALUES ($1, $2, $3, $4)`,

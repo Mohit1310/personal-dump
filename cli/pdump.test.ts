@@ -2,12 +2,24 @@ import { describe, expect, it, vi } from "vitest";
 import { parseArgs, runCli, usage } from "./pdump.js";
 
 const response = (body: unknown, status = 200) =>
-	new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+	new Response(JSON.stringify(body), {
+		status,
+		headers: { "Content-Type": "application/json" },
+	});
 
-function cli(fetchImpl = vi.fn<typeof fetch>(), baseUrl = "http://localhost:3000") {
+function cli(
+	fetchImpl = vi.fn<typeof fetch>(),
+	baseUrl = "http://localhost:3000",
+) {
 	const log = vi.fn();
 	const error = vi.fn();
-	return { fetchImpl, log, error, run: (args: string[]) => runCli(args, { fetch: fetchImpl, baseUrl, log, error }) };
+	return {
+		fetchImpl,
+		log,
+		error,
+		run: (args: string[]) =>
+			runCli(args, { fetch: fetchImpl, baseUrl, log, error }),
+	};
 }
 
 describe("pdump CLI", () => {
@@ -30,23 +42,37 @@ describe("pdump CLI", () => {
 		expect(c.error).toHaveBeenCalledWith(`pdump: ${usage}`);
 	});
 
-	it("parses valid input", () => expect(parseArgs(["add", "--text", "hello"])).toEqual({ content: "hello" }));
+	it("parses valid input", () =>
+		expect(parseArgs(["add", "--text", "hello"])).toEqual({
+			content: "hello",
+		}));
 
 	it("posts to the default endpoint with expected request", async () => {
-		const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(response({ dumpId: "d1", chunksCreated: 2 }));
+		const fetchImpl = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(response({ dumpId: "d1", chunksCreated: 2 }));
 		const c = cli(fetchImpl);
 		expect(await c.run(["add", "--text", "hello"])).toBe(0);
-		expect(fetchImpl).toHaveBeenCalledWith(new URL("/api/dump", "http://localhost:3000"), {
-			method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: "hello" }),
-		});
+		expect(fetchImpl).toHaveBeenCalledWith(
+			new URL("/api/dump", "http://localhost:3000"),
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ content: "hello" }),
+			},
+		);
 		expect(c.log).toHaveBeenCalledWith("Stored dump d1 (2 chunks).");
 	});
 
 	it("uses PERSONAL_DUMP_URL when supplied", async () => {
-		const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(response({ dumpId: "d2", chunksCreated: 1 }));
+		const fetchImpl = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(response({ dumpId: "d2", chunksCreated: 1 }));
 		const c = cli(fetchImpl, "https://example.test/base");
 		expect(await c.run(["add", "--text", "hello"])).toBe(0);
-		expect(fetchImpl.mock.calls[0]?.[0]).toEqual(new URL("/api/dump", "https://example.test/base"));
+		expect(fetchImpl.mock.calls[0]?.[0]).toEqual(
+			new URL("/api/dump", "https://example.test/base"),
+		);
 	});
 
 	it.each([
@@ -61,7 +87,9 @@ describe("pdump CLI", () => {
 	});
 
 	it("reports network errors and returns non-zero", async () => {
-		const fetchImpl = vi.fn<typeof fetch>().mockRejectedValue(new Error("offline"));
+		const fetchImpl = vi
+			.fn<typeof fetch>()
+			.mockRejectedValue(new Error("offline"));
 		const c = cli(fetchImpl);
 		expect(await c.run(["add", "--text", "hello"])).toBe(1);
 		expect(c.error).toHaveBeenCalledWith("pdump: offline");

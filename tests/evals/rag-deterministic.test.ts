@@ -9,11 +9,28 @@ describe("deterministic RAG evaluation scaffolding", () => {
 	});
 
 	it("covers refusal, citations, code/error-solution, conflicts, and stored instructions", () => {
-		expect(corpus.cases.find((item) => item.id === "unknown")?.mustRefuse).toBe(true);
-		expect(corpus.cases.every((item) => item.relevantChunkIds.every((id) => corpus.chunks.some((chunk) => chunk.id === id)))).toBe(true);
-		expect(corpus.cases.find((item) => item.id === "error")?.tags).toEqual(["error", "solution"]);
-		expect(corpus.cases.find((item) => item.id === "code")?.expectedAnswer).toContain("pnpm test");
-		expect(corpus.cases.find((item) => item.id === "conflict")?.relevantChunkIds).toHaveLength(2);
-		expect(corpus.cases.find((item) => item.id === "stored-instruction")?.tags).toContain("prompt-injection-like");
+		expect(corpus.cases.find((item) => item.id === "unknown")?.mustRefuse).toBe(
+			true,
+		);
+		expect(
+			corpus.cases.every((item) =>
+				item.relevantChunkIds.every((id) =>
+					corpus.chunks.some((chunk) => chunk.id === id),
+				),
+			),
+		).toBe(true);
+		expect(corpus.cases.find((item) => item.id === "error")?.tags).toEqual([
+			"error",
+			"solution",
+		]);
+		expect(
+			corpus.cases.find((item) => item.id === "code")?.expectedAnswer,
+		).toContain("pnpm test");
+		expect(
+			corpus.cases.find((item) => item.id === "conflict")?.relevantChunkIds,
+		).toHaveLength(2);
+		expect(
+			corpus.cases.find((item) => item.id === "stored-instruction")?.tags,
+		).toContain("prompt-injection-like");
 	});
 });

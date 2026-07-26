@@ -13,7 +13,8 @@ type DumpResponse = {
 };
 
 export function parseArgs(args: string[]) {
-	if (args.includes("--help") || args.includes("-h")) return { help: true as const };
+	if (args.includes("--help") || args.includes("-h"))
+		return { help: true as const };
 	if (args.length !== 3 || args[0] !== "add" || args[1] !== "--text") {
 		throw new Error(usage);
 	}
@@ -50,22 +51,34 @@ export async function runCli(
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ content: parsed.content }),
 		});
-		const result = (await response.json().catch(() => null)) as DumpResponse | null;
+		const result = (await response
+			.json()
+			.catch(() => null)) as DumpResponse | null;
 
 		if (!response.ok) {
-			throw new Error(result?.message ?? result?.error ?? `Request failed (${response.status})`);
+			throw new Error(
+				result?.message ??
+					result?.error ??
+					`Request failed (${response.status})`,
+			);
 		}
 
-		log(`Stored dump ${result?.dumpId ?? "successfully"} (${result?.chunksCreated ?? 0} chunks).`);
+		log(
+			`Stored dump ${result?.dumpId ?? "successfully"} (${result?.chunksCreated ?? 0} chunks).`,
+		);
 		return 0;
 	} catch (errorValue: unknown) {
-		const message = errorValue instanceof Error ? errorValue.message : "Unknown error";
+		const message =
+			errorValue instanceof Error ? errorValue.message : "Unknown error";
 		error(`pdump: ${message}`);
 		return 1;
 	}
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (
+	process.argv[1] &&
+	pathToFileURL(process.argv[1]).href === import.meta.url
+) {
 	runCli(process.argv.slice(2)).then((exitCode) => {
 		process.exitCode = exitCode;
 	});

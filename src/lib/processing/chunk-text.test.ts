@@ -8,7 +8,11 @@ describe("chunkText", () => {
 	});
 
 	it("prefers paragraph, newline, and fallback boundaries", () => {
-		expect(chunkText("aaaa\n\nbbbb\n\ncccc", 6, 0)).toEqual(["aaaa\n\n", "bbbb\n\n", "cccc"]);
+		expect(chunkText("aaaa\n\nbbbb\n\ncccc", 6, 0)).toEqual([
+			"aaaa\n\n",
+			"bbbb\n\n",
+			"cccc",
+		]);
 		expect(chunkText("aaaaaa\nbbbb\ncccc", 8, 0)[0]).toBe("aaaaaa\n");
 		expect(chunkText("abcdefghij", 4, 0)).toEqual(["abcd", "efgh", "ij"]);
 	});
@@ -29,7 +33,7 @@ describe("chunkText", () => {
 	it("handles empty, whitespace, and Unicode input", () => {
 		expect(chunkText("")).toEqual([""]);
 		expect(chunkText("   ")).toEqual(["   "]);
-		expect(chunkText("😀漢字" , 2, 0).join("")).toContain("😀");
+		expect(chunkText("😀漢字", 2, 0).join("")).toContain("😀");
 	});
 
 	it("rejects unsafe parameters", () => {
@@ -41,9 +45,12 @@ describe("chunkText", () => {
 	});
 
 	it("does not split fenced code blocks", () => {
-		const input = "before\n\n```ts\nconst answer = 42;\nconsole.log(answer);\n```\n\nafter";
+		const input =
+			"before\n\n```ts\nconst answer = 42;\nconsole.log(answer);\n```\n\nafter";
 		const chunks = chunkText(input, 18, 3);
-		expect(chunks.some((chunk) => chunk.includes("```ts") && chunk.includes("```"))).toBe(true);
+		expect(
+			chunks.some((chunk) => chunk.includes("```ts") && chunk.includes("```")),
+		).toBe(true);
 		expect(chunks.join("")).toContain("const answer = 42;");
 	});
 });

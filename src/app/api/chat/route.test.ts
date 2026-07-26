@@ -17,13 +17,19 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@ai-sdk/groq", () => ({ createGroq: () => mocks.modelFactory }));
-vi.mock("@/env", () => ({ env: { GROQ_API_KEY: "test", GEMINI_API_KEY: "test" } }));
-vi.mock("@/lib/embeddings/embed-query", () => ({ embedQuery: mocks.embedQuery }));
+vi.mock("@/env", () => ({
+	env: { GROQ_API_KEY: "test", GEMINI_API_KEY: "test" },
+}));
+vi.mock("@/lib/embeddings/embed-query", () => ({
+	embedQuery: mocks.embedQuery,
+}));
 vi.mock("@/lib/models/groq-models", () => ({
 	DEFAULT_GROQ_MODEL: "fallback-model",
 	getGroqModelIds: mocks.getGroqModelIds,
 }));
-vi.mock("@/lib/retrieval/vector-search", () => ({ vectorSearch: mocks.vectorSearch }));
+vi.mock("@/lib/retrieval/vector-search", () => ({
+	vectorSearch: mocks.vectorSearch,
+}));
 vi.mock("ai", () => ({
 	convertToModelMessages: mocks.convertToModelMessages,
 	createUIMessageStream: mocks.createUIMessageStream,
@@ -59,7 +65,10 @@ function setupStream(): void {
 						read: async () => {
 							if (read) return { done: true, value: undefined };
 							read = true;
-							return { done: false, value: { type: "text-delta", delta: "answer" } };
+							return {
+								done: false,
+								value: { type: "text-delta", delta: "answer" },
+							};
 						},
 					};
 				},
@@ -67,20 +76,35 @@ function setupStream(): void {
 		};
 	});
 	mocks.createUIMessageStream.mockImplementation(
-		({ execute }: { execute: (args: { writer: { write: (value: StreamValue) => void } }) => Promise<void> }) => {
-		const values: StreamValue[] = [];
-		const stream = new ReadableStream({
-			start(controller) {
-				void execute({ writer: { write: (value) => values.push(value) } }).then(() => {
-					controller.enqueue(new TextEncoder().encode(JSON.stringify(values)));
-					controller.close();
-				}, (error) => controller.error(error));
-			},
-		});
-		return stream;
+		({
+			execute,
+		}: {
+			execute: (args: {
+				writer: { write: (value: StreamValue) => void };
+			}) => Promise<void>;
+		}) => {
+			const values: StreamValue[] = [];
+			const stream = new ReadableStream({
+				start(controller) {
+					void execute({
+						writer: { write: (value) => values.push(value) },
+					}).then(
+						() => {
+							controller.enqueue(
+								new TextEncoder().encode(JSON.stringify(values)),
+							);
+							controller.close();
+						},
+						(error) => controller.error(error),
+					);
+				},
+			});
+			return stream;
 		},
 	);
-	mocks.createUIMessageStreamResponse.mockImplementation(({ stream }: { stream: ReadableStream }) => new Response(stream));
+	mocks.createUIMessageStreamResponse.mockImplementation(
+		({ stream }: { stream: ReadableStream }) => new Response(stream),
+	);
 }
 
 async function responsePayload(body: unknown): Promise<StreamValue[]> {
@@ -124,20 +148,37 @@ describe("POST /api/chat", () => {
 		expect(mocks.embedQuery).toHaveBeenCalledWith("latest");
 		expect(mocks.modelFactory).toHaveBeenCalledWith("model-b");
 		expect(payload).toContainEqual({ type: "text-delta", delta: "answer" });
-		expect(payload).toContainEqual(expect.objectContaining({ type: "source-document", sourceId: "chunk-1", providerMetadata: { custom: expect.objectContaining({ score: 0.8, distance: 0.2 }) } }));
+		expect(payload).toContainEqual(
+			expect.objectContaining({
+				type: "source-document",
+				sourceId: "chunk-1",
+				providerMetadata: {
+					custom: expect.objectContaining({ score: 0.8, distance: 0.2 }),
+				},
+			}),
+		);
 	});
 
 	it("falls back for an unavailable model and skips retrieval for an empty query", async () => {
-		await responsePayload({ model: "unknown", messages: [{ role: "assistant", parts: [] }] });
+		await responsePayload({
+			model: "unknown",
+			messages: [{ role: "assistant", parts: [] }],
+		});
 		expect(mocks.modelFactory).toHaveBeenCalledWith("model-a");
 		expect(mocks.embedQuery).not.toHaveBeenCalled();
 		expect(mocks.vectorSearch).not.toHaveBeenCalled();
 	});
 
 	it("uses only retrieved context and limits it to eight chunks", async () => {
-		const many = Array.from({ length: 10 }, (_, i) => ({ id: String(i), content: `context-${i}`, distance: i / 10 }));
+		const many = Array.from({ length: 10 }, (_, i) => ({
+			id: String(i),
+			content: `context-${i}`,
+			distance: i / 10,
+		}));
 		mocks.vectorSearch.mockResolvedValue(many);
-		await responsePayload({ messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }] });
+		await responsePayload({
+			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
+		});
 		const system = latestStreamTextArgs().system as string;
 		expect(system).toContain("context-0");
 		expect(system).toContain("context-7");
@@ -147,13 +188,25 @@ describe("POST /api/chat", () => {
 
 	it("continues without context when retrieval fails", async () => {
 		mocks.embedQuery.mockRejectedValue(new Error("embedding failed"));
-		await responsePayload({ messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }] });
-		expect(latestStreamTextArgs().system).toContain("no relevant context was found");
+		await responsePayload({
+			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
+		});
+		expect(latestStreamTextArgs().system).toContain(
+			"no relevant context was found",
+		);
 	});
 
 	it("surfaces provider failure while consuming the response stream", async () => {
-		mocks.streamText.mockImplementation(() => { throw new Error("provider failed"); });
-		const response = await POST(request({ messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }] }));
+		mocks.streamText.mockImplementation(() => {
+			throw new Error("provider failed");
+		});
+		const response = await POST(
+			request({
+				messages: [
+					{ role: "user", parts: [{ type: "text", text: "question" }] },
+				],
+			}),
+		);
 		expect(response.status).toBe(200);
 		await expect(response.text()).rejects.toThrow("provider failed");
 	});

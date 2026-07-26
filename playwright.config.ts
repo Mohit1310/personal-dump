@@ -4,24 +4,24 @@ export default defineConfig({
 	testDir: "./tests/e2e",
 	fullyParallel: true,
 	workers: 1,
-	 forbidOnly: !!process.env.CI,
-	 retries: process.env.CI ? 2 : 0,
-	 reporter: "list",
-	 use: {
+	forbidOnly: !!process.env.CI,
+	retries: process.env.CI ? 2 : 0,
+	reporter: "list",
+	use: {
 		baseURL: "http://localhost:3000",
-		 trace: "on-first-retry",
-		 storageState: { cookies: [], origins: [] },
-	 },
-	 webServer: {
-		 command: "pnpm dev",
+		trace: "on-first-retry",
+		storageState: { cookies: [], origins: [] },
+	},
+	webServer: {
+		command: "pnpm dev",
 		url: "http://localhost:3000",
 		timeout: 120_000,
 		reuseExistingServer: !process.env.CI,
-	 },
-	 projects: [
+	},
+	projects: [
 		{
-			 name: "chromium",
-			 use: { ...devices["Desktop Chrome"] },
+			name: "chromium",
+			use: { ...devices["Desktop Chrome"] },
 		},
 	],
 });
