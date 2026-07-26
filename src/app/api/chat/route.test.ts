@@ -88,6 +88,14 @@ async function responsePayload(body: unknown): Promise<StreamValue[]> {
 	return JSON.parse(await response.text()) as StreamValue[];
 }
 
+function latestStreamTextArgs(): Record<string, unknown> {
+	const args = mocks.streamTextArgs.at(-1);
+	if (!args) {
+		throw new Error("streamText was not called");
+	}
+	return args;
+}
+
 describe("POST /api/chat", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -130,7 +138,7 @@ describe("POST /api/chat", () => {
 		const many = Array.from({ length: 10 }, (_, i) => ({ id: String(i), content: `context-${i}`, distance: i / 10 }));
 		mocks.vectorSearch.mockResolvedValue(many);
 		await responsePayload({ messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }] });
-		const system = mocks.streamTextArgs[0].system as string;
+		const system = latestStreamTextArgs().system as string;
 		expect(system).toContain("context-0");
 		expect(system).toContain("context-7");
 		expect(system).not.toContain("context-8");
@@ -140,7 +148,7 @@ describe("POST /api/chat", () => {
 	it("continues without context when retrieval fails", async () => {
 		mocks.embedQuery.mockRejectedValue(new Error("embedding failed"));
 		await responsePayload({ messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }] });
-		expect(mocks.streamTextArgs[0].system).toContain("no relevant context was found");
+		expect(latestStreamTextArgs().system).toContain("no relevant context was found");
 	});
 
 	it("surfaces provider failure while consuming the response stream", async () => {
