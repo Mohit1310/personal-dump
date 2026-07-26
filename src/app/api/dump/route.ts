@@ -5,13 +5,18 @@ import { chunkText } from "@/lib/processing/chunk-text";
 import { db } from "@/server/db";
 
 const dumpSchema = z.object({
-	content: z.string().min(1, "Content is required"),
+	content: z.string().trim().min(1, "Content is required"),
 	type: z.enum(["note", "error", "solution"]).optional().default("note"),
 });
 
 export async function POST(req: Request) {
 	try {
-		const body = await req.json();
+		let body: unknown;
+		try {
+			body = await req.json();
+		} catch {
+			return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+		}
 		const validatedData = dumpSchema.safeParse(body);
 
 		if (!validatedData.success) {
