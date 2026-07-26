@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useState } from "react";
@@ -30,8 +30,8 @@ describe("ChatInput", () => {
 		render(<Harness />);
 		await waitFor(() => expect(screen.getByText("model-a")).toBeInTheDocument());
 		fireEvent.click(screen.getByRole("button", { name: /model-a/i }));
-		await waitFor(() => expect(screen.getByRole("button", { name: /model-a/i })).toHaveAttribute("aria-expanded", "true"));
-		await user.click(await screen.findByText("model-b"));
+		const dialog = await screen.findByRole("dialog");
+		await user.click(within(dialog).getByText("model-b"));
 		await user.type(screen.getByPlaceholderText(/enter command/i), "find it");
 		await user.click(screen.getByRole("button", { name: "Submit" }));
 		await waitFor(() => expect(onSubmit).toHaveBeenCalledWith("find it", "model-b"));
