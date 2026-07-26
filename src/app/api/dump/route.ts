@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { embedQuery } from "@/lib/embeddings/embed-query";
+import {
+	dumpContentSchema,
+	insertPreparedChunks,
+	prepareDumpContent,
+} from "@/lib/dump-content";
 import { dumpMetadataSchema } from "@/lib/dump-metadata";
-import { chunkText } from "@/lib/processing/chunk-text";
 import { db } from "@/server/db";
 
 const dumpSchema = dumpMetadataSchema.extend({
-	content: z
-		.string()
-		.min(1, "Content is required")
-		.refine((content) => content.trim().length > 0, "Content is required"),
+	content: dumpContentSchema,
 });
 
 export async function POST(req: Request) {
@@ -38,8 +37,7 @@ export async function POST(req: Request) {
 		} = validatedData.data;
 
 		// Prepare all external work before opening a database transaction.
-		const chunks = chunkText(content);
-		const embeddings = await Promise.all(chunks.map(embedQuery));
+		const chunks = await prepareDumpContent(content);
 
 		const dump = await db.$transaction(async (tx) => {
 			const createdDump = await tx.dump.create({
@@ -52,21 +50,7 @@ export async function POST(req: Request) {
 				},
 			});
 
-			for (const [index, chunkContent] of chunks.entries()) {
-				const chunk = await tx.chunk.create({
-					data: {
-						dumpId: createdDump.id,
-						content: chunkContent,
-						order: index,
-					},
-				});
-				const vectorString = `[${embeddings[index]!.join(",")}]`;
-
-				await tx.$executeRaw`
-					INSERT INTO "Embedding" (id, "chunkId", vector, "createdAt")
-					VALUES (${crypto.randomUUID()}, ${chunk.id}, ${vectorString}::vector, ${new Date()})
-				`;
-			}
+			await insertPreparedChunks(tx, createdDump.id, chunks);
 
 			return createdDump;
 		});

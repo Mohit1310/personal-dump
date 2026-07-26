@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import {
+	dumpContentSchema,
+	insertPreparedChunks,
+	prepareDumpContent,
+} from "@/lib/dump-content";
 import { dumpMetadataSchema } from "@/lib/dump-metadata";
 import { db } from "@/server/db";
 
 const paramsSchema = z.object({ id: z.uuid() });
+const contentUpdateSchema = z
+	.object({
+		content: dumpContentSchema,
+	})
+	.strict();
 const updateSchema = dumpMetadataSchema.refine(
 	(metadata) => Object.keys(metadata).length > 0,
 	"At least one metadata field is required",
@@ -97,6 +107,72 @@ export async function PATCH(
 		return NextResponse.json(
 			{
 				error: "Failed to update dump",
+				message: error instanceof Error ? error.message : "Unknown error",
+			},
+			{ status: 500 },
+		);
+	}
+}
+
+export async function PUT(
+	request: Request,
+	{ params }: { params: Promise<{ id: string }> },
+) {
+	const parsedParams = paramsSchema.safeParse(await params);
+	if (!parsedParams.success) {
+		return NextResponse.json({ error: "Invalid dump id" }, { status: 400 });
+	}
+
+	let body: unknown;
+	try {
+		body = await request.json();
+	} catch {
+		return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+	}
+	const parsedBody = contentUpdateSchema.safeParse(body);
+	if (!parsedBody.success) {
+		return NextResponse.json(
+			{ error: "Invalid input", details: parsedBody.error.format() },
+			{ status: 400 },
+		);
+	}
+
+	const id = parsedParams.data.id;
+	try {
+		const exists = await db.dump.findUnique({
+			where: { id },
+			select: { id: true },
+		});
+		if (!exists) {
+			return NextResponse.json({ error: "Dump not found" }, { status: 404 });
+		}
+
+		// Finish provider work before opening the replacement transaction.
+		const chunks = await prepareDumpContent(parsedBody.data.content);
+		const dump = await db.$transaction(async (tx) => {
+			const updatedDump = await tx.dump.update({
+				where: { id },
+				data: { content: parsedBody.data.content },
+				select: dumpSelect,
+			});
+			await tx.chunk.deleteMany({ where: { dumpId: id } });
+			await insertPreparedChunks(tx, id, chunks);
+			return updatedDump;
+		});
+
+		return NextResponse.json({
+			success: true,
+			dump,
+			chunksCreated: chunks.length,
+		});
+	} catch (error) {
+		if (isMissingRecordError(error)) {
+			return NextResponse.json({ error: "Dump not found" }, { status: 404 });
+		}
+		console.error("Dump content update API Error:", error);
+		return NextResponse.json(
+			{
+				error: "Failed to update dump content",
 				message: error instanceof Error ? error.message : "Unknown error",
 			},
 			{ status: 500 },
