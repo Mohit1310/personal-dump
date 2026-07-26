@@ -12,6 +12,7 @@ export default defineConfig({
 		exclude: [
 			"node_modules/**",
 			".next/**",
+			"build/**",
 			"tests/e2e/**",
 			"tests/evals/**",
 			"tests/integration/**",
