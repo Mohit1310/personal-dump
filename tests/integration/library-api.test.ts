@@ -116,9 +116,12 @@ describe("Knowledge Library APIs", () => {
 
 	it("returns a 500 contract when the list dependency fails", async () => {
 		const originalTransaction = db.$transaction;
-		const transaction = vi
-			.spyOn(db, "$transaction")
-			.mockRejectedValueOnce(new Error("database down"));
+		// Vitest restores Prisma's proxy descriptor as `undefined` after file teardown.
+		Object.defineProperty(db, "$transaction", {
+			configurable: true,
+			value: vi.fn().mockRejectedValueOnce(new Error("database down")),
+			writable: true,
+		});
 
 		try {
 			const response = await listDumps(request());
@@ -129,12 +132,12 @@ describe("Knowledge Library APIs", () => {
 				message: "database down",
 			});
 		} finally {
-			transaction.mockRestore();
 			Object.defineProperty(db, "$transaction", {
 				configurable: true,
 				value: originalTransaction,
 				writable: true,
 			});
+			expect(db.$transaction).toBe(originalTransaction);
 		}
 	});
 
