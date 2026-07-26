@@ -150,6 +150,41 @@ the lower reciprocal rank and establishes comparison points for issues #14,
 | CLI packaging                 | Compile the command-line entry point.                                                                                                                        | `pnpm build:cli`                              |
 | Production packaging          | Next.js production compilation.                                                                                                                              | `pnpm build`                                  |
 
+## Verification harness follow-up
+
+Issue [#25](https://github.com/Mohit1310/personal-dump/issues/25) is **in
+progress** in [PR #29](https://github.com/Mohit1310/personal-dump/pull/29).
+The fresh-cache follow-up reproduced the inherited `pnpm test:integration`
+failure at 4 failures out of 25 tests whenever the Knowledge Library file ran
+first. Prisma's client proxy reports an own `$transaction` descriptor whose
+value is `undefined` even though normal property access returns the callable.
+`vi.spyOn` registered that descriptor for file teardown, so Vitest performed a
+second restore after the test's `finally` block and replaced the cached
+callable with `undefined`.
+
+The deterministic repair avoids registering a spy on the Prisma proxy. The
+test installs a one-call failure mock directly, restores the captured callable
+in `finally`, and asserts its identity. No production behavior, assertion,
+suite ordering, or test selection changed.
+
+Verification on 2026-07-26 regenerated Prisma Client 7.3.0, passed the focused
+Library/vector pair in both orders (2 files, 14 tests), passed the full
+integration command twice (4 files, 25 tests per run), and passed every
+integration file independently (7, 4, 7, and 7 tests). The unit suite passed
+14 files and 113 tests with one worker after the host produced unrelated
+parallel JSDOM timing failures; evals passed 1 file and 2 tests; Playwright
+passed all 8 tests; and typecheck plus the CLI build passed. The production
+build still reaches successful compilation and TypeScript checking before the
+pre-existing `/library` Suspense prerender failure tracked and fixed separately
+by [#26](https://github.com/Mohit1310/personal-dump/issues/26) and
+[PR #30](https://github.com/Mohit1310/personal-dump/pull/30).
+
+The repository-wide quality-debt baseline remains separate from #25: Oxfmt
+checked 146 files and found issues in 56, while Oxlint reported 3,232 warnings
+and 17 errors. Both changed files pass Oxfmt; the changed TypeScript file has
+29 existing-style warnings and zero lint errors. Deferred [#5](https://github.com/Mohit1310/personal-dump/issues/5)
+remains untouched.
+
 ## Progress
 
 | Order | Issue | Milestone | Status      | Delivery                                                     |

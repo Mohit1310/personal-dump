@@ -115,18 +115,30 @@ describe("Knowledge Library APIs", () => {
 	});
 
 	it("returns a 500 contract when the list dependency fails", async () => {
-		const transaction = vi
-			.spyOn(db, "$transaction")
-			.mockRejectedValueOnce(new Error("database down"));
-
-		const response = await listDumps(request());
-
-		expect(response.status).toBe(500);
-		expect(await response.json()).toMatchObject({
-			error: "Failed to retrieve dumps",
-			message: "database down",
+		const originalTransaction = db.$transaction;
+		// Vitest restores Prisma's proxy descriptor as `undefined` after file teardown.
+		Object.defineProperty(db, "$transaction", {
+			configurable: true,
+			value: vi.fn().mockRejectedValueOnce(new Error("database down")),
+			writable: true,
 		});
-		transaction.mockRestore();
+
+		try {
+			const response = await listDumps(request());
+
+			expect(response.status).toBe(500);
+			expect(await response.json()).toMatchObject({
+				error: "Failed to retrieve dumps",
+				message: "database down",
+			});
+		} finally {
+			Object.defineProperty(db, "$transaction", {
+				configurable: true,
+				value: originalTransaction,
+				writable: true,
+			});
+			expect(db.$transaction).toBe(originalTransaction);
+		}
 	});
 
 	it("partially updates normalized metadata and preserves unspecified fields", async () => {
