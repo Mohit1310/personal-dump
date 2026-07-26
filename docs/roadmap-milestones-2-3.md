@@ -127,7 +127,7 @@ prerequisite, not part of the milestone 2–3 scope.
 | ----: | ----- | --------- | ----------- | ------------------------------------------------------------ |
 |     1 | #7    | 2         | In review   | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20) |
 |     2 | #8    | 2         | In progress | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21) |
-|     3 | #9    | 2         | In progress | Pending PR                                                   |
+|     3 | #9    | 2         | In progress | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22) |
 |     4 | #10   | 2         | Todo        | —                                                            |
 |     5 | #11   | 2         | Todo        | —                                                            |
 |     6 | #12   | 2         | Todo        | —                                                            |
