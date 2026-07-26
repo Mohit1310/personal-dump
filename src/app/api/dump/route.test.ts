@@ -5,7 +5,8 @@ const mocks = vi.hoisted(() => ({
 	embedQuery: vi.fn(),
 	dumpCreate: vi.fn(),
 	chunkCreate: vi.fn(),
-	executeRawUnsafe: vi.fn(),
+	executeRaw: vi.fn(),
+	transaction: vi.fn(),
 }));
 
 vi.mock("@/lib/processing/chunk-text", () => ({ chunkText: mocks.chunkText }));
@@ -16,7 +17,8 @@ vi.mock("@/server/db", () => ({
 	db: {
 		dump: { create: mocks.dumpCreate },
 		chunk: { create: mocks.chunkCreate },
-		$executeRawUnsafe: mocks.executeRawUnsafe,
+		$executeRaw: mocks.executeRaw,
+		$transaction: mocks.transaction,
 	},
 }));
 
@@ -41,7 +43,14 @@ describe("POST /api/dump", () => {
 		mocks.embedQuery.mockImplementation((content: string) =>
 			Promise.resolve(content === "first" ? [1, 2] : [3, 4]),
 		);
-		mocks.executeRawUnsafe.mockResolvedValue(1);
+		mocks.executeRaw.mockResolvedValue(1);
+		mocks.transaction.mockImplementation((callback: (tx: object) => unknown) =>
+			callback({
+				dump: { create: mocks.dumpCreate },
+				chunk: { create: mocks.chunkCreate },
+				$executeRaw: mocks.executeRaw,
+			}),
+		);
 	});
 
 	it.each([undefined, null, "", "   ", 42])(
@@ -83,9 +92,9 @@ describe("POST /api/dump", () => {
 			mocks.chunkCreate.mock.calls.map(([arg]) => arg.data.content).sort(),
 		).toEqual(["first", "second"]);
 		expect(mocks.embedQuery).toHaveBeenCalledTimes(2);
-		expect(mocks.executeRawUnsafe).toHaveBeenCalledTimes(2);
+		expect(mocks.executeRaw).toHaveBeenCalledTimes(2);
 	});
-	it("returns 500 and characterizes partial writes when a dependency fails", async () => {
+	it("returns 500 without database writes when embedding generation fails", async () => {
 		mocks.embedQuery.mockRejectedValueOnce(new Error("provider down"));
 		const response = await POST(request({ content: "original" }));
 		expect(response.status).toBe(500);
@@ -93,6 +102,9 @@ describe("POST /api/dump", () => {
 			error: "Failed to store dump",
 			message: "provider down",
 		});
-		expect(mocks.dumpCreate).toHaveBeenCalledTimes(1);
+		expect(mocks.transaction).not.toHaveBeenCalled();
+		expect(mocks.dumpCreate).not.toHaveBeenCalled();
+		expect(mocks.chunkCreate).not.toHaveBeenCalled();
+		expect(mocks.executeRaw).not.toHaveBeenCalled();
 	});
 });

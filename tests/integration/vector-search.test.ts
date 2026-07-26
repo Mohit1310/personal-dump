@@ -131,4 +131,31 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 			),
 		).rejects.toThrow();
 	});
+
+	it("rolls back all dump records when an embedding write fails", async () => {
+		const dumpId = randomUUID();
+		const chunkId = randomUUID();
+
+		await expect(
+			db.$transaction(async (tx) => {
+				await tx.dump.create({ data: { id: dumpId, content: "atomic dump" } });
+				await tx.chunk.create({
+					data: {
+						id: chunkId,
+						dumpId,
+						content: "atomic chunk",
+						order: 0,
+					},
+				});
+				await tx.$executeRaw`
+					INSERT INTO "Embedding" (id, "chunkId", vector)
+					VALUES (${randomUUID()}, ${chunkId}, ${vectorText([1, 0])}::vector)
+				`;
+			}),
+		).rejects.toThrow();
+
+		expect(await db.dump.count({ where: { id: dumpId } })).toBe(0);
+		expect(await db.chunk.count({ where: { id: chunkId } })).toBe(0);
+		expect(await db.embedding.count({ where: { chunkId } })).toBe(0);
+	});
 });
