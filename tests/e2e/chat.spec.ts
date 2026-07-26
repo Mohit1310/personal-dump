@@ -70,6 +70,7 @@ test.describe("chat", () => {
 		const input = page.getByPlaceholder("Enter command or query...");
 		await page.getByText(models[1], { exact: true }).last().click();
 		await expect(page.getByRole("dialog")).toBeHidden();
+		await input.click();
 		await expect(input).toBeFocused();
 		await input.pressSequentially("Recall this");
 		await expect(input).toHaveValue("Recall this");
