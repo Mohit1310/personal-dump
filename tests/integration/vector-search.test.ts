@@ -19,7 +19,8 @@ async function seedChunk(dumpId: string, content: string, values: number[], orde
 		order,
 	);
 	await db.$executeRawUnsafe(
-		`INSERT INTO "Embedding" ("chunkId", "vector") VALUES ($1, $2::vector)`,
+		`INSERT INTO "Embedding" ("id", "chunkId", "vector") VALUES ($1, $2, $3::vector)`,
+		randomUUID(),
 		chunkId,
 		vectorText(values),
 	);
@@ -66,7 +67,7 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 		expect(results[0]!.distance).toBeCloseTo(0);
 	});
 
-	it("does not return chunks from other dumps", async () => {
+	it("searches semantically across dumps", async () => {
 		await seedChunk(dumpIds[0]!, "included", vector(0), 0);
 		await seedChunk(dumpIds[1]!, "also semantically nearest", vector(0), 0);
 
@@ -110,7 +111,8 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 		);
 		await expect(
 			db.$executeRawUnsafe(
-				`INSERT INTO "Embedding" ("chunkId", "vector") VALUES ($1, $2::vector)`,
+				`INSERT INTO "Embedding" ("id", "chunkId", "vector") VALUES ($1, $2, $3::vector)`,
+				randomUUID(),
 				chunkId,
 				vectorText([1, 0]),
 			),
