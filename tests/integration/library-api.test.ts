@@ -115,18 +115,27 @@ describe("Knowledge Library APIs", () => {
 	});
 
 	it("returns a 500 contract when the list dependency fails", async () => {
+		const originalTransaction = db.$transaction;
 		const transaction = vi
 			.spyOn(db, "$transaction")
 			.mockRejectedValueOnce(new Error("database down"));
 
-		const response = await listDumps(request());
+		try {
+			const response = await listDumps(request());
 
-		expect(response.status).toBe(500);
-		expect(await response.json()).toMatchObject({
-			error: "Failed to retrieve dumps",
-			message: "database down",
-		});
-		transaction.mockRestore();
+			expect(response.status).toBe(500);
+			expect(await response.json()).toMatchObject({
+				error: "Failed to retrieve dumps",
+				message: "database down",
+			});
+		} finally {
+			transaction.mockRestore();
+			Object.defineProperty(db, "$transaction", {
+				configurable: true,
+				value: originalTransaction,
+				writable: true,
+			});
+		}
 	});
 
 	it("partially updates normalized metadata and preserves unspecified fields", async () => {
