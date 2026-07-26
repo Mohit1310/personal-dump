@@ -42,9 +42,7 @@ describe("getGroqModelIds", () => {
 				fetchCount += 1;
 				return new Response(
 					JSON.stringify({
-						data: [
-							{ id: fetchCount === 1 ? "model" : "refreshed-model" },
-						],
+						data: [{ id: fetchCount === 1 ? "model" : "refreshed-model" }],
 					}),
 					{ status: 200 },
 				);
