@@ -185,6 +185,12 @@ and 17 errors. Both changed files pass Oxfmt; the changed TypeScript file has
 29 existing-style warnings and zero lint errors. Deferred [#5](https://github.com/Mohit1310/personal-dump/issues/5)
 remains untouched.
 
+Issue [#26](https://github.com/Mohit1310/personal-dump/issues/26) is **in
+progress** in [PR #30](https://github.com/Mohit1310/personal-dump/pull/30),
+stacked on PR #29. It restores production prerendering for `/library` by
+placing its client search-parameter consumer behind an accessible loading
+fallback, with no change to Library filters or data-loading behavior.
+
 ## Progress
 
 | Order | Issue | Milestone | Status      | Delivery                                                     |
