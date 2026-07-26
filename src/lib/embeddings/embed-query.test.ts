@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const embedContent = vi.fn();
+const testEnv = vi.hoisted(() => ({
+	DATABASE_URL: "postgresql://localhost/test",
+	GEMINI_API_KEY: "test-gemini-key",
+	GROQ_API_KEY: "test-groq-key",
+	NODE_ENV: "test" as const,
+}));
+
+vi.mock("@/env", () => ({ env: testEnv }));
 
 vi.mock("@google/genai", () => ({
 	GoogleGenAI: vi.fn(() => ({ models: { embedContent } })),

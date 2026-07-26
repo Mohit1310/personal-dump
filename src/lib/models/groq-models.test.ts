@@ -1,4 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const testEnv = vi.hoisted(() => ({
+	DATABASE_URL: "postgresql://localhost/test",
+	GEMINI_API_KEY: "test-gemini-key",
+	GROQ_API_KEY: "test-groq-key",
+	NODE_ENV: "test" as const,
+}));
+
+vi.mock("@/env", () => ({ env: testEnv }));
+
 describe("getGroqModelIds", () => {
 	beforeEach(() => {
 		vi.useRealTimers();
@@ -15,9 +25,9 @@ describe("getGroqModelIds", () => {
 	});
 
 	it("caches for five minutes and refreshes after expiry", async () => {
-		vi.useFakeTimers();
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ data: [{ id: "model" }] }), { status: 200 }));
 		const { getGroqModelIds } = await import("./groq-models");
+		vi.useFakeTimers();
 		const first = await getGroqModelIds();
 		await getGroqModelIds();
 		expect(fetchMock).toHaveBeenCalledTimes(1);
