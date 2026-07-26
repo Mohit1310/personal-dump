@@ -159,7 +159,7 @@ the lower reciprocal rank and establishes comparison points for issues #14,
 |     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23) |
 |     5 | #11   | 2         | In progress | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24) |
 |     6 | #12   | 2         | Todo        | —                                                            |
-|     7 | #13   | 3         | In progress | —                                                            |
+|     7 | #13   | 3         | In progress | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27) |
 |     8 | #14   | 3         | Todo        | —                                                            |
 |     9 | #15   | 3         | Todo        | —                                                            |
 |    10 | #16   | 3         | Todo        | —                                                            |
