@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { parseArgs, runCli, usage } from "./pdump.js";
 
-const response = (body: unknown, ok = true, status = 200) =>
-	new Response(JSON.stringify(body), { ok, status, headers: { "Content-Type": "application/json" } });
+const response = (body: unknown, status = 200) =>
+	new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
 function cli(fetchImpl = vi.fn<typeof fetch>(), baseUrl = "http://localhost:3000") {
 	const log = vi.fn();
@@ -50,8 +50,8 @@ describe("pdump CLI", () => {
 	});
 
 	it.each([
-		[response({ message: "bad input" }, false, 400), "bad input"],
-		[response({ error: "broken" }, false, 500), "broken"],
+		[response({ message: "bad input" }, 400), "bad input"],
+		[response({ error: "broken" }, 500), "broken"],
 		[new Response("not json", { status: 502 }), "Request failed (502)"],
 	])("reports HTTP/API errors", async (result, message) => {
 		const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(result);
