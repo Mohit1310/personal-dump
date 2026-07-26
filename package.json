@@ -25,7 +25,6 @@
 		"test:e2e": "playwright test",
 		"test:eval": "vitest run --config vitest.eval.config.ts",
 		"test:integration": "vitest run --config vitest.integration.config.ts",
-		"test:unit": "vitest run",
 		"test:watch": "vitest",
 		"start": "next start",
 		"typecheck": "tsc --noEmit",

@@ -45,12 +45,31 @@ describe("chunkText", () => {
 	});
 
 	it("does not split fenced code blocks", () => {
-		const input =
-			"before\n\n```ts\nconst answer = 42;\nconsole.log(answer);\n```\n\nafter";
+		const fencedBlock = "```ts\nconst answer = 42;\nconsole.log(answer);\n```";
+		const input = `before\n\n${fencedBlock}\n\nafter`;
 		const chunks = chunkText(input, 18, 3);
-		expect(
-			chunks.some((chunk) => chunk.includes("```ts") && chunk.includes("```")),
-		).toBe(true);
-		expect(chunks.join("")).toContain("const answer = 42;");
+
+		expect(chunks.some((chunk) => chunk.includes(fencedBlock))).toBe(true);
+		for (const chunk of chunks) {
+			if (chunk.includes("const answer") || chunk.includes("console.log")) {
+				expect(chunk).toContain(fencedBlock);
+			}
+		}
+	});
+
+	it("keeps making progress when overlap exceeds a natural break", () => {
+		const input = "before\n\n```\ncode\n```\n\nafter extra text";
+		const chunks = chunkText(input, 30, 25);
+
+		expect(chunks.length).toBeLessThanOrEqual(input.length);
+		expect(chunks.at(-1)).toContain("after extra text");
+	});
+
+	it("keeps an unclosed fenced block intact through the end", () => {
+		const fencedBlock = "```ts\nconst answer = 42;\nconsole.log(answer);";
+		const input = `before\n\n${fencedBlock}`;
+		const chunks = chunkText(input, 18, 3);
+
+		expect(chunks.some((chunk) => chunk.includes(fencedBlock))).toBe(true);
 	});
 });
