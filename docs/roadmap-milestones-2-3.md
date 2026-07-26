@@ -93,16 +93,17 @@ prerequisite, not part of the milestone 2–3 scope.
 
 ## Decisions
 
-| Area               | Decision                                                                                                                        | Reason                                                                                          |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Metadata ownership | Metadata is supplied and editable by the user.                                                                                  | AI-generated metadata is outside the roadmap and would make ingestion less explicit.            |
-| Schema             | Keep metadata as fields on `Dump`; use a PostgreSQL enum for the three types and `text[]` for tags.                             | This supports future filters without tag tables, repositories, or another taxonomy concept.     |
-| Defaults/backfill  | Existing and content-only dumps receive empty title/source, `note`, no tags, and an `updatedAt` initially equal to `createdAt`. | Required fields remain queryable without losing content or inventing metadata.                  |
-| API limits         | Title: 200 characters; source: 500; tags: at most 20, each at most 50.                                                          | Bounded metadata prevents abusive payloads while remaining ample for a personal knowledge base. |
-| Tag normalization  | Trim, lowercase, replace whitespace runs with `-`, preserve first-seen order, and remove duplicates.                            | One deterministic representation supports later equality/containment filters.                   |
-| Content handling   | Preserve content exactly; normalize only metadata.                                                                              | Ingestion must not alter code, errors, commands, or formatting.                                 |
-| Write behavior     | Generate chunks/embeddings before the existing transaction and persist metadata with the dump inside it.                        | Keeps PR #6 atomicity while adding no new layer.                                                |
-| Extensibility      | Add no tag table, repository/service layer, metadata generator, or dependency.                                                  | The current model and route already own the required responsibilities.                          |
+| Area               | Decision                                                                                                                                                                                                | Reason                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Metadata ownership | Metadata is supplied and editable by the user.                                                                                                                                                          | AI-generated metadata is outside the roadmap and would make ingestion less explicit.                                             |
+| Schema             | Keep metadata as fields on `Dump`; use a PostgreSQL enum for the three types and `text[]` for tags.                                                                                                     | This supports future filters without tag tables, repositories, or another taxonomy concept.                                      |
+| Defaults/backfill  | Existing and content-only dumps receive empty title/source, `note`, no tags, and an `updatedAt` initially equal to `createdAt`.                                                                         | Required fields remain queryable without losing content or inventing metadata.                                                   |
+| API limits         | Title: 200 characters; source: 500; tags: at most 20, each at most 50.                                                                                                                                  | Bounded metadata prevents abusive payloads while remaining ample for a personal knowledge base.                                  |
+| Tag normalization  | Trim, lowercase, replace whitespace runs with `-`, preserve first-seen order, and remove duplicates.                                                                                                    | One deterministic representation supports later equality/containment filters.                                                    |
+| Content handling   | Preserve content exactly; normalize only metadata.                                                                                                                                                      | Ingestion must not alter code, errors, commands, or formatting.                                                                  |
+| Write behavior     | Generate chunks/embeddings before the existing transaction and persist metadata with the dump inside it.                                                                                                | Keeps PR #6 atomicity while adding no new layer.                                                                                 |
+| Library read API   | `GET /api/dumps` accepts bounded `page`/`pageSize` plus combinable `q`, `type`, `tag`, and `source` filters; it sorts by `createdAt DESC, id DESC`. `GET /api/dumps/[id]` returns metadata and content. | A compact, deterministic contract supports the library UI while list responses and both endpoints exclude chunks and embeddings. |
+| Extensibility      | Add no tag table, repository/service layer, metadata generator, or dependency.                                                                                                                          | The current model and route already own the required responsibilities.                                                           |
 
 ## Verification matrix
 
@@ -121,18 +122,18 @@ prerequisite, not part of the milestone 2–3 scope.
 
 ## Progress
 
-| Order | Issue | Milestone | Status    | Delivery                                                     |
-| ----: | ----- | --------- | --------- | ------------------------------------------------------------ |
-|     1 | #7    | 2         | In review | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20) |
-|     2 | #8    | 2         | Todo      | —                                                            |
-|     3 | #9    | 2         | Todo      | —                                                            |
-|     4 | #10   | 2         | Todo      | —                                                            |
-|     5 | #11   | 2         | Todo      | —                                                            |
-|     6 | #12   | 2         | Todo      | —                                                            |
-|     7 | #13   | 3         | Todo      | —                                                            |
-|     8 | #14   | 3         | Todo      | —                                                            |
-|     9 | #15   | 3         | Todo      | —                                                            |
-|    10 | #16   | 3         | Todo      | —                                                            |
-|    11 | #17   | 3         | Todo      | —                                                            |
-|    12 | #18   | 3         | Todo      | —                                                            |
-|    13 | #19   | 3         | Todo      | —                                                            |
+| Order | Issue | Milestone | Status      | Delivery                                                     |
+| ----: | ----- | --------- | ----------- | ------------------------------------------------------------ |
+|     1 | #7    | 2         | In review   | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20) |
+|     2 | #8    | 2         | In progress | —                                                            |
+|     3 | #9    | 2         | Todo        | —                                                            |
+|     4 | #10   | 2         | Todo        | —                                                            |
+|     5 | #11   | 2         | Todo        | —                                                            |
+|     6 | #12   | 2         | Todo        | —                                                            |
+|     7 | #13   | 3         | Todo        | —                                                            |
+|     8 | #14   | 3         | Todo        | —                                                            |
+|     9 | #15   | 3         | Todo        | —                                                            |
+|    10 | #16   | 3         | Todo        | —                                                            |
+|    11 | #17   | 3         | Todo        | —                                                            |
+|    12 | #18   | 3         | Todo        | —                                                            |
+|    13 | #19   | 3         | Todo        | —                                                            |
