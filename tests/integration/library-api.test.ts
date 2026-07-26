@@ -1,12 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { GET as getDump } from "@/app/api/dumps/[id]/route";
+import {
+	DELETE as deleteDump,
+	GET as getDump,
+	PATCH as patchDump,
+} from "@/app/api/dumps/[id]/route";
 import { GET as listDumps } from "@/app/api/dumps/route";
 import { db } from "@/server/db";
 
 const request = (query = "") =>
 	new Request(`http://localhost/api/dumps${query ? `?${query}` : ""}`);
 const detailContext = (id: string) => ({ params: Promise.resolve({ id }) });
+const mutationRequest = (method: "PATCH" | "DELETE", body?: unknown) =>
+	new Request("http://localhost/api/dumps/example", {
+		method,
+		body: body === undefined ? undefined : JSON.stringify(body),
+		headers: { "content-type": "application/json" },
+	});
 
 describe("Knowledge Library APIs", () => {
 	const dumpIds: string[] = [];
@@ -117,5 +127,97 @@ describe("Knowledge Library APIs", () => {
 			message: "database down",
 		});
 		transaction.mockRestore();
+	});
+
+	it("partially updates normalized metadata and preserves unspecified fields", async () => {
+		const dump = await db.dump.create({
+			data: {
+				content: `${namespace} metadata mutation`,
+				title: "Original title",
+				type: "error",
+				tags: ["original"],
+				source: "Original source",
+			},
+		});
+		dumpIds.push(dump.id);
+
+		const response = await patchDump(
+			mutationRequest("PATCH", {
+				title: "  Updated title  ",
+				tags: [" TypeScript ", "database setup", "typescript"],
+			}),
+			detailContext(dump.id),
+		);
+		const body = (await response.json()) as { dump: Record<string, unknown> };
+
+		expect(response.status).toBe(200);
+		expect(body.dump).toMatchObject({
+			id: dump.id,
+			content: `${namespace} metadata mutation`,
+			title: "Updated title",
+			type: "error",
+			tags: ["typescript", "database-setup"],
+			source: "Original source",
+		});
+		expect(await db.dump.findUnique({ where: { id: dump.id } })).toMatchObject({
+			title: "Updated title",
+			type: "error",
+			tags: ["typescript", "database-setup"],
+			source: "Original source",
+		});
+	});
+
+	it("deletes the dump and its cascade-owned chunks and embeddings", async () => {
+		const dump = await db.dump.create({
+			data: { content: `${namespace} cascade mutation` },
+		});
+		const chunk = await db.chunk.create({
+			data: { dumpId: dump.id, content: "cascade chunk", order: 0 },
+		});
+		await db.$executeRaw`
+			INSERT INTO "Embedding" (id, "chunkId", vector, "createdAt")
+			VALUES (${randomUUID()}, ${chunk.id}, ${`[${Array(768).fill(1).join(",")}]`}::vector, ${new Date()})
+		`;
+
+		const response = await deleteDump(
+			mutationRequest("DELETE"),
+			detailContext(dump.id),
+		);
+
+		expect(response.status).toBe(200);
+		expect(await db.dump.findUnique({ where: { id: dump.id } })).toBeNull();
+		expect(await db.chunk.findUnique({ where: { id: chunk.id } })).toBeNull();
+		expect(
+			await db.embedding.findUnique({ where: { chunkId: chunk.id } }),
+		).toBeNull();
+	});
+
+	it("returns clear mutation 400, 404, and 500 contracts", async () => {
+		expect(
+			(
+				await patchDump(
+					mutationRequest("PATCH", { content: "not allowed" }),
+					detailContext(randomUUID()),
+				)
+			).status,
+		).toBe(400);
+		expect(
+			(await deleteDump(mutationRequest("DELETE"), detailContext(randomUUID())))
+				.status,
+		).toBe(404);
+
+		const update = vi
+			.spyOn(db.dump, "update")
+			.mockRejectedValueOnce(new Error("database down"));
+		const response = await patchDump(
+			mutationRequest("PATCH", { title: "Updated" }),
+			detailContext(randomUUID()),
+		);
+		expect(response.status).toBe(500);
+		expect(await response.json()).toMatchObject({
+			error: "Failed to update dump",
+			message: "database down",
+		});
+		update.mockRestore();
 	});
 });
