@@ -36,7 +36,9 @@ test.describe("chat", () => {
 		await stubChat(page, "No relevant knowledge found in your dumps.");
 		await page.goto("/chat");
 
-		await page.getByPlaceholder("Enter command or query...").fill("Something unknown");
+		await page
+			.getByPlaceholder("Enter command or query...")
+			.pressSequentially("Something unknown");
 		await page.getByRole("button", { name: "Submit" }).click();
 
 		await expect(page.getByText("Something unknown")).toBeVisible();
@@ -58,9 +60,11 @@ test.describe("chat", () => {
 		await page.goto("/chat");
 
 		await page.getByRole("button", { name: models[0] }).click();
-		await page.getByRole("option", { name: models[1] }).click();
-		await page.getByPlaceholder("Enter command or query...").fill("Recall this");
-		await page.getByRole("button", { name: "Submit" }).click();
+		await page.getByText(models[1], { exact: true }).last().click();
+		const input = page.getByPlaceholder("Enter command or query...");
+		await input.pressSequentially("Recall this");
+		await expect(input).toHaveValue("Recall this");
+		await input.press("Enter");
 
 		await expect(page.getByText("Stored answer")).toBeVisible();
 		expect(requestModel).toBe(models[1]);

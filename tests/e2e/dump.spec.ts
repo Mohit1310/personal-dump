@@ -11,7 +11,7 @@ test.describe("dump submission", () => {
 		const submit = page.getByRole("button", { name: /dump data/i });
 		await expect(submit).toBeDisabled();
 
-		await editor.fill("A useful note from the browser test.");
+		await editor.pressSequentially("A useful note from the browser test.");
 		await expect(submit).toBeEnabled();
 		await submit.click();
 
@@ -27,7 +27,7 @@ test.describe("dump submission", () => {
 
 		await page.goto("/dump");
 		const editor = page.getByPlaceholder(/input stream ready/i);
-		await editor.fill("Keep this text so I can retry.");
+		await editor.pressSequentially("Keep this text so I can retry.");
 		await page.getByRole("button", { name: /dump data/i }).click();
 
 		await expect(page.getByText("Failed to store knowledge")).toBeVisible();
