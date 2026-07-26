@@ -1,12 +1,13 @@
 "use client";
 
-import { Box, MessageSquare, NotebookPen } from "lucide-react";
+import { Archive, Box, MessageSquare, NotebookPen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
 	{ href: "/dump", label: "Dump", icon: NotebookPen },
+	{ href: "/library", label: "Library", icon: Archive },
 	{ href: "/chat", label: "Chat", icon: MessageSquare },
 ];
 
