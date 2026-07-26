@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
 	streamTextArgs: [] as Array<Record<string, unknown>>,
 }));
 
-vi.mock("@ai-sdk/groq", () => ({ createGroq: mocks.createGroq }));
+vi.mock("@ai-sdk/groq", () => ({ createGroq: () => mocks.modelFactory }));
 vi.mock("@/env", () => ({ env: { GROQ_API_KEY: "test", GEMINI_API_KEY: "test" } }));
 vi.mock("@/lib/embeddings/embed-query", () => ({ embedQuery: mocks.embedQuery }));
 vi.mock("@/lib/models/groq-models", () => ({
@@ -49,7 +49,6 @@ function request(body: unknown): Request {
 function setupStream(): void {
 	mocks.convertToModelMessages.mockResolvedValue([]);
 	mocks.modelFactory.mockReturnValue("selected-model");
-	mocks.createGroq.mockReturnValue(mocks.modelFactory);
 	mocks.streamText.mockImplementation((args: Record<string, unknown>) => {
 		mocks.streamTextArgs.push(args);
 		return {
@@ -75,7 +74,7 @@ function setupStream(): void {
 				void execute({ writer: { write: (value) => values.push(value) } }).then(() => {
 					controller.enqueue(new TextEncoder().encode(JSON.stringify(values)));
 					controller.close();
-				});
+				}, (error) => controller.error(error));
 			},
 		});
 		return stream;
@@ -144,10 +143,10 @@ describe("POST /api/chat", () => {
 		expect(mocks.streamTextArgs[0].system).toContain("no relevant context was found");
 	});
 
-	it("returns a provider failure as a 500 response", async () => {
+	it("surfaces provider failure while consuming the response stream", async () => {
 		mocks.streamText.mockImplementation(() => { throw new Error("provider failed"); });
 		const response = await POST(request({ messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }] }));
-		expect(response.status).toBe(500);
-		expect(await response.json()).toMatchObject({ error: "Chat failed", message: "provider failed" });
+		expect(response.status).toBe(200);
+		await expect(response.text()).rejects.toThrow("provider failed");
 	});
 });
