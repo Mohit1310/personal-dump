@@ -163,18 +163,18 @@ quality claim, and confidence gating remains deferred to issue #17.
 
 ## Progress
 
-| Order | Issue | Milestone | Status      | Delivery                                                     |
-| ----: | ----- | --------- | ----------- | ------------------------------------------------------------ |
-|     1 | #7    | 2         | In review   | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20) |
-|     2 | #8    | 2         | In progress | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21) |
-|     3 | #9    | 2         | In progress | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22) |
-|     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23) |
-|     5 | #11   | 2         | In progress | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24) |
-|     6 | #12   | 2         | Todo        | —                                                            |
-|     7 | #13   | 3         | In progress | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27) |
-|     8 | #14   | 3         | In progress | Combined with #15 on `codex/issues-14-15-knowledge-scope`    |
-|     9 | #15   | 3         | In progress | Combined with #14 on `codex/issues-14-15-knowledge-scope`    |
-|    10 | #16   | 3         | Todo        | —                                                            |
-|    11 | #17   | 3         | Todo        | —                                                            |
-|    12 | #18   | 3         | Todo        | —                                                            |
-|    13 | #19   | 3         | Todo        | —                                                            |
+| Order | Issue | Milestone | Status      | Delivery                                                              |
+| ----: | ----- | --------- | ----------- | --------------------------------------------------------------------- |
+|     1 | #7    | 2         | In review   | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20)          |
+|     2 | #8    | 2         | In progress | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21)          |
+|     3 | #9    | 2         | In progress | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22)          |
+|     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23)          |
+|     5 | #11   | 2         | In progress | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24)          |
+|     6 | #12   | 2         | Todo        | —                                                                     |
+|     7 | #13   | 3         | In progress | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27)          |
+|     8 | #14   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
+|     9 | #15   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
+|    10 | #16   | 3         | Todo        | —                                                                     |
+|    11 | #17   | 3         | Todo        | —                                                                     |
+|    12 | #18   | 3         | Todo        | —                                                                     |
+|    13 | #19   | 3         | Todo        | —                                                                     |
