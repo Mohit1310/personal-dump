@@ -5,13 +5,18 @@ import { generateAnswer } from "@/lib/rag/generate-answer";
 import { vectorSearch } from "@/lib/retrieval/vector-search";
 
 const searchSchema = z.object({
-	query: z.string().min(1, "Query is required"),
+	query: z.string().trim().min(1, "Query is required"),
 	topK: z.number().int().positive().optional().default(8),
 });
 
 export async function POST(req: Request) {
 	try {
-		const body = await req.json();
+		let body: unknown;
+		try {
+			body = await req.json();
+		} catch {
+			return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+		}
 		const validatedData = searchSchema.safeParse(body);
 
 		if (!validatedData.success) {
