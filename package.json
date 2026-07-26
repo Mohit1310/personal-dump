@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "next build",
+		"build:cli": "tsc -p tsconfig.cli.json",
 		"check": "oxfmt --check && oxlint",
 		"check:unsafe": "oxfmt && oxlint --fix",
 		"check:write": "oxfmt && oxlint --fix",
@@ -17,6 +18,7 @@
 		"dev": "next dev",
 		"postinstall": "prisma generate",
 		"preview": "next build && next start",
+		"pdump": "pnpm --silent build:cli && node build/cli/pdump.js",
 		"format": "oxfmt",
 		"format:check": "oxfmt --check",
 		"start": "next start",

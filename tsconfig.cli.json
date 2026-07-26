@@ -1,0 +1,20 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"allowJs": false,
+		"checkJs": false,
+		"incremental": false,
+		"isolatedModules": false,
+		"lib": ["ES2022"],
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"noEmit": false,
+		"outDir": "./build/cli",
+		"paths": {},
+		"plugins": [],
+		"rootDir": "./cli",
+		"types": ["node"]
+	},
+	"include": ["cli/**/*.ts"],
+	"exclude": ["node_modules"]
+}
