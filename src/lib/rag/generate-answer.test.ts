@@ -26,7 +26,10 @@ describe("generateAnswer", () => {
 		generateContent.mockResolvedValue({ text: "answer" });
 		const { generateAnswer } = await import("./generate-answer");
 		await generateAnswer({ userQuery: "question", chunks: Array.from({ length: 10 }, (_, i) => chunk(String(i))) });
-		const prompt = generateContent.mock.calls[0][0].contents[0].parts[0].text;
+		const request = generateContent.mock.calls[0]?.[0];
+		if (!request) throw new Error("Gemini request was not captured");
+		const prompt = request.contents?.[0]?.parts?.[0]?.text;
+		if (typeof prompt !== "string") throw new Error("Gemini prompt was not captured");
 		expect(prompt).toContain("0");
 		expect(prompt).toContain("7");
 		expect(prompt).not.toContain("[Chunk 9]");
