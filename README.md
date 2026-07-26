@@ -32,25 +32,21 @@ CORE FEATURES
 TECH STACK
 
 Frontend
-
 - Next.js (App Router)
 - TypeScript
 
 Backend
-
 - Next.js Route Handlers
 - TypeScript
 - Zod for validation
 
 Database
-
 - PostgreSQL
 - pgvector extension
 - Prisma ORM
 - Raw SQL for vector similarity search
 
 AI
-
 - Gemini Embedding Models
 - Gemini Pro (answer formatting only)
 
@@ -59,42 +55,40 @@ AI
 PROJECT STRUCTURE
 
 app/
-dump/
-page.tsx
-chat/
-page.tsx
-api/
-dump/
-route.ts
-search/
-route.ts
+  dump/
+    page.tsx
+  chat/
+    page.tsx
+  api/
+    dump/
+      route.ts
+    search/
+      route.ts
 
 lib/
-db/
-client.ts
-schema.prisma
-chunking/
-chunkText.ts
-embeddings/
-gemini.ts
-retrieval/
-search.ts
-rag/
-answer.ts
+  db/
+    client.ts
+    schema.prisma
+  chunking/
+    chunkText.ts
+  embeddings/
+    gemini.ts
+  retrieval/
+    search.ts
+  rag/
+    answer.ts
 
 ---
 
 HOW IT WORKS
 
 Dump Flow
-
 1. User enters text in /dump
 2. Text is chunked
 3. Chunks are embedded
 4. Data is stored in PostgreSQL
 
 Query Flow
-
 1. User asks a question in /chat
 2. Query is embedded
 3. Vector similarity search runs
@@ -127,7 +121,6 @@ NON-GOALS (v1)
 GETTING STARTED
 
 Requirements
-
 - Node.js (LTS)
 - PostgreSQL with pgvector
 - Gemini API key
@@ -142,7 +135,6 @@ GEMINI_API_KEY=your_api_key_here
 ROADMAP
 
 v1
-
 - Text dump and retrieval
 - Semantic search
 - RAG-based answers
