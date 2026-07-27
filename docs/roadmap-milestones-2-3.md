@@ -1,309 +1,150 @@
-# Roadmap context: milestones 2 and 3
+# Milestones 2–3 achievement record
 
-## Boundary
+This is the durable engineering record for the Knowledge Library and RAG
+retrieval roadmap. The companion [standalone report](reports/milestones-2-3.html)
+is an offline, responsive reading version of the same verified record.
 
-This roadmap is limited to GitHub issues
-[#7](https://github.com/Mohit1310/personal-dump/issues/7) through
-[#19](https://github.com/Mohit1310/personal-dump/issues/19), implemented in
-strict numerical order. Milestone 2 covers the Knowledge Library and
-user-controlled metadata (#7–#12). Milestone 3 covers deterministic RAG
-evaluation and retrieval improvements (#13–#19).
+## Scope and verified state
 
-Roadmap points 4–6 are explicitly deferred. GitHub issues
-[#2](https://github.com/Mohit1310/personal-dump/issues/2),
-[#3](https://github.com/Mohit1310/personal-dump/issues/3), and
-[#5](https://github.com/Mohit1310/personal-dump/issues/5) are explicitly
-excluded. The completed atomic-ingestion work in issue #4/PR #6 is a
-prerequisite, not part of the milestone 2–3 scope.
+Milestone 2 covers issues [#7](https://github.com/Mohit1310/personal-dump/issues/7)
+through [#12](https://github.com/Mohit1310/personal-dump/issues/12): metadata
+and the Knowledge Library. Milestone 3 covers
+[#13](https://github.com/Mohit1310/personal-dump/issues/13) through
+[#19](https://github.com/Mohit1310/personal-dump/issues/19): deterministic
+evaluation and retrieval quality. Atomic ingestion in
+[#4](https://github.com/Mohit1310/personal-dump/issues/4) /
+[PR #6](https://github.com/Mohit1310/personal-dump/pull/6) is a prerequisite,
+not milestone scope.
 
-## Exact milestone scope
+At this record's final update, #7–#18 are closed and their delivery PRs are
+merged. #19 is open and **In Progress** in the Personal dump project; its report
+PR is the only remaining review state. Nothing in this ticket implements
+deferred GitHub issues [#2](https://github.com/Mohit1310/personal-dump/issues/2),
+[#3](https://github.com/Mohit1310/personal-dump/issues/3), or
+[#5](https://github.com/Mohit1310/personal-dump/issues/5), nor roadmap points
+4–6.
 
-### Milestone 2: Knowledge Library and metadata
+## Original baseline and delivered capability
 
-1. **#7 — Add user-controlled metadata to dumps.** Add title,
-   note/error/solution type, normalized tags, source, and updated timestamp to
-   `Dump`; safely backfill existing rows; persist validated metadata during
-   ingestion; retain content-only compatibility; and establish this context
-   document.
-2. **#8 — Add Knowledge Library list and detail APIs.** Add deterministic
-   pagination, text search, type/tag/source filters, dump detail lookup,
-   minimal response shapes that exclude vectors, and explicit 400/404
-   contracts.
-3. **#9 — Add dump metadata update and delete APIs.** Add partial
-   metadata-only updates and cascade-backed deletion with consistent tag
-   normalization, validation, not-found behavior, and no content editing.
-4. **#10 — Support atomic dump content edits and re-indexing.** Prepare all
-   replacement chunks and embeddings before writes, then replace content and
-   derived records transactionally while preserving the prior version on any
-   failure.
-5. **#11 — Build Knowledge Library browse, search, and filter UI.** Add
-   `/library`, navigation, paginated summaries, URL-backed debounced
-   search/filters, detail navigation, and accessible loading, empty, error, and
-   retry states without collections or new UI dependencies.
-6. **#12 — Build dump detail, edit, and delete experience.** Add
-   `/library/[id]` with metadata/content display, metadata edits, explicit
-   re-indexing, confirmed deletion, unsaved-change handling, and complete
-   create/browse/edit/delete coverage while keeping chunks and embeddings out
-   of the primary UI.
+The original retrieval benchmark is provider-free: 12 fixed synthetic-vector
+chunks and 10 labeled queries (8 positive, 2 no-answer) evaluated at K=3. It
+tests semantic paraphrases, exact identifiers and errors, overlapping notes,
+metadata scopes, and irrelevant questions. It measures retrieval mechanics,
+not Gemini embedding quality.
 
-### Milestone 3: RAG evaluation and retrieval
+The original vector-only ranking retrieved every labeled positive chunk in the
+top three, but placed the two exact-identifier cases at rank two and returned
+nearest chunks for both no-answer queries. The delivered system now provides:
 
-1. **#13 — Expand deterministic RAG evaluation corpus and retrieval metrics.**
-   Cover paraphrases, exact identifiers, errors, overlapping notes, irrelevant
-   queries, and metadata scopes; label relevant chunks; report Recall@K, mean
-   reciprocal rank, no-answer accuracy, and grounded-answer checks; and record
-   the pre-change baseline without paid calls.
-2. **#14 — Add metadata filters to vector retrieval.** Define a typed filter
-   contract, filter by type/tag/source in PostgreSQL before ranking, extend
-   search/chat validation, preserve unfiltered behavior, and verify combined
-   filtering and ranking against pgvector.
-3. **#15 — Add knowledge-scope controls to chat.** Add compact,
-   keyboard-accessible type/tag/source controls using existing data contracts;
-   send one scope per submission; show active scope; support clear-all; and
-   avoid a global state layer.
-4. **#16 — Add hybrid full-text and vector retrieval.** Add PostgreSQL
-   full-text ranking and deterministic rank fusion, retain vector-only
-   comparison, add only measured indexes, and improve exact-token cases without
-   an external search or reranking service.
-5. **#17 — Add retrieval confidence gating for no-answer responses.** Derive
-   an explicit threshold from evaluation evidence, remove weak results before
-   prompting, align search/chat no-context behavior, and retain required
-   retrieval and grounded-answer performance.
-6. **#18 — Deduplicate and budget RAG context assembly.** Deterministically
-   remove identical/overlapping evidence, enforce an explicit context budget,
-   preserve citation identity and stable ordering, and avoid an LLM reranker.
-7. **#19 — Publish milestones 2 and 3 achievement report.** Finalize this
-   document with verified links, decisions, migrations, results, and
-   limitations; add a standalone responsive HTML report with baseline/final
-   capabilities and metrics; and report only merged or pushed facts.
+- User-owned title, type, tags, and source metadata; metadata-aware ingestion,
+  browsing, filtering, editing, deletion, and explicit content re-indexing.
+- A Knowledge Library with deterministic list/detail APIs and `/library` browse,
+  search, filters, detail, edit, re-index, and delete flows.
+- Scoped chat retrieval using the same type/tag/source contract as the library.
+- Hybrid PostgreSQL retrieval: vector cosine candidates plus full-text
+  candidates, fused deterministically with reciprocal-rank fusion (RRF).
+- A calibrated relevance gate, duplicate/overlap removal, stable evidence
+  ordering, and a whole-chunk 12,000-character context budget before answer
+  generation or source output.
 
-## Sequential workflow
+## Ticket and PR map
 
-1. Keep exactly one roadmap ticket active, starting with #7 and proceeding
-   through #19 without skipping ahead.
-2. Start each ticket from its completed predecessor (or an explicit stacked
-   prerequisite when the predecessor is awaiting merge).
-   Issues #14 and #15 are the one exception: they ship together as one vertical
-   retrieval-and-chat-scope slice because #15 directly consumes #14's contract.
-3. Implement only the active issue and its stated tests/documentation.
-4. Run focused tests while developing, then the complete verification baseline.
-5. Commit and push the complete ticket, open its PR, and move the project item
-   to review.
-6. Merge only after review. Mark the issue complete through the PR and update
-   the progress table with factual links/results before activating the next
-   ticket.
+| Milestone    | Ticket                                                                          | Verified status   | Delivery                                                                      |
+| ------------ | ------------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| Prerequisite | [#4](https://github.com/Mohit1310/personal-dump/issues/4) atomic ingestion      | Closed            | [PR #6](https://github.com/Mohit1310/personal-dump/pull/6), merged            |
+| 2            | [#7](https://github.com/Mohit1310/personal-dump/issues/7) metadata              | Closed            | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20), merged          |
+| 2            | [#8](https://github.com/Mohit1310/personal-dump/issues/8) library read APIs     | Closed            | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21), merged          |
+| 2            | [#9](https://github.com/Mohit1310/personal-dump/issues/9) metadata mutations    | Closed            | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22), merged          |
+| 2            | [#10](https://github.com/Mohit1310/personal-dump/issues/10) content re-indexing | Closed            | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23), merged          |
+| 2            | [#11](https://github.com/Mohit1310/personal-dump/issues/11) library UI          | Closed            | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24), merged          |
+| 2            | [#12](https://github.com/Mohit1310/personal-dump/issues/12) library detail      | Closed            | [PR #28](https://github.com/Mohit1310/personal-dump/pull/28), merged          |
+| 3            | [#13](https://github.com/Mohit1310/personal-dump/issues/13) deterministic evals | Closed            | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27), merged          |
+| 3            | [#14](https://github.com/Mohit1310/personal-dump/issues/14) retrieval filters   | Closed            | [PR #31](https://github.com/Mohit1310/personal-dump/pull/31), merged with #15 |
+| 3            | [#15](https://github.com/Mohit1310/personal-dump/issues/15) chat scope          | Closed            | [PR #31](https://github.com/Mohit1310/personal-dump/pull/31), merged with #14 |
+| 3            | [#16](https://github.com/Mohit1310/personal-dump/issues/16) hybrid retrieval    | Closed            | [PR #32](https://github.com/Mohit1310/personal-dump/pull/32), merged          |
+| 3            | [#17](https://github.com/Mohit1310/personal-dump/issues/17) confidence gate     | Closed            | [PR #33](https://github.com/Mohit1310/personal-dump/pull/33), merged with #18 |
+| 3            | [#18](https://github.com/Mohit1310/personal-dump/issues/18) evidence budget     | Closed            | [PR #33](https://github.com/Mohit1310/personal-dump/pull/33), merged with #17 |
+| 3            | [#19](https://github.com/Mohit1310/personal-dump/issues/19) achievement report  | Open, In Progress | [PR #34](https://github.com/Mohit1310/personal-dump/pull/34), open review     |
 
-## Decisions
+## Architecture decisions and migrations
 
-| Area                | Decision                                                                                                                                                                                                        | Reason                                                                                                                                                                           |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Metadata ownership  | Metadata is supplied and editable by the user.                                                                                                                                                                  | AI-generated metadata is outside the roadmap and would make ingestion less explicit.                                                                                             |
-| Schema              | Keep metadata as fields on `Dump`; use a PostgreSQL enum for the three types and `text[]` for tags.                                                                                                             | This supports future filters without tag tables, repositories, or another taxonomy concept.                                                                                      |
-| Defaults/backfill   | Existing and content-only dumps receive empty title/source, `note`, no tags, and an `updatedAt` initially equal to `createdAt`.                                                                                 | Required fields remain queryable without losing content or inventing metadata.                                                                                                   |
-| API limits          | Title: 200 characters; source: 500; tags: at most 20, each at most 50.                                                                                                                                          | Bounded metadata prevents abusive payloads while remaining ample for a personal knowledge base.                                                                                  |
-| Tag normalization   | Trim, lowercase, replace whitespace runs with `-`, preserve first-seen order, and remove duplicates.                                                                                                            | One deterministic representation supports later equality/containment filters.                                                                                                    |
-| Content handling    | Preserve content exactly; normalize only metadata.                                                                                                                                                              | Ingestion must not alter code, errors, commands, or formatting.                                                                                                                  |
-| Write behavior      | Generate chunks/embeddings before the existing transaction and persist metadata with the dump inside it.                                                                                                        | Keeps PR #6 atomicity while adding no new layer.                                                                                                                                 |
-| Library read API    | `GET /api/dumps` accepts bounded `page`/`pageSize` plus combinable `q`, `type`, `tag`, and `source` filters; it sorts by `createdAt DESC, id DESC`. `GET /api/dumps/[id]` returns metadata and content.         | A compact, deterministic contract supports the library UI while list responses and both endpoints exclude chunks and embeddings.                                                 |
-| Metadata mutations  | `PATCH /api/dumps/[id]` accepts one or more metadata fields only; `DELETE /api/dumps/[id]` deletes the root dump and relies on database cascades.                                                               | Content changes stay exclusively in #10 while the existing schema keeps dependent chunks and embeddings consistent.                                                              |
-| Content re-indexing | `PUT /api/dumps/[id]` accepts content only, prepares all replacement chunks and embeddings before writes, then updates content and replaces the ordered derived records in one transaction.                     | The explicit operation stays separate from metadata edits; provider failures perform no writes, while pgvector or other persistence failures roll back the complete replacement. |
-| Library UI          | `/library` keeps `q`, `type`, `tag`, `source`, and `page` in the URL; free-text fields debounce before fetching, while type and pagination update immediately.                                                  | A shareable URL needs no client store, and the existing list API remains the only source of library data.                                                                        |
-| RAG evaluation      | Use 12 synthetic-vector chunks and 10 labeled queries (8 positive, 2 no-answer) at K=3; run the same frozen rankings through the pure evaluator and real pgvector integration fixture.                          | Provider-free vectors make local/CI results deterministic and measure retrieval mechanics; they are not a Gemini embedding-quality benchmark.                                    |
-| Retrieval scope     | Accept at most one optional `type`, normalized `tag`, and case-insensitive exact `source`; apply every active dimension with `AND` before distance ordering and limiting, then break distance ties by chunk id. | The scalar contract matches the established Library controls, keeps SQL parameterized and deterministic, and supports every cross-dimension combination without a new taxonomy.  |
-| Chat scope          | Keep scope state inside the existing composer, load all tag/source values through paginated `/api/dumps` summaries, and omit `filters` entirely for all-knowledge submissions.                                  | The Library contract remains the metadata source of truth; no global store, new endpoint, or state dependency is needed, and option failures do not block chat.                  |
-| Extensibility       | Add no tag table, repository/service layer, metadata generator, or dependency.                                                                                                                                  | The current model and route already own the required responsibilities.                                                                                                           |
+The first migration creates `Dump`, `Chunk`, and `Embedding`, enables pgvector,
+and cascades dependent records. The metadata migration adds the PostgreSQL
+`DumpType` enum and `title`, `type`, `tags`, `source`, and `updatedAt` to
+`Dump`; legacy rows are backfilled with their original `createdAt`. Metadata
+lives on `Dump` as an enum and `text[]`, rather than adding tag tables or a
+service layer.
 
-## Current retrieval baseline
+Ingestion generates chunks and embeddings before the transaction, then writes
+the dump and derived records atomically. Content edits prepare replacements
+before writing and replace the content and ordered derived records in one
+transaction, so provider failures write nothing and persistence failures roll
+back the full replacement. Metadata edits remain distinct from re-indexing.
 
-Issue #13 freezes the vector-only retrieval baseline before milestone 3 changes
-the algorithm. The representative corpus covers semantic paraphrases, exact
-errors and identifiers, overlapping notes, irrelevant questions, and
-type/tag/source-scoped questions. Every positive query labels its relevant chunks
-and answer fragments; corpus validation fails when either label or grounded
-fragment is absent.
+Retrieval applies at most one optional type, normalized tag, and
+case-insensitive source with `AND` before ranking and limiting. Hybrid search
+gets bounded vector and PostgreSQL `simple` full-text candidates, then RRF
+scores them as `1 / (60 + rank)`. Equal scores break by lexical rank, vector
+rank, then chunk id. A measured empty-test-database `EXPLAIN (ANALYZE,
+BUFFERS)` completed in 0.10 ms with a sequential scan, so no GIN index or new
+migration was added without representative-corpus evidence.
 
-| Metric                   | Baseline |
-| ------------------------ | -------: |
-| Recall@3                 |  100.00% |
-| Mean reciprocal rank     |   68.75% |
-| No-answer accuracy       |    0.00% |
-| Grounded-answer accuracy |  100.00% |
+After hybrid retrieval, a result needs at least one shared significant
+normalized token with the query (`MIN_RELEVANT_TOKEN_OVERLAP = 1`). This was
+calibrated from the frozen corpus: labeled evidence had at least one overlap;
+returned irrelevant candidates had zero. The context step then discards exact
+duplicates and chunks overlapping 80% or more of the smaller token set, keeps
+retrieval order, and emits only whole chunks that fit a deterministic
+12,000-character budget. Character budgeting avoids model-specific tokenizers
+across Gemini and Groq paths.
 
-Recall, reciprocal rank, and grounded-answer accuracy use the 8 positive
-queries. No-answer accuracy uses the 2 negative queries. The current vector
-search always returns its nearest chunks without a relevance threshold, so
-both irrelevant queries fail the no-answer check. Exact-token and
-metadata-scoped cases retrieve the labeled chunk at rank 2, which accounts for
-the lower reciprocal rank and establishes comparison points for issues #14,
-#16, and #17.
+## Evaluation progression
 
-Issue #14 applies the labeled type, tag, and source scopes before ranking. On
-the same deterministic corpus, Recall@3 remains 100%, mean reciprocal rank
-improves to 87.50%, no-answer accuracy remains 0%, and grounded-answer accuracy
-remains 100%. This isolates metadata-filter mechanics; it is not an embedding
-quality claim, and confidence gating remains deferred to issue #17.
+All percentages below are exact deterministic evaluation outputs. Recall, MRR,
+exact-token recall, semantic recall, and grounding use the 8 positive cases;
+no-answer accuracy uses the 2 negative cases.
 
-## Issue #16 hybrid retrieval
+| Stage                            | Recall@3 |     MRR | Exact-token Recall@1 | Semantic Recall@3 | No-answer accuracy | Grounded-answer accuracy |
+| -------------------------------- | -------: | ------: | -------------------: | ----------------: | -----------------: | -----------------------: |
+| Vector-only baseline             |  100.00% |  68.75% |                0.00% |           100.00% |              0.00% |                  100.00% |
+| Metadata-scoped vector           |  100.00% |  87.50% |                0.00% |           100.00% |              0.00% |                  100.00% |
+| Hybrid RRF                       |  100.00% | 100.00% |              100.00% |           100.00% |              0.00% |                  100.00% |
+| Hybrid + confidence gate/context |  100.00% | 100.00% |              100.00% |           100.00% |            100.00% |                  100.00% |
 
-Issue #16 keeps the existing `vectorSearch` function as the internal,
-vector-only comparison mode and adds `hybridSearch` in the same module. Both
-candidate paths apply the existing type/tag/source scope before their bounded
-ranking: pgvector orders semantic candidates by cosine distance and PostgreSQL
-full-text search tokenizes the query with the `simple` configuration, ranks
-matching chunk content with `ts_rank_cd`, and handles identifiers, commands,
-and error codes without an external search service. Each path returns at most
-`min(3 × K, 60)` candidates, with public `K` limited to 1–20. Reciprocal-rank
-fusion uses `1 / (60 + rank)` per path; equal fused scores break first by
-lexical rank, then vector rank, then chunk id. This preserves deterministic
-ordering while preferring exact-token evidence in the otherwise equal
-cross-ranked case.
+Hybrid retrieval moves exact identifiers to rank one without reducing semantic
+retrieval. The relevance gate changes the two unsupported no-answer cases from
+nearest-neighbor output to no context while retaining every labeled, grounded
+positive result. Context deduplication and budgeting preserve those evaluation
+outcomes; they are evidence-preparation controls, not an LLM reranker.
 
-The pre-change vector-only corpus result was Recall@3 100.00%, MRR 68.75%,
-exact-token Recall@1 0.00% (both exact cases were rank 2), semantic Recall@3
-100.00%, no-answer accuracy 0.00%, and grounded-answer accuracy 100.00%.
-The deterministic hybrid result is Recall@3 100.00%, MRR 100.00%, exact-token
-Recall@1 100.00%, semantic Recall@3 100.00%, no-answer accuracy 0.00%, and
-grounded-answer accuracy 100.00%. No-answer behavior remains intentionally
-unchanged because confidence gating is issue #17.
+## Final verification
 
-An `EXPLAIN (ANALYZE, BUFFERS)` of the full-text candidate query against the
-current test database (zero chunks) used a sequential scan and completed in
-0.10 ms. That does not justify a PostgreSQL GIN index or a migration for this
-query shape, so #16 adds neither. The query remains parameterized and bounded;
-an index can be reconsidered with a representative persisted corpus and a plan
-showing a measured benefit.
+The report changes only documentation. The final sequential task run passed:
 
-Verification on branch `codex/issue-16-hybrid-retrieval` passed the focused
-fusion unit test (2 tests), hybrid pgvector integration file (25 tests), and
-deterministic evals (7 tests). It also passed the full unit suite (17 files,
-137 tests), the full PostgreSQL/pgvector integration suite twice in sequence
-(4 files, 43 tests per run), and all 12 Playwright tests. Strict typechecking,
-the CLI build, and the production build completed successfully. The ten changed
-files pass Oxfmt; their TypeScript files have zero Oxlint errors (373 existing
-rule warnings). Repository-wide Oxfmt remains a separate deferred #5 baseline:
-57 of 154 files are unformatted; Oxlint reports 18 errors and 3,772 warnings
-in unrelated legacy UI files, with no changes made to that deferred work.
-Delivery: [PR #32](https://github.com/Mohit1310/personal-dump/pull/32).
+| Command                         | Exact result                                                                              |
+| ------------------------------- | ----------------------------------------------------------------------------------------- |
+| `pnpm test:eval`                | 1 file, 8 tests passed                                                                    |
+| `pnpm test`                     | 18 files, 143 tests passed                                                                |
+| `pnpm test:integration` (run 1) | 4 files, 43 tests passed against real PostgreSQL/pgvector                                 |
+| `pnpm test:integration` (run 2) | 4 files, 43 tests passed against real PostgreSQL/pgvector                                 |
+| `pnpm test:e2e`                 | 12 Playwright tests passed                                                                |
+| `pnpm typecheck`                | passed                                                                                    |
+| `pnpm build:cli`                | passed                                                                                    |
+| `pnpm build`                    | passed; all 10 static pages generated                                                     |
+| Changed report files            | Oxfmt: 2 files correctly formatted; Oxlint: 0 warnings and 0 errors on 0 applicable files |
 
-## Issues #17 and #18 grounded context
+The repository-wide quality baseline remains separate and deferred to #5:
+`pnpm format:check` found 56 format issues in 157 files, and `pnpm lint` found
+3,793 warnings and 18 errors in 144 files. No broad cleanup is folded into
+this final roadmap ticket.
 
-Issues [#17](https://github.com/Mohit1310/personal-dump/issues/17) and
-[#18](https://github.com/Mohit1310/personal-dump/issues/18) are implemented
-together on `codex/issues-17-18-grounded-context`, stacked on
-`codex/issue-16-hybrid-retrieval` in
-[PR #33](https://github.com/Mohit1310/personal-dump/pull/33).
+## Limitations and deferrals
 
-The shared RAG preparation step runs after hybrid retrieval and before either
-chat/search prompt construction or source emission. It keeps a result only
-when it shares at least one significant normalized token with the query. The
-deterministic hybrid distribution establishes that boundary: every labeled
-relevant chunk had at least one shared significant token, while every returned
-candidate for the two irrelevant queries had zero. Common query words are
-excluded before comparison so incidental matches such as `is` and `do` do not
-become evidence. The threshold is the named, directly tested
-`MIN_RELEVANT_TOKEN_OVERLAP = 1`; it is a corpus-calibrated confidence gate,
-not a cosine-distance cutoff.
-
-The same preparation step removes identical content and chunks whose normalized
-token overlap reaches `0.8` of the smaller token set, keeping the first/highest
-ranked occurrence and stable source order. It formats each retained whole chunk
-with its chunk id and, when returned by retrieval, dump id. A deterministic
-12,000-character budget includes headers and separators. Rather than truncate,
-the assembler skips an overflowing chunk and can retain later whole evidence;
-this protects fenced code and citation attribution. Character budgeting is
-chosen over provider/model-specific tokenization because the application has
-both Gemini and Groq answer paths and needs one deterministic, dependency-free
-limit.
-
-The #16 hybrid baseline was Recall@3 100.00%, MRR 100.00%, exact-token
-Recall@1 100.00%, semantic Recall@3 100.00%, grounded-answer accuracy 100.00%,
-and no-answer accuracy 0.00%. After confidence gating it is Recall@3 100.00%,
-MRR 100.00%, exact-token Recall@1 100.00%, semantic Recall@3 100.00%,
-grounded-answer accuracy 100.00%, and no-answer accuracy 100.00%. The
-deterministic evaluator records both states without provider calls; the real
-PostgreSQL/pgvector fixture independently verifies the gated no-answer cases.
-
-Verification for #17/#18 passed focused confidence/context, answer, and API
-tests (4 files, 39 tests); deterministic evaluations (1 file, 8 tests); real
-PostgreSQL/pgvector integration (4 files, 43 tests); the full unit suite (18
-files, 143 tests); and the full integration suite twice consecutively (4 files,
-43 tests each). Playwright ran 12 tests, and strict typecheck, CLI build, and
-production build completed. Changed files pass Oxfmt and have zero Oxlint
-errors. Repository-wide format/lint debt remains deferred to #5.
-
-## Verification matrix
-
-| Concern                       | Focused evidence                                                                                                                                                                     | Full baseline command                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| Migration safety and defaults | Temporary-schema PostgreSQL test applies the original migration, inserts a legacy row, applies the metadata migration, and checks content/backfill/defaults.                         | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Validation and normalization  | Dump route unit cases cover invalid types/shapes, length/count limits, trimming, canonical tags, and deduplication.                                                                  | `pnpm test`                                   |
-| Persistence and compatibility | Route unit assertions and real PostgreSQL route tests cover supplied metadata and content-only payloads.                                                                             | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Formatting                    | All changed files pass Oxfmt.                                                                                                                                                        | `pnpm format:check`                           |
-| Lint delta                    | Compare the repository-wide result with the pre-change baseline of 2,874 warnings and 17 errors; no new errors are allowed.                                                          | `pnpm lint`                                   |
-| Static correctness            | Strict TypeScript compilation.                                                                                                                                                       | `pnpm typecheck`                              |
-| RAG regression                | Deterministic no-provider corpus validates labels, Recall@3, MRR, no-answer behavior, grounded fragments, repeatability, and actionable failures.                                    | `pnpm test:eval`                              |
-| Hybrid retrieval              | Real PostgreSQL/pgvector tests cover full-text exact tokens, semantic paraphrases, mixed fusion, scopes, stable ties, bounded input, no-result handling, and no-provider evaluation. | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Retrieval metadata scope      | Route tests reject invalid scopes; real pgvector tests cover type/tag/source, combinations, empty matches, pre-limit filtering, stable ties, and unfiltered compatibility.           | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Chat knowledge scope          | Component and browser tests cover loading/error/empty options, keyboard selection, one scoped request, clear-all, all-knowledge fallback, and the 390px layout.                      | `pnpm test` and `pnpm test:e2e`               |
-| Browser regression            | Full Playwright suite.                                                                                                                                                               | `pnpm test:e2e`                               |
-| CLI packaging                 | Compile the command-line entry point.                                                                                                                                                | `pnpm build:cli`                              |
-| Production packaging          | Next.js production compilation.                                                                                                                                                      | `pnpm build`                                  |
-
-## Verification harness follow-up
-
-Issue [#25](https://github.com/Mohit1310/personal-dump/issues/25) is **in
-progress** in [PR #29](https://github.com/Mohit1310/personal-dump/pull/29).
-The fresh-cache follow-up reproduced the inherited `pnpm test:integration`
-failure at 4 failures out of 25 tests whenever the Knowledge Library file ran
-first. Prisma's client proxy reports an own `$transaction` descriptor whose
-value is `undefined` even though normal property access returns the callable.
-`vi.spyOn` registered that descriptor for file teardown, so Vitest performed a
-second restore after the test's `finally` block and replaced the cached
-callable with `undefined`.
-
-The deterministic repair avoids registering a spy on the Prisma proxy. The
-test installs a one-call failure mock directly, restores the captured callable
-in `finally`, and asserts its identity. No production behavior, assertion,
-suite ordering, or test selection changed.
-
-Verification on 2026-07-26 regenerated Prisma Client 7.3.0, passed the focused
-Library/vector pair in both orders (2 files, 14 tests), passed the full
-integration command twice (4 files, 25 tests per run), and passed every
-integration file independently (7, 4, 7, and 7 tests). The unit suite passed
-14 files and 113 tests with one worker after the host produced unrelated
-parallel JSDOM timing failures; evals passed 1 file and 2 tests; Playwright
-passed all 8 tests; and typecheck plus the CLI build passed. The production
-build still reaches successful compilation and TypeScript checking before the
-pre-existing `/library` Suspense prerender failure tracked and fixed separately
-by [#26](https://github.com/Mohit1310/personal-dump/issues/26) and
-[PR #30](https://github.com/Mohit1310/personal-dump/pull/30).
-
-The repository-wide quality-debt baseline remains separate from #25: Oxfmt
-checked 146 files and found issues in 56, while Oxlint reported 3,232 warnings
-and 17 errors. Both changed files pass Oxfmt; the changed TypeScript file has
-29 existing-style warnings and zero lint errors. Deferred [#5](https://github.com/Mohit1310/personal-dump/issues/5)
-remains untouched.
-
-Issue [#26](https://github.com/Mohit1310/personal-dump/issues/26) is **in
-progress** in [PR #30](https://github.com/Mohit1310/personal-dump/pull/30),
-stacked on PR #29. It restores production prerendering for `/library` by
-placing its client search-parameter consumer behind an accessible loading
-fallback, with no change to Library filters or data-loading behavior.
-
-## Progress
-
-| Order | Issue | Milestone | Status      | Delivery                                                              |
-| ----: | ----- | --------- | ----------- | --------------------------------------------------------------------- |
-|     1 | #7    | 2         | In review   | [PR #20](https://github.com/Mohit1310/personal-dump/pull/20)          |
-|     2 | #8    | 2         | In progress | [PR #21](https://github.com/Mohit1310/personal-dump/pull/21)          |
-|     3 | #9    | 2         | In progress | [PR #22](https://github.com/Mohit1310/personal-dump/pull/22)          |
-|     4 | #10   | 2         | In progress | [PR #23](https://github.com/Mohit1310/personal-dump/pull/23)          |
-|     5 | #11   | 2         | In progress | [PR #24](https://github.com/Mohit1310/personal-dump/pull/24)          |
-|     6 | #12   | 2         | Todo        | —                                                                     |
-|     7 | #13   | 3         | In progress | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27)          |
-|     8 | #14   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
-|     9 | #15   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
-|    10 | #16   | 3         | In progress | [PR #32](https://github.com/Mohit1310/personal-dump/pull/32)          |
-|    11 | #17   | 3         | In progress | [Combined PR #33](https://github.com/Mohit1310/personal-dump/pull/33) |
-|    12 | #18   | 3         | In progress | [Combined PR #33](https://github.com/Mohit1310/personal-dump/pull/33) |
-|    13 | #19   | 3         | Todo        | —                                                                     |
+The evaluation corpus is intentionally small, deterministic, and synthetic;
+it does not measure production embedding quality, answer-model quality, or
+ranking behavior on a representative personal corpus. The calibrated overlap
+threshold is evidence for this corpus, not a universal relevance threshold.
+The system still has no keyword-only fallback, reranker, multi-user model,
+editing/version history for prior content, web search, CI enforcement, branch
+protection, or repository-wide lint/format remediation. Issues #2, #3, and #5
+and roadmap points 4–6 remain deferred by design.
