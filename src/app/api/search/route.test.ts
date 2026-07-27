@@ -25,7 +25,7 @@ const request = (body: unknown) =>
 		body: typeof body === "string" ? body : JSON.stringify(body),
 		headers: { "content-type": "application/json" },
 	});
-const results = [{ id: "chunk-1", content: "answer source", distance: 0.1 }];
+const results = [{ id: "chunk-1", content: "q answer source", distance: 0.1 }];
 
 describe("POST /api/search", () => {
 	beforeEach(() => {
@@ -64,7 +64,10 @@ describe("POST /api/search", () => {
 		expect(mocks.hybridSearch).toHaveBeenCalledWith("q", [1, 2], 8, undefined);
 		expect(mocks.generateAnswer).toHaveBeenCalledWith({
 			userQuery: "q",
-			chunks: results,
+			context: {
+				chunks: results,
+				contextBlock: "[Chunk 1 | chunk: chunk-1]\nq answer source",
+			},
 		});
 	});
 	it("passes normalized filters and supports no results", async () => {

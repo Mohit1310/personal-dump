@@ -41,8 +41,12 @@ vi.mock("ai", () => ({
 import { POST } from "./route";
 
 const chunks: SearchResult[] = [
-	{ id: "chunk-1", content: "Use pnpm test.", distance: 0.2 },
-	{ id: "chunk-2", content: "Use pnpm typecheck.", distance: 0.4 },
+	{ id: "chunk-1", content: "latest question: use pnpm test.", distance: 0.2 },
+	{
+		id: "chunk-2",
+		content: "latest question: use pnpm typecheck.",
+		distance: 0.4,
+	},
 ];
 
 function request(body: unknown): Request {
@@ -202,10 +206,10 @@ describe("POST /api/chat", () => {
 		expect(mocks.hybridSearch).not.toHaveBeenCalled();
 	});
 
-	it("uses only retrieved context and limits it to eight chunks", async () => {
+	it("uses the shared confidence-gated context", async () => {
 		const many = Array.from({ length: 10 }, (_, i) => ({
 			id: String(i),
-			content: `context-${i}`,
+			content: `question evidence-${i}`,
 			distance: i / 10,
 		}));
 		mocks.hybridSearch.mockResolvedValue(many);
@@ -213,10 +217,8 @@ describe("POST /api/chat", () => {
 			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
 		});
 		const system = latestStreamTextArgs().system as string;
-		expect(system).toContain("context-0");
-		expect(system).toContain("context-7");
-		expect(system).not.toContain("context-8");
-		expect(system).not.toContain("question");
+		expect(system).toContain("evidence-0");
+		expect(system).toContain("evidence-9");
 	});
 
 	it("continues without context when retrieval fails", async () => {
@@ -233,6 +235,18 @@ describe("POST /api/chat", () => {
 		mocks.hybridSearch.mockResolvedValue([]);
 		await responsePayload({
 			filters: { type: "error" },
+			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
+		});
+		expect(latestStreamTextArgs().system).toContain(
+			"no relevant context was found",
+		);
+	});
+
+	it("uses the normal no-context prompt when confidence removes weak results", async () => {
+		mocks.hybridSearch.mockResolvedValue([
+			{ id: "noise", content: "unrelated evidence", distance: 0.1 },
+		]);
+		await responsePayload({
 			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
 		});
 		expect(latestStreamTextArgs().system).toContain(

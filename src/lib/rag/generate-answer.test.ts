@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { buildRagContext } from "./context";
 
 const generateContent = vi.fn();
 const testEnv = vi.hoisted(() => ({
@@ -24,26 +25,31 @@ describe("generateAnswer", () => {
 	it("refuses empty context", async () => {
 		const { generateAnswer } = await import("./generate-answer");
 		expect(
-			await generateAnswer({ userQuery: "unknown", chunks: [] }),
+			await generateAnswer({
+				userQuery: "unknown",
+				context: buildRagContext("unknown", []),
+			}),
 		).toContain("couldn't find");
 		expect(generateContent).not.toHaveBeenCalled();
 	});
 
-	it("uses only the top eight chunks in the prompt", async () => {
+	it("uses the prepared, budgeted context in the prompt", async () => {
 		generateContent.mockResolvedValue({ text: "answer" });
 		const { generateAnswer } = await import("./generate-answer");
 		await generateAnswer({
 			userQuery: "question",
-			chunks: Array.from({ length: 10 }, (_, i) => chunk(String(i))),
+			context: buildRagContext(
+				"context",
+				Array.from({ length: 10 }, (_, i) => chunk(String(i), `context ${i}`)),
+			),
 		});
 		const request = generateContent.mock.calls[0]?.[0];
 		if (!request) throw new Error("Gemini request was not captured");
 		const prompt = request.contents?.[0]?.parts?.[0]?.text;
 		if (typeof prompt !== "string")
 			throw new Error("Gemini prompt was not captured");
-		expect(prompt).toContain("0");
-		expect(prompt).toContain("7");
-		expect(prompt).not.toContain("[Chunk 9]");
+		expect(prompt).toContain("[Chunk 1 | chunk: 0]");
+		expect(prompt).toContain("[Chunk 10 | chunk: 9]");
 		expect(prompt).toContain("User Question: question");
 	});
 
@@ -51,15 +57,24 @@ describe("generateAnswer", () => {
 		const { generateAnswer } = await import("./generate-answer");
 		generateContent.mockResolvedValueOnce({ text: "model answer" });
 		expect(
-			await generateAnswer({ userQuery: "q", chunks: [chunk("context")] }),
+			await generateAnswer({
+				userQuery: "q",
+				context: buildRagContext("q", [chunk("context", "q context")]),
+			}),
 		).toBe("model answer");
 		generateContent.mockResolvedValueOnce({});
 		expect(
-			await generateAnswer({ userQuery: "q", chunks: [chunk("context")] }),
+			await generateAnswer({
+				userQuery: "q",
+				context: buildRagContext("q", [chunk("context", "q context")]),
+			}),
 		).toBe("Failed to generate answer.");
 		generateContent.mockRejectedValueOnce(new Error("offline"));
 		await expect(
-			generateAnswer({ userQuery: "q", chunks: [chunk("context")] }),
+			generateAnswer({
+				userQuery: "q",
+				context: buildRagContext("q", [chunk("context", "q context")]),
+			}),
 		).rejects.toThrow("Failed to generate answer from Gemini");
 	});
 });

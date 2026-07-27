@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { generateAnswer } from "@/lib/rag/generate-answer";
+import { buildRagContext } from "@/lib/rag/context";
 import { retrievalFiltersSchema } from "@/lib/retrieval/filters";
 import {
 	DEFAULT_RETRIEVAL_TOP_K,
@@ -45,13 +46,14 @@ export async function POST(req: Request) {
 
 		// 2. Perform bounded hybrid retrieval.
 		const results = await hybridSearch(query, queryVector, topK, filters);
+		const context = buildRagContext(query, results);
 
 		// 3. Generate answer using RAG
-		const answer = await generateAnswer({ userQuery: query, chunks: results });
+		const answer = await generateAnswer({ userQuery: query, context });
 
 		return NextResponse.json({
 			answer,
-			sources: results,
+			sources: context.chunks,
 		});
 	} catch (error) {
 		console.error("Search API Error:", error);

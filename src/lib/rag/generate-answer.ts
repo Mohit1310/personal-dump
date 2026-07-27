@@ -1,17 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { env } from "@/env";
+import type { RagContext } from "./context";
 
 const client = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
-interface SearchResult {
-	id: string;
-	content: string;
-	distance: number;
-}
-
 interface GenerateAnswerParams {
 	userQuery: string;
-	chunks: SearchResult[];
+	context: RagContext;
 }
 
 /**
@@ -19,19 +14,13 @@ interface GenerateAnswerParams {
  */
 export async function generateAnswer({
 	userQuery,
-	chunks,
+	context,
 }: GenerateAnswerParams): Promise<string> {
-	if (chunks.length === 0) {
+	if (context.chunks.length === 0) {
 		return "I couldn't find any relevant information in your personal dump to answer this question.";
 	}
 
-	// 1. Build context block
-	const contextBlock = chunks
-		.slice(0, 8) // Limit to top 8 chunks
-		.map((chunk, i) => `[Chunk ${i + 1}]\n${chunk.content}`)
-		.join("\n---\n");
-
-	// 2. Define strict system rules
+	// Define strict system rules.
 	const systemPrompt = `
 You are a highly capable AI assistant helping a user explore their "personal dump" of notes, code, and documents.
 Your goal is to provide a clear, helpful, and accurate answer based **ONLY** on the context provided below.
@@ -47,11 +36,11 @@ STRICT RULES:
 8. If the user asks about an error, try to identify the fix based on the context.
 
 Retrieved Context:
-${contextBlock}
+${context.contextBlock}
 `.trim();
 
 	try {
-		// 3. Generate content
+		// Generate content.
 		const result = await client.models.generateContent({
 			model: "gemini-2.5-flash",
 			contents: [
