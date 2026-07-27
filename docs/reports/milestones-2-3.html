@@ -3,16 +3,16 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="color-scheme" content="light" />
+		<meta name="color-scheme" content="dark" />
 		<title>Personal dump — milestones 2–3 lab record</title>
 		<style>
 			:root {
-				--paper: #f5f3ed;
-				--ink: #18232c;
-				--navy: #173f5f;
-				--slate: #5d6970;
-				--line: #c6cdc8;
-				--amber: #c87020;
+				--paper: #10181c;
+				--ink: #e6eee9;
+				--navy: #9ac9df;
+				--slate: #a8b8b4;
+				--line: #3b4b50;
+				--amber: #f0ad61;
 			}
 			* {
 				box-sizing: border-box;
@@ -205,17 +205,17 @@
 					monospace;
 				letter-spacing: 0.04em;
 				text-transform: uppercase;
-				background: #e8e9e3;
+				background: #1e2c31;
 			}
 			.status {
 				white-space: nowrap;
 				font-weight: 700;
 			}
 			.done {
-				color: #1d6241;
+				color: #78d3a2;
 			}
 			.open {
-				color: #9b4b12;
+				color: #f3b56d;
 			}
 			.metrics td:not(:first-child),
 			.metrics th:not(:first-child) {
@@ -242,7 +242,7 @@
 			.callout {
 				border: 1px solid var(--navy);
 				padding: 18px;
-				background: #edf0ea;
+				background: #17242a;
 			}
 			.callout p:last-child {
 				margin-bottom: 0;
@@ -294,6 +294,12 @@
 			@media print {
 				html {
 					background: white;
+					--paper: #ffffff;
+					--ink: #18232c;
+					--navy: #173f5f;
+					--slate: #5d6970;
+					--line: #c6cdc8;
+					--amber: #c87020;
 					font-size: 10.5pt;
 				}
 				.sheet {
