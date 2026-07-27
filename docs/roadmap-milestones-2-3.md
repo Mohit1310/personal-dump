@@ -143,23 +143,64 @@ improves to 87.50%, no-answer accuracy remains 0%, and grounded-answer accuracy
 remains 100%. This isolates metadata-filter mechanics; it is not an embedding
 quality claim, and confidence gating remains deferred to issue #17.
 
+## Issue #16 hybrid retrieval
+
+Issue #16 keeps the existing `vectorSearch` function as the internal,
+vector-only comparison mode and adds `hybridSearch` in the same module. Both
+candidate paths apply the existing type/tag/source scope before their bounded
+ranking: pgvector orders semantic candidates by cosine distance and PostgreSQL
+full-text search tokenizes the query with the `simple` configuration, ranks
+matching chunk content with `ts_rank_cd`, and handles identifiers, commands,
+and error codes without an external search service. Each path returns at most
+`min(3 × K, 60)` candidates, with public `K` limited to 1–20. Reciprocal-rank
+fusion uses `1 / (60 + rank)` per path; equal fused scores break first by
+lexical rank, then vector rank, then chunk id. This preserves deterministic
+ordering while preferring exact-token evidence in the otherwise equal
+cross-ranked case.
+
+The pre-change vector-only corpus result was Recall@3 100.00%, MRR 68.75%,
+exact-token Recall@1 0.00% (both exact cases were rank 2), semantic Recall@3
+100.00%, no-answer accuracy 0.00%, and grounded-answer accuracy 100.00%.
+The deterministic hybrid result is Recall@3 100.00%, MRR 100.00%, exact-token
+Recall@1 100.00%, semantic Recall@3 100.00%, no-answer accuracy 0.00%, and
+grounded-answer accuracy 100.00%. No-answer behavior remains intentionally
+unchanged because confidence gating is issue #17.
+
+An `EXPLAIN (ANALYZE, BUFFERS)` of the full-text candidate query against the
+current test database (zero chunks) used a sequential scan and completed in
+0.10 ms. That does not justify a PostgreSQL GIN index or a migration for this
+query shape, so #16 adds neither. The query remains parameterized and bounded;
+an index can be reconsidered with a representative persisted corpus and a plan
+showing a measured benefit.
+
+Verification on branch `codex/issue-16-hybrid-retrieval` passed the focused
+fusion unit test (2 tests), hybrid pgvector integration file (25 tests), and
+deterministic evals (7 tests). It also passed the full unit suite (17 files,
+137 tests), the full PostgreSQL/pgvector integration suite twice in sequence
+(4 files, 43 tests per run), and all 12 Playwright tests. Strict typechecking,
+the CLI build, and the production build completed successfully. The ten changed
+files pass Oxfmt; their TypeScript files have zero Oxlint errors (373 existing
+rule warnings). Repository-wide Oxfmt remains a separate deferred #5 baseline:
+57 of 154 files are unformatted; Oxlint reports 18 errors and 3,772 warnings
+in unrelated legacy UI files, with no changes made to that deferred work.
+
 ## Verification matrix
 
-| Concern                       | Focused evidence                                                                                                                                                           | Full baseline command                         |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Migration safety and defaults | Temporary-schema PostgreSQL test applies the original migration, inserts a legacy row, applies the metadata migration, and checks content/backfill/defaults.               | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Validation and normalization  | Dump route unit cases cover invalid types/shapes, length/count limits, trimming, canonical tags, and deduplication.                                                        | `pnpm test`                                   |
-| Persistence and compatibility | Route unit assertions and real PostgreSQL route tests cover supplied metadata and content-only payloads.                                                                   | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Formatting                    | All changed files pass Oxfmt.                                                                                                                                              | `pnpm format:check`                           |
-| Lint delta                    | Compare the repository-wide result with the pre-change baseline of 2,874 warnings and 17 errors; no new errors are allowed.                                                | `pnpm lint`                                   |
-| Static correctness            | Strict TypeScript compilation.                                                                                                                                             | `pnpm typecheck`                              |
-| RAG regression                | Deterministic no-provider corpus validates labels, Recall@3, MRR, no-answer behavior, grounded fragments, repeatability, and actionable failures.                          | `pnpm test:eval`                              |
-| Retrieval baseline            | Real PostgreSQL/pgvector fixture reproduces the frozen 10-query rankings and all four metrics.                                                                             | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Retrieval metadata scope      | Route tests reject invalid scopes; real pgvector tests cover type/tag/source, combinations, empty matches, pre-limit filtering, stable ties, and unfiltered compatibility. | `TEST_DATABASE_URL=... pnpm test:integration` |
-| Chat knowledge scope          | Component and browser tests cover loading/error/empty options, keyboard selection, one scoped request, clear-all, all-knowledge fallback, and the 390px layout.            | `pnpm test` and `pnpm test:e2e`               |
-| Browser regression            | Full Playwright suite.                                                                                                                                                     | `pnpm test:e2e`                               |
-| CLI packaging                 | Compile the command-line entry point.                                                                                                                                      | `pnpm build:cli`                              |
-| Production packaging          | Next.js production compilation.                                                                                                                                            | `pnpm build`                                  |
+| Concern                       | Focused evidence                                                                                                                                                                     | Full baseline command                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Migration safety and defaults | Temporary-schema PostgreSQL test applies the original migration, inserts a legacy row, applies the metadata migration, and checks content/backfill/defaults.                         | `TEST_DATABASE_URL=... pnpm test:integration` |
+| Validation and normalization  | Dump route unit cases cover invalid types/shapes, length/count limits, trimming, canonical tags, and deduplication.                                                                  | `pnpm test`                                   |
+| Persistence and compatibility | Route unit assertions and real PostgreSQL route tests cover supplied metadata and content-only payloads.                                                                             | `TEST_DATABASE_URL=... pnpm test:integration` |
+| Formatting                    | All changed files pass Oxfmt.                                                                                                                                                        | `pnpm format:check`                           |
+| Lint delta                    | Compare the repository-wide result with the pre-change baseline of 2,874 warnings and 17 errors; no new errors are allowed.                                                          | `pnpm lint`                                   |
+| Static correctness            | Strict TypeScript compilation.                                                                                                                                                       | `pnpm typecheck`                              |
+| RAG regression                | Deterministic no-provider corpus validates labels, Recall@3, MRR, no-answer behavior, grounded fragments, repeatability, and actionable failures.                                    | `pnpm test:eval`                              |
+| Hybrid retrieval              | Real PostgreSQL/pgvector tests cover full-text exact tokens, semantic paraphrases, mixed fusion, scopes, stable ties, bounded input, no-result handling, and no-provider evaluation. | `TEST_DATABASE_URL=... pnpm test:integration` |
+| Retrieval metadata scope      | Route tests reject invalid scopes; real pgvector tests cover type/tag/source, combinations, empty matches, pre-limit filtering, stable ties, and unfiltered compatibility.           | `TEST_DATABASE_URL=... pnpm test:integration` |
+| Chat knowledge scope          | Component and browser tests cover loading/error/empty options, keyboard selection, one scoped request, clear-all, all-knowledge fallback, and the 390px layout.                      | `pnpm test` and `pnpm test:e2e`               |
+| Browser regression            | Full Playwright suite.                                                                                                                                                               | `pnpm test:e2e`                               |
+| CLI packaging                 | Compile the command-line entry point.                                                                                                                                                | `pnpm build:cli`                              |
+| Production packaging          | Next.js production compilation.                                                                                                                                                      | `pnpm build`                                  |
 
 ## Verification harness follow-up
 
@@ -215,7 +256,7 @@ fallback, with no change to Library filters or data-loading behavior.
 |     7 | #13   | 3         | In progress | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27)          |
 |     8 | #14   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
 |     9 | #15   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
-|    10 | #16   | 3         | Todo        | —                                                                     |
+|    10 | #16   | 3         | In progress | Branch `codex/issue-16-hybrid-retrieval`; PR pending                  |
 |    11 | #17   | 3         | Todo        | —                                                                     |
 |    12 | #18   | 3         | Todo        | —                                                                     |
 |    13 | #19   | 3         | Todo        | —                                                                     |

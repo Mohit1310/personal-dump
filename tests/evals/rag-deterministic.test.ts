@@ -6,10 +6,13 @@ import {
 	currentVectorBaselineMetrics,
 	EVAL_TOP_K,
 	evaluateCorpus,
+	hybridBaseline,
+	hybridBaselineMetrics,
 	metadataScopedVectorBaseline,
 	metadataScopedVectorMetrics,
 	recallAtK,
 	reciprocalRank,
+	taggedRecallAtK,
 	validateCorpus,
 } from "./schema";
 
@@ -66,6 +69,29 @@ describe("deterministic RAG evaluation", () => {
 			"favorite-color: expected no answer, retrieved [garden-note, user-profile-general, user-profile-identifier]",
 			"travel-visa: expected no answer, retrieved [garden-note, user-profile-general, user-profile-identifier]",
 		]);
+	});
+
+	it("improves exact-token ranking without regressing semantic retrieval", () => {
+		const vectorReport = evaluateCorpus(
+			corpus,
+			currentVectorBaseline,
+			EVAL_TOP_K,
+		);
+		const hybridReport = evaluateCorpus(corpus, hybridBaseline, EVAL_TOP_K);
+
+		expect(hybridReport.metrics).toEqual(hybridBaselineMetrics);
+		expect(
+			taggedRecallAtK(corpus, currentVectorBaseline, "exact-identifier", 1),
+		).toBe(0);
+		expect(taggedRecallAtK(corpus, hybridBaseline, "exact-identifier", 1)).toBe(
+			1,
+		);
+		expect(hybridReport.metrics.recallAtK).toBeGreaterThanOrEqual(
+			vectorReport.metrics.recallAtK,
+		);
+		expect(hybridReport.metrics.groundedAnswerAccuracy).toBeGreaterThanOrEqual(
+			vectorReport.metrics.groundedAnswerAccuracy,
+		);
 	});
 
 	it("evaluates metadata-scoped rankings without provider calls", () => {

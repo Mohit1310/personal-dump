@@ -12,7 +12,11 @@ import { env } from "@/env";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { DEFAULT_GROQ_MODEL, getGroqModelIds } from "@/lib/models/groq-models";
 import { retrievalFiltersSchema } from "@/lib/retrieval/filters";
-import { type SearchResult, vectorSearch } from "@/lib/retrieval/vector-search";
+import {
+	DEFAULT_RETRIEVAL_TOP_K,
+	hybridSearch,
+	type SearchResult,
+} from "@/lib/retrieval/vector-search";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -105,12 +109,17 @@ export async function POST(req: Request) {
 			.find((m) => m.role === "user");
 		const query = lastUserMessage ? getMessageText(lastUserMessage) : "";
 
-		// Perform vector search for RAG context
+		// Perform hybrid search for RAG context.
 		let chunks: SearchResult[] = [];
 		if (query) {
 			try {
 				const queryVector = await embedQuery(query);
-				chunks = await vectorSearch(queryVector, 8, filters);
+				chunks = await hybridSearch(
+					query,
+					queryVector,
+					DEFAULT_RETRIEVAL_TOP_K,
+					filters,
+				);
 			} catch (error) {
 				console.error("RAG retrieval failed:", error);
 				// Continue without context if retrieval fails

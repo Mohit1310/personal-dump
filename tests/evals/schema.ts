@@ -334,6 +334,54 @@ export const metadataScopedVectorMetrics: EvaluationMetrics = {
 	groundedAnswerAccuracy: 1,
 };
 
+export const hybridBaseline: Record<string, string[]> = {
+	"paraphrase-db-startup": [
+		"postgres-startup-fix",
+		"garden-note",
+		"user-profile-general",
+	],
+	"connection-error": [
+		"postgres-startup-fix",
+		"garden-note",
+		"user-profile-general",
+	],
+	"exact-pnpm-error": [
+		"pnpm-lockfile-error",
+		"pnpm-install-note",
+		"garden-note",
+	],
+	"overlapping-timeouts": ["timeout-current", "timeout-legacy", "garden-note"],
+	"type-scoped-deploy": [
+		"deploy-personal",
+		"auth-runbook",
+		"postgres-startup-fix",
+	],
+	"tag-scoped-timeout": ["timeout-legacy"],
+	"source-scoped-auth": ["auth-runbook"],
+	"exact-service-identifier": [
+		"user-profile-identifier",
+		"user-profile-general",
+		"garden-note",
+	],
+	"favorite-color": [
+		"garden-note",
+		"user-profile-general",
+		"user-profile-identifier",
+	],
+	"travel-visa": [
+		"garden-note",
+		"user-profile-general",
+		"user-profile-identifier",
+	],
+};
+
+export const hybridBaselineMetrics: EvaluationMetrics = {
+	recallAtK: 1,
+	meanReciprocalRank: 1,
+	noAnswerAccuracy: 0,
+	groundedAnswerAccuracy: 1,
+};
+
 const chunkMatchesScope = (
 	chunk: EvalChunk,
 	scope: RetrievalFilters,
@@ -361,6 +409,24 @@ export function reciprocalRank(
 ): number {
 	const index = retrieved.findIndex((id) => relevant.includes(id));
 	return index < 0 ? 0 : 1 / (index + 1);
+}
+
+export function taggedRecallAtK(
+	evalCorpus: EvalCorpus,
+	rankings: Record<string, string[]>,
+	tag: string,
+	topK: number,
+): number {
+	const taggedCases = evalCorpus.cases.filter((item) =>
+		item.tags.includes(tag),
+	);
+	return (
+		taggedCases.reduce(
+			(total, item) =>
+				total + recallAtK(rankings[item.id] ?? [], item.relevantChunkIds, topK),
+			0,
+		) / taggedCases.length
+	);
 }
 
 export function validateCorpus(evalCorpus: EvalCorpus): void {

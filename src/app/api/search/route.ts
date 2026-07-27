@@ -3,11 +3,21 @@ import { z } from "zod";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { generateAnswer } from "@/lib/rag/generate-answer";
 import { retrievalFiltersSchema } from "@/lib/retrieval/filters";
-import { vectorSearch } from "@/lib/retrieval/vector-search";
+import {
+	DEFAULT_RETRIEVAL_TOP_K,
+	hybridSearch,
+	MAX_RETRIEVAL_TOP_K,
+} from "@/lib/retrieval/vector-search";
 
 const searchSchema = z.object({
 	query: z.string().trim().min(1, "Query is required"),
-	topK: z.number().int().positive().optional().default(8),
+	topK: z
+		.number()
+		.int()
+		.min(1)
+		.max(MAX_RETRIEVAL_TOP_K)
+		.optional()
+		.default(DEFAULT_RETRIEVAL_TOP_K),
 	filters: retrievalFiltersSchema.optional(),
 });
 
@@ -33,8 +43,8 @@ export async function POST(req: Request) {
 		// 1. Generate embedding for the query
 		const queryVector = await embedQuery(query);
 
-		// 2. Perform vector search
-		const results = await vectorSearch(queryVector, topK, filters);
+		// 2. Perform bounded hybrid retrieval.
+		const results = await hybridSearch(query, queryVector, topK, filters);
 
 		// 3. Generate answer using RAG
 		const answer = await generateAnswer({ userQuery: query, chunks: results });

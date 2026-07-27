@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 	streamText: vi.fn(),
 	embedQuery: vi.fn(),
 	getGroqModelIds: vi.fn(),
-	vectorSearch: vi.fn(),
+	hybridSearch: vi.fn(),
 	modelFactory: vi.fn(),
 	streamTextArgs: [] as Array<Record<string, unknown>>,
 }));
@@ -28,7 +28,8 @@ vi.mock("@/lib/models/groq-models", () => ({
 	getGroqModelIds: mocks.getGroqModelIds,
 }));
 vi.mock("@/lib/retrieval/vector-search", () => ({
-	vectorSearch: mocks.vectorSearch,
+	DEFAULT_RETRIEVAL_TOP_K: 8,
+	hybridSearch: mocks.hybridSearch,
 }));
 vi.mock("ai", () => ({
 	convertToModelMessages: mocks.convertToModelMessages,
@@ -126,7 +127,7 @@ describe("POST /api/chat", () => {
 		mocks.streamTextArgs.length = 0;
 		mocks.getGroqModelIds.mockResolvedValue(["model-a", "model-b"]);
 		mocks.embedQuery.mockResolvedValue([1, 2, 3]);
-		mocks.vectorSearch.mockResolvedValue(chunks);
+		mocks.hybridSearch.mockResolvedValue(chunks);
 		setupStream();
 	});
 
@@ -151,8 +152,8 @@ describe("POST /api/chat", () => {
 			],
 		});
 		expect(mocks.embedQuery).toHaveBeenCalledWith("latest");
-		expect(mocks.vectorSearch).toHaveBeenCalledTimes(1);
-		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2, 3], 8, {
+		expect(mocks.hybridSearch).toHaveBeenCalledTimes(1);
+		expect(mocks.hybridSearch).toHaveBeenCalledWith("latest", [1, 2, 3], 8, {
 			type: "solution",
 			tag: "database-setup",
 			source: "Shell history",
@@ -198,7 +199,7 @@ describe("POST /api/chat", () => {
 		});
 		expect(mocks.modelFactory).toHaveBeenCalledWith("model-a");
 		expect(mocks.embedQuery).not.toHaveBeenCalled();
-		expect(mocks.vectorSearch).not.toHaveBeenCalled();
+		expect(mocks.hybridSearch).not.toHaveBeenCalled();
 	});
 
 	it("uses only retrieved context and limits it to eight chunks", async () => {
@@ -207,7 +208,7 @@ describe("POST /api/chat", () => {
 			content: `context-${i}`,
 			distance: i / 10,
 		}));
-		mocks.vectorSearch.mockResolvedValue(many);
+		mocks.hybridSearch.mockResolvedValue(many);
 		await responsePayload({
 			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
 		});
@@ -229,7 +230,7 @@ describe("POST /api/chat", () => {
 	});
 
 	it("uses the normal no-context prompt for an empty scoped match", async () => {
-		mocks.vectorSearch.mockResolvedValue([]);
+		mocks.hybridSearch.mockResolvedValue([]);
 		await responsePayload({
 			filters: { type: "error" },
 			messages: [{ role: "user", parts: [{ type: "text", text: "question" }] }],
