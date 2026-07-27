@@ -64,7 +64,7 @@ nearest chunks for both no-answer queries. The delivered system now provides:
 | 3            | [#16](https://github.com/Mohit1310/personal-dump/issues/16) hybrid retrieval    | Closed            | [PR #32](https://github.com/Mohit1310/personal-dump/pull/32), merged          |
 | 3            | [#17](https://github.com/Mohit1310/personal-dump/issues/17) confidence gate     | Closed            | [PR #33](https://github.com/Mohit1310/personal-dump/pull/33), merged with #18 |
 | 3            | [#18](https://github.com/Mohit1310/personal-dump/issues/18) evidence budget     | Closed            | [PR #33](https://github.com/Mohit1310/personal-dump/pull/33), merged with #17 |
-| 3            | [#19](https://github.com/Mohit1310/personal-dump/issues/19) achievement report  | Open, In Progress | This report PR: open review                                                   |
+| 3            | [#19](https://github.com/Mohit1310/personal-dump/issues/19) achievement report  | Open, In Progress | [PR #34](https://github.com/Mohit1310/personal-dump/pull/34), open review     |
 
 ## Architecture decisions and migrations
 
