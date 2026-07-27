@@ -183,6 +183,7 @@ files pass Oxfmt; their TypeScript files have zero Oxlint errors (373 existing
 rule warnings). Repository-wide Oxfmt remains a separate deferred #5 baseline:
 57 of 154 files are unformatted; Oxlint reports 18 errors and 3,772 warnings
 in unrelated legacy UI files, with no changes made to that deferred work.
+Delivery: [PR #32](https://github.com/Mohit1310/personal-dump/pull/32).
 
 ## Verification matrix
 
@@ -256,7 +257,7 @@ fallback, with no change to Library filters or data-loading behavior.
 |     7 | #13   | 3         | In progress | [PR #27](https://github.com/Mohit1310/personal-dump/pull/27)          |
 |     8 | #14   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
 |     9 | #15   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
-|    10 | #16   | 3         | In progress | Branch `codex/issue-16-hybrid-retrieval`; PR pending                  |
+|    10 | #16   | 3         | In progress | [PR #32](https://github.com/Mohit1310/personal-dump/pull/32)          |
 |    11 | #17   | 3         | Todo        | —                                                                     |
 |    12 | #18   | 3         | Todo        | —                                                                     |
 |    13 | #19   | 3         | Todo        | —                                                                     |
