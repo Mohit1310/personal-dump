@@ -2,6 +2,7 @@ import {
 	type RetrievalFilters,
 	retrievalFiltersSchema,
 } from "../../src/lib/retrieval/filters";
+import { filterRelevantResults, tokenOverlap } from "../../src/lib/rag/context";
 
 export interface EvalChunk {
 	id: string;
@@ -33,6 +34,8 @@ export interface EvalCorpus {
 export interface EvaluationMetrics {
 	recallAtK: number;
 	meanReciprocalRank: number;
+	exactTokenRecallAtK: number;
+	semanticRecallAtK: number;
 	noAnswerAccuracy: number;
 	groundedAnswerAccuracy: number;
 }
@@ -313,6 +316,8 @@ export const currentVectorBaseline: Record<string, string[]> = {
 export const currentVectorBaselineMetrics: EvaluationMetrics = {
 	recallAtK: 1,
 	meanReciprocalRank: 5.5 / 8,
+	exactTokenRecallAtK: 1,
+	semanticRecallAtK: 1,
 	noAnswerAccuracy: 0,
 	groundedAnswerAccuracy: 1,
 };
@@ -330,6 +335,8 @@ export const metadataScopedVectorBaseline: Record<string, string[]> = {
 export const metadataScopedVectorMetrics: EvaluationMetrics = {
 	recallAtK: 1,
 	meanReciprocalRank: 7 / 8,
+	exactTokenRecallAtK: 1,
+	semanticRecallAtK: 1,
 	noAnswerAccuracy: 0,
 	groundedAnswerAccuracy: 1,
 };
@@ -378,7 +385,65 @@ export const hybridBaseline: Record<string, string[]> = {
 export const hybridBaselineMetrics: EvaluationMetrics = {
 	recallAtK: 1,
 	meanReciprocalRank: 1,
+	exactTokenRecallAtK: 1,
+	semanticRecallAtK: 1,
 	noAnswerAccuracy: 0,
+	groundedAnswerAccuracy: 1,
+};
+
+export function confidenceCalibration(
+	evalCorpus: EvalCorpus,
+	rankings: Record<string, string[]>,
+): { minimumRelevantOverlap: number; maximumIrrelevantOverlap: number } {
+	const chunks = new Map(evalCorpus.chunks.map((chunk) => [chunk.id, chunk]));
+	const positiveOverlaps = evalCorpus.cases
+		.filter(({ mustRefuse }) => !mustRefuse)
+		.flatMap((item) =>
+			item.relevantChunkIds.map((id) =>
+				tokenOverlap(item.query, chunks.get(id)?.content ?? ""),
+			),
+		);
+	const negativeOverlaps = evalCorpus.cases
+		.filter(({ mustRefuse }) => mustRefuse)
+		.flatMap((item) =>
+			(rankings[item.id] ?? []).map((id) =>
+				tokenOverlap(item.query, chunks.get(id)?.content ?? ""),
+			),
+		);
+
+	return {
+		minimumRelevantOverlap: Math.min(...positiveOverlaps),
+		maximumIrrelevantOverlap: Math.max(...negativeOverlaps),
+	};
+}
+
+export function applyConfidenceGate(
+	evalCorpus: EvalCorpus,
+	rankings: Record<string, string[]>,
+): Record<string, string[]> {
+	const chunks = new Map(evalCorpus.chunks.map((chunk) => [chunk.id, chunk]));
+	return Object.fromEntries(
+		evalCorpus.cases.map((item) => [
+			item.id,
+			filterRelevantResults(
+				item.query,
+				(rankings[item.id] ?? []).flatMap((id) => {
+					const chunk = chunks.get(id);
+					return chunk ? [{ id, content: chunk.content, distance: 0 }] : [];
+				}),
+			).map(({ id }) => id),
+		]),
+	);
+}
+
+export const hybridGatedBaseline = applyConfidenceGate(corpus, hybridBaseline);
+
+export const hybridGatedBaselineMetrics: EvaluationMetrics = {
+	recallAtK: 1,
+	meanReciprocalRank: 1,
+	exactTokenRecallAtK: 1,
+	semanticRecallAtK: 1,
+	noAnswerAccuracy: 1,
 	groundedAnswerAccuracy: 1,
 };
 
@@ -536,6 +601,18 @@ export function evaluateCorpus(
 	const reciprocalRanks = positiveCases.map((item) =>
 		reciprocalRank(rankings[item.id]!.slice(0, topK), item.relevantChunkIds),
 	);
+	const exactTokenRecallAtK = taggedRecallAtK(
+		evalCorpus,
+		rankings,
+		"exact-identifier",
+		topK,
+	);
+	const semanticRecallAtK = taggedRecallAtK(
+		evalCorpus,
+		rankings,
+		"paraphrase",
+		topK,
+	);
 
 	const noAnswerResults = negativeCases.map((item) => {
 		const retrieved = rankings[item.id]!.slice(0, topK);
@@ -577,6 +654,8 @@ export function evaluateCorpus(
 		metrics: {
 			recallAtK: mean(recalls),
 			meanReciprocalRank: mean(reciprocalRanks),
+			exactTokenRecallAtK,
+			semanticRecallAtK,
 			noAnswerAccuracy: mean(noAnswerResults),
 			groundedAnswerAccuracy: mean(groundedResults),
 		},

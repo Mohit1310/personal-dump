@@ -10,6 +10,7 @@ import {
 } from "vitest";
 import { db } from "@/server/db";
 import { hybridSearch, vectorSearch } from "@/lib/retrieval/vector-search";
+import { filterRelevantResults } from "@/lib/rag/context";
 import {
 	corpus,
 	currentVectorBaseline,
@@ -17,6 +18,7 @@ import {
 	EVAL_TOP_K,
 	evaluateCorpus,
 	hybridBaselineMetrics,
+	hybridGatedBaselineMetrics,
 	metadataScopedVectorBaseline,
 	metadataScopedVectorMetrics,
 } from "../evals/schema";
@@ -365,22 +367,34 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 		}
 
 		const rankings: Record<string, string[]> = {};
+		const gatedRankings: Record<string, string[]> = {};
 		for (const item of corpus.cases) {
-			rankings[item.id] = (
-				await hybridSearch(
-					item.query,
-					expandVector(item.queryEmbedding),
-					EVAL_TOP_K,
-					item.scope,
-				)
-			).map(({ id }) => id.replace("hybrid-", ""));
+			const results = await hybridSearch(
+				item.query,
+				expandVector(item.queryEmbedding),
+				EVAL_TOP_K,
+				item.scope,
+			);
+			rankings[item.id] = results.map(({ id }) => id.replace("hybrid-", ""));
+			gatedRankings[item.id] = filterRelevantResults(item.query, results).map(
+				({ id }) => id.replace("hybrid-", ""),
+			);
 		}
 
 		const report = evaluateCorpus(corpus, rankings, EVAL_TOP_K);
+		expect(gatedRankings, JSON.stringify(gatedRankings, null, 2)).toMatchObject(
+			{
+				"favorite-color": [],
+				"travel-visa": [],
+			},
+		);
 		expect(
 			report.metrics,
 			`Hybrid pgvector rankings changed:\n${JSON.stringify(rankings, null, 2)}`,
 		).toEqual(hybridBaselineMetrics);
+		expect(evaluateCorpus(corpus, gatedRankings, EVAL_TOP_K).metrics).toEqual(
+			hybridGatedBaselineMetrics,
+		);
 		expect(rankings["exact-pnpm-error"]![0]).toBe("pnpm-lockfile-error");
 		expect(rankings["exact-service-identifier"]![0]).toBe(
 			"user-profile-identifier",

@@ -12,10 +12,10 @@ import { env } from "@/env";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { DEFAULT_GROQ_MODEL, getGroqModelIds } from "@/lib/models/groq-models";
 import { retrievalFiltersSchema } from "@/lib/retrieval/filters";
+import { buildRagContext, type RagContext } from "@/lib/rag/context";
 import {
 	DEFAULT_RETRIEVAL_TOP_K,
 	hybridSearch,
-	type SearchResult,
 } from "@/lib/retrieval/vector-search";
 
 // Allow streaming responses up to 30 seconds
@@ -32,15 +32,10 @@ const model = createGroq({
 /**
  * Builds a RAG system prompt with retrieved context chunks.
  */
-function buildSystemPrompt(chunks: SearchResult[]): string {
-	if (chunks.length === 0) {
+function buildSystemPrompt(context: RagContext): string {
+	if (context.chunks.length === 0) {
 		return `You are a helpful AI assistant. The user is asking about their personal dump of notes, code, and documents, but no relevant context was found. Politely let them know you couldn't find relevant information.`;
 	}
-
-	const contextBlock = chunks
-		.slice(0, 8)
-		.map((chunk, i) => `[Chunk ${i + 1}]\n${chunk.content}`)
-		.join("\n---\n");
 
 	return `
 You are a highly capable AI assistant helping a user explore their "personal dump" of notes, code, and documents.
@@ -57,7 +52,7 @@ STRICT RULES:
 8. If the user asks about an error, try to identify the fix based on the context.
 
 Retrieved Context:
-${contextBlock}
+${context.contextBlock}
 `.trim();
 }
 
@@ -110,16 +105,17 @@ export async function POST(req: Request) {
 		const query = lastUserMessage ? getMessageText(lastUserMessage) : "";
 
 		// Perform hybrid search for RAG context.
-		let chunks: SearchResult[] = [];
+		let context: RagContext = { chunks: [], contextBlock: "" };
 		if (query) {
 			try {
 				const queryVector = await embedQuery(query);
-				chunks = await hybridSearch(
+				const results = await hybridSearch(
 					query,
 					queryVector,
 					DEFAULT_RETRIEVAL_TOP_K,
 					filters,
 				);
+				context = buildRagContext(query, results);
 			} catch (error) {
 				console.error("RAG retrieval failed:", error);
 				// Continue without context if retrieval fails
@@ -131,7 +127,7 @@ export async function POST(req: Request) {
 				// Stream the LLM response first
 				const result = streamText({
 					model: model(selectedModel),
-					system: buildSystemPrompt(chunks),
+					system: buildSystemPrompt(context),
 					messages: await convertToModelMessages(messages),
 				});
 
@@ -145,12 +141,12 @@ export async function POST(req: Request) {
 				}
 
 				// Now write source-document parts (added to the same message after text)
-				for (const chunk of chunks) {
+				for (const chunk of context.chunks) {
 					writer.write({
 						type: "source-document",
 						sourceId: chunk.id,
 						mediaType: "text/plain",
-						title: `Chunk ${chunks.indexOf(chunk) + 1}`,
+						title: `Chunk ${context.chunks.indexOf(chunk) + 1}`,
 						providerMetadata: {
 							custom: {
 								content: chunk.content,

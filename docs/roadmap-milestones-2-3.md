@@ -185,6 +185,52 @@ rule warnings). Repository-wide Oxfmt remains a separate deferred #5 baseline:
 in unrelated legacy UI files, with no changes made to that deferred work.
 Delivery: [PR #32](https://github.com/Mohit1310/personal-dump/pull/32).
 
+## Issues #17 and #18 grounded context
+
+Issues [#17](https://github.com/Mohit1310/personal-dump/issues/17) and
+[#18](https://github.com/Mohit1310/personal-dump/issues/18) are implemented
+together on `codex/issues-17-18-grounded-context`, stacked on
+`codex/issue-16-hybrid-retrieval` in
+[PR #33](https://github.com/Mohit1310/personal-dump/pull/33).
+
+The shared RAG preparation step runs after hybrid retrieval and before either
+chat/search prompt construction or source emission. It keeps a result only
+when it shares at least one significant normalized token with the query. The
+deterministic hybrid distribution establishes that boundary: every labeled
+relevant chunk had at least one shared significant token, while every returned
+candidate for the two irrelevant queries had zero. Common query words are
+excluded before comparison so incidental matches such as `is` and `do` do not
+become evidence. The threshold is the named, directly tested
+`MIN_RELEVANT_TOKEN_OVERLAP = 1`; it is a corpus-calibrated confidence gate,
+not a cosine-distance cutoff.
+
+The same preparation step removes identical content and chunks whose normalized
+token overlap reaches `0.8` of the smaller token set, keeping the first/highest
+ranked occurrence and stable source order. It formats each retained whole chunk
+with its chunk id and, when returned by retrieval, dump id. A deterministic
+12,000-character budget includes headers and separators. Rather than truncate,
+the assembler skips an overflowing chunk and can retain later whole evidence;
+this protects fenced code and citation attribution. Character budgeting is
+chosen over provider/model-specific tokenization because the application has
+both Gemini and Groq answer paths and needs one deterministic, dependency-free
+limit.
+
+The #16 hybrid baseline was Recall@3 100.00%, MRR 100.00%, exact-token
+Recall@1 100.00%, semantic Recall@3 100.00%, grounded-answer accuracy 100.00%,
+and no-answer accuracy 0.00%. After confidence gating it is Recall@3 100.00%,
+MRR 100.00%, exact-token Recall@1 100.00%, semantic Recall@3 100.00%,
+grounded-answer accuracy 100.00%, and no-answer accuracy 100.00%. The
+deterministic evaluator records both states without provider calls; the real
+PostgreSQL/pgvector fixture independently verifies the gated no-answer cases.
+
+Verification for #17/#18 passed focused confidence/context, answer, and API
+tests (4 files, 39 tests); deterministic evaluations (1 file, 8 tests); real
+PostgreSQL/pgvector integration (4 files, 43 tests); the full unit suite (18
+files, 143 tests); and the full integration suite twice consecutively (4 files,
+43 tests each). Playwright ran 12 tests, and strict typecheck, CLI build, and
+production build completed. Changed files pass Oxfmt and have zero Oxlint
+errors. Repository-wide format/lint debt remains deferred to #5.
+
 ## Verification matrix
 
 | Concern                       | Focused evidence                                                                                                                                                                     | Full baseline command                         |
@@ -258,6 +304,6 @@ fallback, with no change to Library filters or data-loading behavior.
 |     8 | #14   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
 |     9 | #15   | 3         | In progress | [Combined PR #31](https://github.com/Mohit1310/personal-dump/pull/31) |
 |    10 | #16   | 3         | In progress | [PR #32](https://github.com/Mohit1310/personal-dump/pull/32)          |
-|    11 | #17   | 3         | Todo        | —                                                                     |
-|    12 | #18   | 3         | Todo        | —                                                                     |
+|    11 | #17   | 3         | In progress | [Combined PR #33](https://github.com/Mohit1310/personal-dump/pull/33) |
+|    12 | #18   | 3         | In progress | [Combined PR #33](https://github.com/Mohit1310/personal-dump/pull/33) |
 |    13 | #19   | 3         | Todo        | —                                                                     |

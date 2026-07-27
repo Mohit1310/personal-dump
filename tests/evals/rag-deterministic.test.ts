@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
 	assertMinimumMetrics,
+	applyConfidenceGate,
+	confidenceCalibration,
 	corpus,
 	currentVectorBaseline,
 	currentVectorBaselineMetrics,
@@ -8,6 +10,8 @@ import {
 	evaluateCorpus,
 	hybridBaseline,
 	hybridBaselineMetrics,
+	hybridGatedBaseline,
+	hybridGatedBaselineMetrics,
 	metadataScopedVectorBaseline,
 	metadataScopedVectorMetrics,
 	recallAtK,
@@ -91,6 +95,26 @@ describe("deterministic RAG evaluation", () => {
 		);
 		expect(hybridReport.metrics.groundedAnswerAccuracy).toBeGreaterThanOrEqual(
 			vectorReport.metrics.groundedAnswerAccuracy,
+		);
+	});
+
+	it("calibrates confidence from the hybrid distribution and preserves grounded retrieval", () => {
+		const calibration = confidenceCalibration(corpus, hybridBaseline);
+		const report = evaluateCorpus(corpus, hybridGatedBaseline, EVAL_TOP_K);
+
+		expect(calibration).toEqual({
+			minimumRelevantOverlap: 1,
+			maximumIrrelevantOverlap: 0,
+		});
+		expect(applyConfidenceGate(corpus, hybridBaseline)).toEqual(
+			hybridGatedBaseline,
+		);
+		expect(report.metrics).toEqual(hybridGatedBaselineMetrics);
+		expect(report.metrics.recallAtK).toBeGreaterThanOrEqual(
+			hybridBaselineMetrics.recallAtK,
+		);
+		expect(report.metrics.groundedAnswerAccuracy).toBeGreaterThanOrEqual(
+			hybridBaselineMetrics.groundedAnswerAccuracy,
 		);
 	});
 

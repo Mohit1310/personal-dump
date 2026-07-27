@@ -3,6 +3,7 @@ import { type RetrievalFilters, retrievalFiltersSchema } from "./filters";
 
 export interface SearchResult {
 	id: string;
+	dumpId?: string;
 	content: string;
 	distance: number;
 }
@@ -35,6 +36,7 @@ const searchVectorCandidates = async (
 		`
       SELECT
         c.id,
+		c."dumpId" AS "dumpId",
         c.content,
         (e.vector <=> $1::vector) AS distance
       FROM "Embedding" e
@@ -76,6 +78,7 @@ const searchLexicalCandidates = async (
       )
       SELECT
         c.id,
+		c."dumpId" AS "dumpId",
         c.content,
         (e.vector <=> $2::vector) AS distance
       FROM search_query q
