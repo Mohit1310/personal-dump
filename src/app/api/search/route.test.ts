@@ -2,14 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	embedQuery: vi.fn(),
-	vectorSearch: vi.fn(),
+	hybridSearch: vi.fn(),
 	generateAnswer: vi.fn(),
 }));
 vi.mock("@/lib/embeddings/embed-query", () => ({
 	embedQuery: mocks.embedQuery,
 }));
 vi.mock("@/lib/retrieval/vector-search", () => ({
-	vectorSearch: mocks.vectorSearch,
+	DEFAULT_RETRIEVAL_TOP_K: 8,
+	MAX_RETRIEVAL_TOP_K: 20,
+	hybridSearch: mocks.hybridSearch,
 }));
 vi.mock("@/lib/rag/generate-answer", () => ({
 	generateAnswer: mocks.generateAnswer,
@@ -29,7 +31,7 @@ describe("POST /api/search", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mocks.embedQuery.mockResolvedValue([1, 2]);
-		mocks.vectorSearch.mockResolvedValue(results);
+		mocks.hybridSearch.mockResolvedValue(results);
 		mocks.generateAnswer.mockResolvedValue("formatted answer");
 	});
 	it.each([undefined, null, "", "   ", 42])(
@@ -38,6 +40,7 @@ describe("POST /api/search", () => {
 	);
 	it("rejects invalid topK and malformed JSON", async () => {
 		expect((await POST(request({ query: "q", topK: 0 }))).status).toBe(400);
+		expect((await POST(request({ query: "q", topK: 21 }))).status).toBe(400);
 		expect((await POST(request({ query: "q", topK: "8" }))).status).toBe(400);
 		expect((await POST(request("{"))).status).toBe(400);
 	});
@@ -58,14 +61,14 @@ describe("POST /api/search", () => {
 			sources: results,
 		});
 		expect(mocks.embedQuery).toHaveBeenCalledWith("q");
-		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2], 8, undefined);
+		expect(mocks.hybridSearch).toHaveBeenCalledWith("q", [1, 2], 8, undefined);
 		expect(mocks.generateAnswer).toHaveBeenCalledWith({
 			userQuery: "q",
 			chunks: results,
 		});
 	});
 	it("passes normalized filters and supports no results", async () => {
-		mocks.vectorSearch.mockResolvedValue([]);
+		mocks.hybridSearch.mockResolvedValue([]);
 		mocks.generateAnswer.mockResolvedValue("no results");
 		const response = await POST(
 			request({
@@ -83,13 +86,13 @@ describe("POST /api/search", () => {
 			answer: "no results",
 			sources: [],
 		});
-		expect(mocks.vectorSearch).toHaveBeenCalledWith([1, 2], 3, {
+		expect(mocks.hybridSearch).toHaveBeenCalledWith("q", [1, 2], 3, {
 			type: "solution",
 			tag: "database-setup",
 			source: "Shell history",
 		});
 	});
-	it.each(["embedQuery", "vectorSearch", "generateAnswer"])(
+	it.each(["embedQuery", "hybridSearch", "generateAnswer"])(
 		"returns 500 when %s fails",
 		async (dependency) => {
 			mocks[dependency as keyof typeof mocks].mockRejectedValueOnce(

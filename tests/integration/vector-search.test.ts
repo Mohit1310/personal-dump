@@ -9,13 +9,14 @@ import {
 	it,
 } from "vitest";
 import { db } from "@/server/db";
-import { vectorSearch } from "@/lib/retrieval/vector-search";
+import { hybridSearch, vectorSearch } from "@/lib/retrieval/vector-search";
 import {
 	corpus,
 	currentVectorBaseline,
 	currentVectorBaselineMetrics,
 	EVAL_TOP_K,
 	evaluateCorpus,
+	hybridBaselineMetrics,
 	metadataScopedVectorBaseline,
 	metadataScopedVectorMetrics,
 } from "../evals/schema";
@@ -116,6 +117,69 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 		]);
 	});
 
+	it("ranks exact error tokens above a stronger semantic-only vector match", async () => {
+		const exactId = await seedChunk(
+			dumpIds[0]!,
+			"ERR_PNPM_OUTDATED_LOCKFILE: run `pnpm install --frozen-lockfile=false`.",
+			vector(1),
+			0,
+		);
+		await seedChunk(dumpIds[1]!, "General CI setup notes.", vector(0), 0);
+
+		const results = await hybridSearch(
+			"How do I fix ERR_PNPM_OUTDATED_LOCKFILE?",
+			vector(0),
+			2,
+		);
+
+		expect(results[0]).toMatchObject({ id: exactId });
+	});
+
+	it("keeps semantic-only paraphrases retrievable", async () => {
+		const semanticId = await seedChunk(
+			dumpIds[0]!,
+			"Start PostgreSQL before running the app.",
+			vector(0),
+			0,
+		);
+		await seedChunk(dumpIds[1]!, "Unrelated garden note.", vector(1), 0);
+
+		const results = await hybridSearch(
+			"What needs to be running before the app can reach my local DB?",
+			vector(0),
+			1,
+		);
+
+		expect(results[0]).toMatchObject({ id: semanticId });
+	});
+
+	it("applies metadata scope to both hybrid candidate rankings", async () => {
+		await seedChunk(
+			dumpIds[0]!,
+			"ERR_SCOPE_TOKEN: scoped solution.",
+			vector(1),
+			0,
+		);
+		const scopedId = await seedChunk(
+			dumpIds[1]!,
+			"ERR_SCOPE_TOKEN: scoped error.",
+			vector(0),
+			0,
+		);
+
+		const results = await hybridSearch("ERR_SCOPE_TOKEN", vector(1), 2, {
+			type: "error",
+			tag: "frontend",
+			source: "browser console",
+		});
+
+		expect(results).toEqual([expect.objectContaining({ id: scopedId })]);
+	});
+
+	it("returns no hybrid results when neither candidate path matches", async () => {
+		expect(await hybridSearch("missing token", vector(2))).toEqual([]);
+	});
+
 	it.each([
 		["type", { type: "solution" as const }, ["first"]],
 		["tag", { tag: "frontend" }, ["second"]],
@@ -182,6 +246,21 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 			"tie one",
 			"tie two",
 		]);
+	});
+
+	it("returns stable lexical ties and validates bounded hybrid input", async () => {
+		await seedChunk(dumpIds[0]!, "TIE_TOKEN one", vector(3), 0, "hybrid-tie-b");
+		await seedChunk(dumpIds[0]!, "TIE_TOKEN two", vector(4), 1, "hybrid-tie-a");
+
+		expect(
+			(await hybridSearch("TIE_TOKEN", vector(5), 2)).map(({ id }) => id),
+		).toEqual(["hybrid-tie-a", "hybrid-tie-b"]);
+		await expect(hybridSearch("TIE_TOKEN", vector(5), 0)).rejects.toThrow(
+			"Failed to perform hybrid search",
+		);
+		await expect(hybridSearch("TIE_TOKEN", vector(5), 21)).rejects.toThrow(
+			"Failed to perform hybrid search",
+		);
 	});
 
 	it("matches the deterministic metadata-scoped evaluation cases", async () => {
@@ -262,6 +341,50 @@ describe("vectorSearch against PostgreSQL and pgvector", () => {
 			report.metrics,
 			`Metric failures:\n${report.failures.join("\n")}`,
 		).toEqual(currentVectorBaselineMetrics);
+	});
+
+	it("matches hybrid eval thresholds without provider calls", async () => {
+		for (const chunk of corpus.chunks) {
+			const dumpId = `hybrid-eval-dump-${chunk.id}`;
+			dumpIds.push(dumpId);
+			await db.dump.create({
+				data: {
+					id: dumpId,
+					content: chunk.content,
+					title: chunk.id,
+					...chunk.metadata,
+				},
+			});
+			await seedChunk(
+				dumpId,
+				chunk.content,
+				expandVector(chunk.embedding),
+				0,
+				`hybrid-${chunk.id}`,
+			);
+		}
+
+		const rankings: Record<string, string[]> = {};
+		for (const item of corpus.cases) {
+			rankings[item.id] = (
+				await hybridSearch(
+					item.query,
+					expandVector(item.queryEmbedding),
+					EVAL_TOP_K,
+					item.scope,
+				)
+			).map(({ id }) => id.replace("hybrid-", ""));
+		}
+
+		const report = evaluateCorpus(corpus, rankings, EVAL_TOP_K);
+		expect(
+			report.metrics,
+			`Hybrid pgvector rankings changed:\n${JSON.stringify(rankings, null, 2)}`,
+		).toEqual(hybridBaselineMetrics);
+		expect(rankings["exact-pnpm-error"]![0]).toBe("pnpm-lockfile-error");
+		expect(rankings["exact-service-identifier"]![0]).toBe(
+			"user-profile-identifier",
+		);
 	});
 
 	it("translates database errors", async () => {
