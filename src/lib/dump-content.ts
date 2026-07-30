@@ -3,10 +3,19 @@ import { z } from "zod";
 import { embedQuery } from "@/lib/embeddings/embed-query";
 import { chunkText } from "@/lib/processing/chunk-text";
 
+export const MAX_DUMP_CONTENT_BYTES = 1_048_576;
+
+export const isDumpContentTooLarge = (content: string) =>
+	Buffer.byteLength(content, "utf8") > MAX_DUMP_CONTENT_BYTES;
+
 export const dumpContentSchema = z
 	.string()
 	.min(1, "Content is required")
-	.refine((content) => content.trim().length > 0, "Content is required");
+	.refine((content) => content.trim().length > 0, "Content is required")
+	.refine(
+		(content) => !isDumpContentTooLarge(content),
+		`Content must be at most ${MAX_DUMP_CONTENT_BYTES} bytes`,
+	);
 
 export type PreparedChunk = {
 	content: string;

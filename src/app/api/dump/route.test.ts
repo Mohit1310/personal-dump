@@ -22,6 +22,10 @@ vi.mock("@/server/db", () => ({
 	},
 }));
 
+import {
+	dumpContentSchema,
+	MAX_DUMP_CONTENT_BYTES,
+} from "@/lib/dump-content";
 import { POST } from "./route";
 
 const request = (body: unknown) =>
@@ -61,6 +65,44 @@ describe("POST /api/dump", () => {
 			expect(mocks.dumpCreate).not.toHaveBeenCalled();
 		},
 	);
+	it("enforces the content limit by UTF-8 byte length", () => {
+		expect(
+			dumpContentSchema.safeParse("a".repeat(MAX_DUMP_CONTENT_BYTES)).success,
+		).toBe(true);
+		expect(
+			dumpContentSchema.safeParse("a".repeat(MAX_DUMP_CONTENT_BYTES + 1))
+				.success,
+		).toBe(false);
+		expect(
+			dumpContentSchema.safeParse(
+				"😀".repeat(Math.floor(MAX_DUMP_CONTENT_BYTES / 4) + 1),
+			).success,
+		).toBe(false);
+	});
+	it("accepts content at the byte limit", async () => {
+		const content = "a".repeat(MAX_DUMP_CONTENT_BYTES);
+
+		const response = await POST(request({ content }));
+
+		expect(response.status).toBe(200);
+		expect(mocks.chunkText).toHaveBeenCalledWith(content);
+	});
+	it("rejects oversized content before chunking, embedding, or database writes", async () => {
+		const content = "😀".repeat(
+			Math.floor(MAX_DUMP_CONTENT_BYTES / 4) + 1,
+		);
+
+		const response = await POST(request({ content }));
+
+		expect(response.status).toBe(413);
+		expect(await response.json()).toEqual({ error: "Content too large" });
+		expect(mocks.chunkText).not.toHaveBeenCalled();
+		expect(mocks.embedQuery).not.toHaveBeenCalled();
+		expect(mocks.transaction).not.toHaveBeenCalled();
+		expect(mocks.dumpCreate).not.toHaveBeenCalled();
+		expect(mocks.chunkCreate).not.toHaveBeenCalled();
+		expect(mocks.executeRaw).not.toHaveBeenCalled();
+	});
 	it("rejects invalid type and malformed JSON", async () => {
 		expect((await POST(request({ content: "ok", type: "other" }))).status).toBe(
 			400,
@@ -143,10 +185,7 @@ describe("POST /api/dump", () => {
 		mocks.embedQuery.mockRejectedValueOnce(new Error("provider down"));
 		const response = await POST(request({ content: "original" }));
 		expect(response.status).toBe(500);
-		expect(await response.json()).toMatchObject({
-			error: "Failed to store dump",
-			message: "provider down",
-		});
+		expect(await response.json()).toEqual({ error: "Failed to store dump" });
 		expect(mocks.transaction).not.toHaveBeenCalled();
 		expect(mocks.dumpCreate).not.toHaveBeenCalled();
 		expect(mocks.chunkCreate).not.toHaveBeenCalled();
