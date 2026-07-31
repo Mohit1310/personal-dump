@@ -17,8 +17,8 @@ function cli(
 		fetchImpl,
 		log,
 		error,
-		run: (args: string[]) =>
-			runCli(args, { fetch: fetchImpl, baseUrl, log, error }),
+		run: (args: string[], input = {}) =>
+			runCli(args, { fetch: fetchImpl, baseUrl, log, error, ...input }),
 	};
 }
 
@@ -36,16 +36,71 @@ describe("pdump CLI", () => {
 		expect(c.error).toHaveBeenCalledWith("pdump: Text cannot be empty.");
 	});
 
-	it("rejects invalid arguments with usage", async () => {
+	it("rejects a missing source", async () => {
 		const c = cli();
 		expect(await c.run(["add"])).toBe(1);
-		expect(c.error).toHaveBeenCalledWith(`pdump: ${usage}`);
+		expect(c.error).toHaveBeenCalledWith(
+			"pdump: Exactly one input source is required.",
+		);
 	});
 
 	it("parses valid input", () =>
 		expect(parseArgs(["add", "--text", "hello"])).toEqual({
+			sourceKind: "text",
 			content: "hello",
 		}));
+
+	it("parses metadata in any order and keeps repeated tags", () => {
+		expect(
+			parseArgs([
+				"add",
+				"--tag",
+				"first",
+				"--file",
+				"notes/example.md",
+				"--type",
+				"solution",
+				"--tag",
+				"second",
+				"--title",
+				"Example",
+				"--source",
+				"terminal",
+			]),
+		).toEqual({
+			sourceKind: "file",
+			filePath: "notes/example.md",
+			tags: ["first", "second"],
+			type: "solution",
+			title: "Example",
+			source: "terminal",
+		});
+	});
+
+	it.each([
+		["add", "--text", "one", "--file", "two"],
+		["add", "--stdin", "--stdin"],
+		["add", "--text", "one", "--title", "a", "--title", "b"],
+		["add", "--text", "one", "--unknown"],
+		["add", "--text"],
+		["add", "--text", "one", "unexpected"],
+	])("rejects invalid command arguments %j", async (...args) => {
+		const c = cli();
+		expect(await c.run(args)).toBe(1);
+		expect(c.error).toHaveBeenCalledTimes(1);
+		expect(c.fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it.each(["/tmp/input", "C:\\temp\\input", "\\\\server\\share\\input"])(
+		"rejects absolute metadata sources",
+		async (source) => {
+			const c = cli();
+			expect(await c.run(["add", "--text", "hello", "--source", source])).toBe(
+				1,
+			);
+			expect(c.fetchImpl).not.toHaveBeenCalled();
+		},
+	);
 
 	it("posts to the default endpoint with expected request", async () => {
 		const fetchImpl = vi
@@ -75,8 +130,89 @@ describe("pdump CLI", () => {
 		);
 	});
 
+	it("posts file content with private defaults and no path", async () => {
+		const fetchImpl = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(response({ dumpId: "d3", chunksCreated: 1 }));
+		const c = cli(fetchImpl);
+		const filePath = "C:\\private\\notes\\deploy.md";
+		expect(
+			await c.run(["add", "--file", filePath], {
+				readFile: vi.fn().mockResolvedValue("line one\r\nline two"),
+			}),
+		).toBe(0);
+		expect(fetchImpl.mock.calls[0]?.[1]?.body).toBe(
+			JSON.stringify({
+				content: "line one\r\nline two",
+				title: "deploy.md",
+				source: "file",
+			}),
+		);
+	});
+
+	it("lets explicit metadata override file defaults", async () => {
+		const fetchImpl = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(response({ dumpId: "d4", chunksCreated: 1 }));
+		const c = cli(fetchImpl);
+		expect(
+			await c.run(
+				[
+					"add",
+					"--file",
+					"note.md",
+					"--title",
+					"Custom",
+					"--type",
+					"error",
+					"--tag",
+					"one",
+					"--tag",
+					"one",
+					"--source",
+					"terminal",
+				],
+				{ readFile: vi.fn().mockResolvedValue("content") },
+			),
+		).toBe(0);
+		expect(fetchImpl.mock.calls[0]?.[1]?.body).toBe(
+			JSON.stringify({
+				content: "content",
+				title: "Custom",
+				source: "terminal",
+				type: "error",
+				tags: ["one", "one"],
+			}),
+		);
+	});
+
+	it("posts stdin content with its default source", async () => {
+		const fetchImpl = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(response({ dumpId: "d5", chunksCreated: 1 }));
+		const c = cli(fetchImpl);
+		expect(
+			await c.run(["add", "--stdin"], {
+				readStdin: vi.fn().mockResolvedValue("piped content"),
+			}),
+		).toBe(0);
+		expect(fetchImpl.mock.calls[0]?.[1]?.body).toBe(
+			JSON.stringify({ content: "piped content", source: "stdin" }),
+		);
+	});
+
+	it("does not fetch when an input reader rejects", async () => {
+		const c = cli();
+		expect(
+			await c.run(["add", "--file", "missing.txt"], {
+				readFile: vi.fn().mockRejectedValue(new Error("File cannot be read.")),
+			}),
+		).toBe(1);
+		expect(c.fetchImpl).not.toHaveBeenCalled();
+	});
+
 	it.each([
-		[response({ message: "bad input" }, 400), "bad input"],
+		[response({ message: "bad input" }, 400), "Request failed (400)"],
 		[response({ error: "broken" }, 500), "broken"],
 		[new Response("not json", { status: 502 }), "Request failed (502)"],
 	])("reports HTTP/API errors", async (result, message) => {
