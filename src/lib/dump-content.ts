@@ -5,8 +5,10 @@ import { chunkText } from "@/lib/processing/chunk-text";
 
 export const MAX_DUMP_CONTENT_BYTES = 1_048_576;
 
+const utf8Encoder = new TextEncoder();
+
 export const isDumpContentTooLarge = (content: string) =>
-	Buffer.byteLength(content, "utf8") > MAX_DUMP_CONTENT_BYTES;
+	utf8Encoder.encode(content).byteLength > MAX_DUMP_CONTENT_BYTES;
 
 export const dumpContentSchema = z
 	.string()
