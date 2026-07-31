@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
 	dumpContentSchema,
 	insertPreparedChunks,
+	isDumpContentTooLarge,
 	prepareDumpContent,
 } from "@/lib/dump-content";
 import { dumpMetadataSchema } from "@/lib/dump-metadata";
@@ -18,6 +19,15 @@ export async function POST(req: Request) {
 			body = await req.json();
 		} catch {
 			return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+		}
+		if (
+			typeof body === "object" &&
+			body !== null &&
+			"content" in body &&
+			typeof body.content === "string" &&
+			isDumpContentTooLarge(body.content)
+		) {
+			return NextResponse.json({ error: "Content too large" }, { status: 413 });
 		}
 		const validatedData = dumpSchema.safeParse(body);
 
@@ -62,12 +72,6 @@ export async function POST(req: Request) {
 		});
 	} catch (error) {
 		console.error("Dump API Error:", error);
-		return NextResponse.json(
-			{
-				error: "Failed to store dump",
-				message: error instanceof Error ? error.message : "Unknown error",
-			},
-			{ status: 500 },
-		);
+		return NextResponse.json({ error: "Failed to store dump" }, { status: 500 });
 	}
 }
