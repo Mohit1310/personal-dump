@@ -2,10 +2,30 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import { db } from "@/server/db";
 
 const EMBEDDING_DIMENSIONS = 768;
+const mocks = vi.hoisted(() => ({
+	chunkText: vi.fn((content: string) => content.split("\n---\n")),
+	embedQuery: vi.fn((content: string) =>
+		Promise.resolve(
+			content === "bad-vector"
+				? [1, 0]
+				: Array.from({ length: 768 }, (_, index) =>
+						index === content.length % 768 ? 1 : 0,
+					),
+		),
+	),
+}));
 const initialMigrationPath = fileURLToPath(
 	new URL(
 		"../../prisma/migrations/20260201055629_starting_schema/migration.sql",
@@ -19,18 +39,13 @@ const metadataMigrationPath = fileURLToPath(
 	),
 );
 
-vi.mock("@/lib/processing/chunk-text", () => ({
-	chunkText: (content: string) => [content],
-}));
+vi.mock("@/lib/processing/chunk-text", () => ({ chunkText: mocks.chunkText }));
 vi.mock("@/lib/embeddings/embed-query", () => ({
-	embedQuery: () =>
-		Promise.resolve([
-			1,
-			...Array.from({ length: EMBEDDING_DIMENSIONS - 1 }, () => 0),
-		]),
+	embedQuery: mocks.embedQuery,
 }));
 
 import { POST } from "@/app/api/dump/route";
+import { MAX_DUMP_CONTENT_BYTES } from "@/lib/dump-content";
 
 const request = (body: unknown) =>
 	new Request("http://localhost/api/dump", {
@@ -107,34 +122,64 @@ describe("dump metadata migration", () => {
 describe("POST /api/dump metadata persistence", () => {
 	const dumpIds: string[] = [];
 
+	afterEach(async () => {
+		await db.dump.deleteMany({ where: { id: { in: dumpIds.splice(0) } } });
+		vi.clearAllMocks();
+	});
+
 	afterAll(async () => {
-		await db.dump.deleteMany({ where: { id: { in: dumpIds } } });
 		await db.$disconnect();
 	});
 
-	it("stores normalized metadata in PostgreSQL", async () => {
+	it("stores normalized metadata with ordered chunks and embeddings", async () => {
 		const response = await POST(
 			request({
-				content: "Persist metadata",
+				content: "first chunk\n---\nsecond chunk",
 				title: "  Database note  ",
 				type: "error",
 				tags: [" PostgreSQL ", "PG Vector", "postgresql"],
 				source: "  shell  ",
 			}),
 		);
-		const body = (await response.json()) as { dumpId: string };
+		const body = (await response.json()) as {
+			chunksCreated: number;
+			dumpId: string;
+		};
 		dumpIds.push(body.dumpId);
+		const chunks = await db.$queryRaw<
+			Array<{ content: string; dimensions: number; order: number }>
+		>`
+			SELECT c.content, c."order", vector_dims(e.vector) AS dimensions
+			FROM "Chunk" c
+			JOIN "Embedding" e ON e."chunkId" = c.id
+			WHERE c."dumpId" = ${body.dumpId}
+			ORDER BY c."order" ASC
+		`;
 
 		expect(response.status).toBe(200);
+		expect(body).toMatchObject({ chunksCreated: 2 });
 		expect(
 			await db.dump.findUnique({ where: { id: body.dumpId } }),
 		).toMatchObject({
-			content: "Persist metadata",
+			content: "first chunk\n---\nsecond chunk",
 			title: "Database note",
 			type: "error",
 			tags: ["postgresql", "pg-vector"],
 			source: "shell",
 		});
+		expect(chunks).toEqual([
+			{
+				content: "first chunk",
+				dimensions: EMBEDDING_DIMENSIONS,
+				order: 0,
+			},
+			{
+				content: "second chunk",
+				dimensions: EMBEDDING_DIMENSIONS,
+				order: 1,
+			},
+		]);
+		expect(mocks.embedQuery).toHaveBeenCalledTimes(2);
 	});
 
 	it("keeps content-only clients backward compatible", async () => {
@@ -152,5 +197,48 @@ describe("POST /api/dump metadata persistence", () => {
 			tags: [],
 			source: "",
 		});
+	});
+
+	it("rejects oversized UTF-8 content before provider or database work", async () => {
+		const before = await db.dump.count();
+		const response = await POST(
+			request({
+				content: "😀".repeat(Math.floor(MAX_DUMP_CONTENT_BYTES / 4) + 1),
+			}),
+		);
+
+		expect(response.status).toBe(413);
+		expect(await response.json()).toEqual({ error: "Content too large" });
+		expect(mocks.chunkText).not.toHaveBeenCalled();
+		expect(mocks.embedQuery).not.toHaveBeenCalled();
+		expect(await db.dump.count()).toBe(before);
+	});
+
+	it("rolls back all records when an embedding cannot be persisted", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		const before = {
+			dumps: await db.dump.count(),
+			chunks: await db.chunk.count(),
+			embeddings: await db.embedding.count(),
+		};
+
+		const response = await POST(
+			request({ content: "valid chunk\n---\nbad-vector" }),
+		);
+
+		expect(response.status).toBe(500);
+		expect(await response.json()).toEqual({ error: "Failed to store dump" });
+		expect(mocks.embedQuery).toHaveBeenCalledTimes(2);
+		expect(String(consoleError.mock.calls[0]?.[1])).toContain(
+			"expected 768 dimensions, not 2",
+		);
+		expect({
+			dumps: await db.dump.count(),
+			chunks: await db.chunk.count(),
+			embeddings: await db.embedding.count(),
+		}).toEqual(before);
+		consoleError.mockRestore();
 	});
 });
