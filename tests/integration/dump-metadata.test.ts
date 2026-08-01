@@ -124,6 +124,7 @@ describe("POST /api/dump metadata persistence", () => {
 
 	afterEach(async () => {
 		await db.dump.deleteMany({ where: { id: { in: dumpIds.splice(0) } } });
+		vi.restoreAllMocks();
 		vi.clearAllMocks();
 	});
 
@@ -239,6 +240,5 @@ describe("POST /api/dump metadata persistence", () => {
 			chunks: await db.chunk.count(),
 			embeddings: await db.embedding.count(),
 		}).toEqual(before);
-		consoleError.mockRestore();
 	});
 });
